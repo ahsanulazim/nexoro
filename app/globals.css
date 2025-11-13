@@ -5,6 +5,14 @@
 }
 
 @theme {
-  --font-montserrat: var(--font-montserrat);
+  --font-space-grotesk: var(--font-space-grotesk);
   --color-main: #400E87;
+}
+
+.dots-before {
+  @apply before:content-[""] before:size-1 before:rounded-[50%] before:bg-main before:absolute before:top-1/2 before:-translate-x-1/2
+}
+
+.dots-after {
+  @apply after:content-[""] after:size-1 after:rounded-[50%] after:bg-main after:absolute after:top-1/2 after:right-0 after:translate-x-1/2
 }
