@@ -7,6 +7,7 @@
 @theme {
   --font-space-grotesk: var(--font-space-grotesk);
   --color-main: #8c00ff;
+  --breakpoint-xs: 480px;
 }
 
 .dots-before {

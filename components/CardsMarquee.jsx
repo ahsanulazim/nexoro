@@ -7,7 +7,7 @@ export default function CardsMarquee({ direction, className }) {
     <Marquee
       speed={30}
       autoFill={true}
-      className={`!absolute rotate-80 -z-10 ${className ? className : ""}`}
+      className={`absolute! rotate-80 overflow-x-visible! -z-10 ${className ? className : ""}`}
       direction={direction ? direction : "left"}
     >
       {images.map((image) => (
