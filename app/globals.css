@@ -6,19 +6,19 @@
 
 @theme {
   --font-space-grotesk: var(--font-space-grotesk);
-  --color-main: #400E87;
+  --color-main: #8c00ff;
 }
 
 .dots-before {
-  @apply before:content-[""] before:size-1 before:rounded-[50%] before:bg-main before:absolute before:top-1/2 before:-translate-x-1/2
+  @apply before:content-[""] before:size-1 before:rounded-[50%] before:bg-main before:absolute before:top-1/2 before:-translate-x-1/2;
 }
 
 .dots-after {
-  @apply after:content-[""] after:size-1 after:rounded-[50%] after:bg-main after:absolute after:top-1/2 after:right-0 after:translate-x-1/2
+  @apply after:content-[""] after:size-1 after:rounded-[50%] after:bg-main after:absolute after:top-1/2 after:right-0 after:translate-x-1/2;
 }
 
 .web-shots {
-  @apply w-56 h-80 flex items-center justify-center bg-base-200 border-8 border-red-500 rounded-lg
+  @apply w-56 h-80 flex items-center justify-center bg-base-200 border-8 border-red-500 rounded-lg;
 }
 
 .text-vertical {
