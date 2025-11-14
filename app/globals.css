@@ -16,3 +16,12 @@
 .dots-after {
   @apply after:content-[""] after:size-1 after:rounded-[50%] after:bg-main after:absolute after:top-1/2 after:right-0 after:translate-x-1/2
 }
+
+.web-shots {
+  @apply w-56 h-80 flex items-center justify-center bg-base-200 border-8 border-red-500 rounded-lg
+}
+
+.text-vertical {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+}
