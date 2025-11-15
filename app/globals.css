@@ -6,7 +6,8 @@
 
 @theme {
   --font-space-grotesk: var(--font-space-grotesk);
-  --color-main: #8c00ff;
+  --color-main: hsl(273, 100%, 50%);
+  --color-main-light: hsl(273, 100%, 80%);
   --breakpoint-xs: 480px;
 }
 
@@ -25,4 +26,13 @@
 .text-vertical {
   writing-mode: vertical-rl;
   text-orientation: mixed;
+}
+
+@keyframes gradient {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@theme {
+  --animate-gradient: gradient 5s ease infinite;
 }

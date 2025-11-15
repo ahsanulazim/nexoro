@@ -2,6 +2,7 @@ import CardsMarquee from "./CardsMarquee";
 import MarketingMarquee from "./MarketingMarquee";
 import Button from "./ui/Button";
 import { IoIosArrowForward } from "react-icons/io";
+import GradText from "./ui/GradText";
 
 export default function Hero() {
   return (
@@ -17,7 +18,7 @@ export default function Hero() {
       <div className="p-5 max-w-[1426px] mx-auto w-full">
         <div className="max-w-lg md:max-w-xl">
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-balance">
-            Creative strategy that drives real results
+            Creative Strategy that Drives <GradText>Real Results</GradText>
           </h1>
           <p className="hidden xs:block py-6">
             Provident cupiditate voluptatem et in. Quaerat fugiat ut assumenda
