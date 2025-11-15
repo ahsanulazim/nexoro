@@ -9,7 +9,10 @@ export default function Hero() {
       <div className="h-52 absolute top-0 bg-linear-to-t from-transparent to-gray-950 w-full"></div>
       <MarketingMarquee />
       <CardsMarquee className="-right-[600px] md:-right-[200px]" />
-      <CardsMarquee direction="right" className="-right-[300px] md:-right-[565px]" />
+      <CardsMarquee
+        direction="right"
+        className="-right-[300px] md:-right-[565px]"
+      />
 
       <div className="p-5 max-w-[1426px] mx-auto w-full">
         <div className="max-w-lg md:max-w-xl">
