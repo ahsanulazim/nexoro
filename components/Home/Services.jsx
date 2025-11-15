@@ -1,13 +1,12 @@
-import services from "@/json/services.json";
-import BtnNeutral from "../ui/BtnNeutral";
 import LightRays from "../effects/LightRays";
+import ServiceStep from "../ui/ServiceStep";
 
 const Services = () => {
   return (
     <section className="relative">
       <LightRays
         raysOrigin="top-center"
-        raysColor="#ce95fc"
+        raysColor="#fffff"
         raysSpeed={1.5}
         lightSpread={0.8}
         rayLength={1.2}
@@ -23,29 +22,7 @@ const Services = () => {
             We are Offering the Best Solutions Quickly & Efficiently
           </h1>
         </div>
-        <div className="flex gap-5 items-start justify-between">
-          <div className="steps steps-vertical shrink-0 sticky top-30 hidden lg:inline-grid">
-            {services.map((step) => (
-              <nav className="step" key={step.title}>
-                {step.title}
-              </nav>
-            ))}
-          </div>
-          <div className="bg-base-300 grow p-5 lg:p-10 rounded-lg flex flex-col gap-5">
-            {services.map((service) => (
-              <div
-                key={service.title}
-                className="flex flex-col gap-5 items-start p-5 lg:p-10 border border-base-100 rounded-md"
-              >
-                <h2 className="text-xl md:text-3xl font-semibold">
-                  {service.title}
-                </h2>
-                <p className="opacity-50 text-sm">{service.description}</p>
-                <BtnNeutral>Learn More</BtnNeutral>
-              </div>
-            ))}
-          </div>
-        </div>
+        <ServiceStep />
       </div>
     </section>
   );
