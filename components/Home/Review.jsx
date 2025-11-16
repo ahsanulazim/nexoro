@@ -10,7 +10,7 @@ const Review = () => {
             The Best Reviews from <GradText>Clients</GradText>
           </h1>
         </div>
-        <div className="flex flex-col gap-5">
+        <div className="flex flex-col gap-4">
           <ReviewMarquee direction="left" />
           <ReviewMarquee direction="right" />
         </div>

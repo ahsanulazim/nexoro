@@ -1,3 +1,4 @@
+import Footer from "./Footer";
 import Navbar from "./Navbar";
 
 export default function Header({ children }) {
@@ -9,6 +10,7 @@ export default function Header({ children }) {
                 <Navbar />
                 {/* Page content here */}
                 {children}
+                <Footer />
             </div>
             <div className="drawer-side z-50">
                 <label htmlFor="my-drawer-2" aria-label="close sidebar" className="drawer-overlay"></label>

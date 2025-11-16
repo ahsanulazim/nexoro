@@ -12,7 +12,7 @@ const ContactForm = () => {
       </h2>
       <p className="text-gray-500 text-sm md:text-lg mb-5">
         or reach us manually at{" "}
-        <a href="mailto:contact@nexoro.com" className="text-main">
+        <a href="mailto:contact@nexoro.com" className="text-main font-semibold">
           contact@nexoro.com
         </a>
       </p>

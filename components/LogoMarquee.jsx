@@ -25,7 +25,7 @@ const LogoMarquee = () => {
   ];
 
   return (
-    <Marquee gradient={true} autoFill={true}>
+    <Marquee autoFill={true}>
       {logos.map((logo) => (
         <img
           className="max-w-32 sm:max-w-40 xl:max-w-60 mr-10"
