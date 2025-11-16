@@ -4,11 +4,11 @@ const Contact = () => {
   return (
     <section>
       <div className="max-w-[1426px] max-lg:py-10 px-5 py-20 mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-14 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 xl:gap-14 items-center">
           <div className="lg:col-span-6">
             <img
               className="rounded-2xl"
-              src="/assets/building.jpg"
+              src="/assets/nexoro-team.jpg"
               alt="building"
             />
           </div>
