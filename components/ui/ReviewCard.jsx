@@ -1,14 +1,26 @@
+import Rating from "./Rating";
+
 const ReviewCard = () => {
   return (
-    <div className="card bg-base-100 w-96 shadow-sm">
+    <div className="card bg-base-100 max-xs:w-2xs w-sm mr-4">
       <div className="card-body">
-        <h2 className="card-title">Card title!</h2>
         <p>
-          A card component has a figure, a body part, and inside body there are
-          title and actions parts
+          This is a very versatile WordPress theme. Many features combined with
+          Elementor and solid support.
         </p>
-        <div className="card-actions justify-end">
-          <button className="btn btn-primary">Buy Now</button>
+        <div className="card-actions max-xs:flex-col-reverse xs:items-center gap-5 justify-between mt-5">
+          <div className="card-title text-sm">
+            <div className="avatar avatar-placeholder">
+              <div className="bg-neutral text-neutral-content w-10 rounded-full">
+                <span className="text-xs">CN</span>
+              </div>
+            </div>{" "}
+            <div>
+              <h2>Customer Name</h2>
+              <p className="text-xs opacity-50">Brand</p>
+            </div>
+          </div>
+          <Rating />
         </div>
       </div>
     </div>

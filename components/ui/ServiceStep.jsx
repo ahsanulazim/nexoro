@@ -29,7 +29,7 @@ const ServiceStep = () => {
               key={service.title}
               id={service.title}
               ref={ref}
-              className="flex flex-col gap-5 items-start p-5 lg:p-10 border border-base-100 rounded-md"
+              className="flex flex-col gap-5 items-start p-5 lg:p-10 border border-base-100 hover:border-main rounded-md"
             >
               <h2 className="text-xl md:text-3xl font-semibold">
                 {service.title}
