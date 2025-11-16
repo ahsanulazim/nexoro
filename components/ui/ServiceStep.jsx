@@ -34,7 +34,7 @@ const ServiceStep = () => {
               <h2 className="text-xl md:text-3xl font-semibold">
                 {service.title}
               </h2>
-              <p className="opacity-50 max-md:text-sm text-lg">
+              <p className="opacity-50 max-md:text-sm text-base">
                 {service.description}
               </p>
               <BtnNeutral>Learn More</BtnNeutral>

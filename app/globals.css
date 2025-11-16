@@ -28,9 +28,18 @@
   text-orientation: mixed;
 }
 
+.btn-nexoro {
+  @apply border-2 btn-primary rounded-full p-0 pl-3 sm:pl-5 h-auto bg-main border-main shadow-none;
+}
+
 @keyframes gradient {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
 }
 
 @theme {

@@ -17,7 +17,7 @@ const Services = () => {
         distortion={0.05}
         className="custom-rays absolute! top-0 -z-10!"
       />
-      <div className="max-w-[1426px] px-5 py-20 mx-auto z-10">
+      <div className="max-w-[1426px] max-lg:py-10 px-5 py-20 mx-auto z-10">
         <div className="max-w-4xl mx-auto mb-10">
           <h1 className="text-center text-3xl sm:text-4xl md:text-5xl font-semibold text-balance">
             We are Offering the Best Solutions{" "}
