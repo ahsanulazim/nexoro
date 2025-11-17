@@ -11,12 +11,12 @@ const Plans = () => {
   const serviceData = services.find((service) => service.title === prices);
 
   return (
-    <div className="max-w-[1426px] mx-auto px-5 py-20">
+    <div className="max-w-[1426px] mx-auto px-5 py-10 sm:py-20">
       <div className="mb-10">
         <h2 className="text-3xl lg:text-5xl font-semibold text-center mb-3">
           Nexoro Solutions <GradText>Pricing</GradText>
         </h2>
-        <ul className="flex justify-center gap-10 *:flex *:items-center *:gap-2">
+        <ul className="flex justify-center gap-y-2 gap-x-3 max-md:text-sm md:gap-x-8 md:gap-y-5 *:flex *:items-center *:gap-2 flex-wrap">
           <li>
             <LuHeadset />
             24/7 support
@@ -45,7 +45,7 @@ const Plans = () => {
           </select>
         </fieldset>
       </div>
-      <div className="grid grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
         {serviceData.plans.map((plan) => (
           <PricingCard
             key={plan.title}

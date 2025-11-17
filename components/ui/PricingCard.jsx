@@ -3,11 +3,14 @@ const PricingCard = ({ title, price, benefits }) => {
     <div className="card bg-base-300 shadow-sm">
       <div className="card-body">
         <span className="badge badge-xs badge-warning">Most Popular</span>
-        <div className="flex justify-between">
-          <h2 className="text-3xl font-bold">{title}</h2>
-          <span className="text-xl">${price}</span>
+        <div className="flex justify-between flex-col lg:flex-row">
+          <h2 className="text-xl lg:text-2xl xl:text-3xl">{title}</h2>
+          <span className="font-semibold text-3xl lg:text-xl">${price}</span>
         </div>
-        <ul className="mt-6 flex flex-col gap-2 text-xs">
+        <div className="mt-4 xl:mt-6">
+          <button className="btn btn-block btn-primary rounded-full border-none bg-linear-to-r from-main via-main-light to-main bg-[length:200%_200%] animate-gradient">Choose Plan</button>
+        </div>
+        <ul className="mt-6 flex flex-col gap-2 text-xs grow">
           {benefits.map((benefit) => (
             <li key={benefit}>
               <svg
@@ -28,9 +31,6 @@ const PricingCard = ({ title, price, benefits }) => {
             </li>
           ))}
         </ul>
-        <div className="mt-6">
-          <button className="btn btn-primary btn-block">Choose Plan</button>
-        </div>
       </div>
     </div>
   );
