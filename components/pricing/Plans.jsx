@@ -1,9 +1,15 @@
+"use client";
 import { LuHeadset, LuRefreshCw, LuShieldCheck } from "react-icons/lu";
 import GradText from "../ui/GradText";
 import services from "@/json/services.json";
 import PricingCard from "../ui/PricingCard";
+import { useState } from "react";
 
 const Plans = () => {
+  const [prices, setPrices] = useState(services[0].title);
+
+  const serviceData = services.find((service) => service.title === prices);
+
   return (
     <div className="max-w-[1426px] mx-auto px-5 py-20">
       <div className="mb-10">
@@ -28,7 +34,11 @@ const Plans = () => {
       <div className="text-center flex justify-center mb-10">
         <fieldset className="fieldset">
           <legend className="fieldset-legend">Select Services</legend>
-          <select defaultValue="Facebook Ads Campaigns" className="select">
+          <select
+            defaultValue={prices}
+            className="select"
+            onChange={(e) => setPrices(e.target.value)}
+          >
             {services.map((service) => (
               <option key={service.title}>{service.title}</option>
             ))}
@@ -36,9 +46,14 @@ const Plans = () => {
         </fieldset>
       </div>
       <div className="grid grid-cols-3 gap-5">
-        <PricingCard />
-        <PricingCard />
-        <PricingCard />
+        {serviceData.plans.map((plan) => (
+          <PricingCard
+            key={plan.title}
+            title={plan.title}
+            price={plan.price}
+            benefits={plan.benefits}
+          />
+        ))}
       </div>
     </div>
   );

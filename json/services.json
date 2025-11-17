@@ -4,20 +4,39 @@
     "description": "Highly targeted and result-driven Facebook ad campaigns designed to maximize ROI. From audience research and custom segmentation to creative ad copy and A/B testing, we ensure your ads reach the right people, drive meaningful engagement, and convert clicks into loyal customers.",
     "plans": [
       {
-      "title":"Starter Ads",
-      "price": 19,
-      "benefits": ["1 Campaign", "1 Ad Set", "1 Creative", "Audience Research", "Pixel Setup"]
-    },
-    {
-      "title":"Growth Ads",
-      "price": 49,
-      "benefits": ["2 Campaigns", "3 Ad Sets", "3 Creatives", "A/B Testing", "Retargeting", "Weekly Report"]
-    },
-    {
-      "title":"Scale Ads",
-      "price": 199,
-      "benefits": ["Full Funnel", "Unlimited Campaigns", "Multiple Creatives", "Retargeting + Lookalike", "Daily Optimization" ]
-    }
+        "title": "Starter Ads",
+        "price": 19,
+        "benefits": [
+          "1 Campaign",
+          "1 Ad Set",
+          "1 Creative",
+          "Audience Research",
+          "Pixel Setup"
+        ]
+      },
+      {
+        "title": "Growth Ads",
+        "price": 49,
+        "benefits": [
+          "2 Campaigns",
+          "3 Ad Sets",
+          "3 Creatives",
+          "A/B Testing",
+          "Retargeting",
+          "Weekly Report"
+        ]
+      },
+      {
+        "title": "Scale Ads",
+        "price": 199,
+        "benefits": [
+          "Full Funnel",
+          "Unlimited Campaigns",
+          "Multiple Creatives",
+          "Retargeting + Lookalike",
+          "Daily Optimization"
+        ]
+      }
     ]
   },
   {
@@ -25,20 +44,35 @@
     "description": "Comprehensive Google Ads management with smart bidding strategies, keyword optimization, and performance tracking. We craft tailored campaigns that place your business in front of the right audience at the right time, ensuring higher click-through rates, reduced ad spend waste, and measurable growth.",
     "plans": [
       {
-      "title":"Starter PPC",
-      "price": 19,
-      "benefits": ["1 Campaign", "10 Keywords"," Negative Keywords", "Conversion Setup"]
-    },
-    {
-      "title":"Growth PPC",
-      "price": 59,
-      "benefits": ["Search + Display"," 25 Keywords", "Competitor Research", "Ad Extensions"]
-    },
-    {
-      "title":"Pro Conversion Plan",
-      "price": 99,
-      "benefits": ["Search + Display + Video"," 50+ Keywords", "Landing Page uggestion", "Daily Optimization"]
-    }
+        "title": "Starter PPC",
+        "price": 19,
+        "benefits": [
+          "1 Campaign",
+          "10 Keywords",
+          " Negative Keywords",
+          "Conversion Setup"
+        ]
+      },
+      {
+        "title": "Growth PPC",
+        "price": 59,
+        "benefits": [
+          "Search + Display",
+          " 25 Keywords",
+          "Competitor Research",
+          "Ad Extensions"
+        ]
+      },
+      {
+        "title": "Pro Conversion Plan",
+        "price": 99,
+        "benefits": [
+          "Search + Display + Video",
+          " 50+ Keywords",
+          "Landing Page uggestion",
+          "Daily Optimization"
+        ]
+      }
     ]
   },
   {
@@ -46,20 +80,31 @@
     "description": "End-to-end SEO solutions including on-page optimization, technical audits, and keyword strategy to help your website rank higher on search engines. We focus on improving site speed, mobile responsiveness, and structured data while building a strong content and backlink profile for long-term visibility.",
     "plans": [
       {
-      "title":"On-Page SEO",
-      "price": 49,
-      "benefits": ["5 Pages SEO", "Meta Tags", "Image Alt", "Basic Keywords"]
-    },
-    {
-      "title":"Growth SEO",
-      "price": 99,
-      "benefits": ["10 Pages SEO", "Technical Fixes","Speed Up", "Schema", "5 Backlinks"]
-    },
-    {
-      "title":"Full SEO",
-      "price": 199,
-      "benefits": ["Search + Display + Video"," 50+ Keywords", "Landing Page uggestion", "Daily Optimization"]
-    }
+        "title": "On-Page SEO",
+        "price": 49,
+        "benefits": ["5 Pages SEO", "Meta Tags", "Image Alt", "Basic Keywords"]
+      },
+      {
+        "title": "Growth SEO",
+        "price": 99,
+        "benefits": [
+          "10 Pages SEO",
+          "Technical Fixes",
+          "Speed Up",
+          "Schema",
+          "5 Backlinks"
+        ]
+      },
+      {
+        "title": "Full SEO",
+        "price": 199,
+        "benefits": [
+          "Search + Display + Video",
+          " 50+ Keywords",
+          "Landing Page uggestion",
+          "Daily Optimization"
+        ]
+      }
     ]
   },
   {
@@ -67,28 +112,107 @@
     "description": "Boost your video performance with optimized titles, descriptions, tags, and playlists. We design eye-catching, click-worthy thumbnails that increase watch time and subscriber growth, while applying proven YouTube SEO techniques to help your content appear in search results and suggested feeds.",
     "plans": [
       {
-      "title":"Video SEO Setup",
-      "price": 49,
-      "benefits": ["5 Pages SEO", "Meta Tags", "Image Alt", "Basic Keywords"]
-    },
-    {
-      "title":"Channel Growth",
-      "price": 99,
-      "benefits": ["10 Pages SEO", "Technical Fixes","Speed Up", "Schema", "5 Backlinks"]
-    },
-    {
-      "title":"Full SEO",
-      "price": 199,
-      "benefits": ["Search + Display + Video"," 50+ Keywords", "Landing Page uggestion", "Daily Optimization"]
-    }
+        "title": "Video SEO Setup",
+        "price": 25,
+        "benefits": [
+          "1 Video SEO + Tags",
+          "Title",
+          "Description",
+          "Thumbnail Tips"
+        ]
+      },
+      {
+        "title": "Channel Growth",
+        "price": 69,
+        "benefits": [
+          "3 Videos SEO",
+          "Hashtags",
+          "Playlist SEO",
+          "Ranking Report"
+        ]
+      },
+      {
+        "title": "Full SEO",
+        "price": 199,
+        "benefits": [
+          "10 Videos SEO",
+          "Channel Audit",
+          "End Screen Strategy",
+          "Competitor Research"
+        ]
+      }
     ]
   },
   {
     "title": "Social Media Post Design",
-    "description": "Engaging and creative social media visuals tailored to your brand identity. From carousel posts and infographics to story highlights and reels, we design content that resonates with your audience, strengthens brand presence, and encourages shares, likes, and meaningful interactions."
+    "description": "Engaging and creative social media visuals tailored to your brand identity. From carousel posts and infographics to story highlights and reels, we design content that resonates with your audience, strengthens brand presence, and encourages shares, likes, and meaningful interactions.",
+    "plans": [
+      {
+        "title": "Video SEO Setup",
+        "price": 25,
+        "benefits": [
+          "1 Video SEO + Tags",
+          "Title",
+          "Description",
+          "Thumbnail Tips"
+        ]
+      },
+      {
+        "title": "Channel Growth",
+        "price": 69,
+        "benefits": [
+          "3 Videos SEO",
+          "Hashtags",
+          "Playlist SEO",
+          "Ranking Report"
+        ]
+      },
+      {
+        "title": "Full SEO",
+        "price": 199,
+        "benefits": [
+          "10 Videos SEO",
+          "Channel Audit",
+          "End Screen Strategy",
+          "Competitor Research"
+        ]
+      }
+    ]
   },
   {
     "title": "Logo & Branding",
-    "description": "Professional logo design and complete branding solutions that capture your business's essence. We create unique visual identities including color palettes, typography, and brand guidelines to ensure consistency across all platforms, helping your brand stand out and leave a lasting impression."
+    "description": "Professional logo design and complete branding solutions that capture your business's essence. We create unique visual identities including color palettes, typography, and brand guidelines to ensure consistency across all platforms, helping your brand stand out and leave a lasting impression.",
+    "plans": [
+      {
+        "title": "Video SEO Setup",
+        "price": 25,
+        "benefits": [
+          "1 Video SEO + Tags",
+          "Title",
+          "Description",
+          "Thumbnail Tips"
+        ]
+      },
+      {
+        "title": "Channel Growth",
+        "price": 69,
+        "benefits": [
+          "3 Videos SEO",
+          "Hashtags",
+          "Playlist SEO",
+          "Ranking Report"
+        ]
+      },
+      {
+        "title": "Full SEO",
+        "price": 199,
+        "benefits": [
+          "10 Videos SEO",
+          "Channel Audit",
+          "End Screen Strategy",
+          "Competitor Research"
+        ]
+      }
+    ]
   }
 ]
