@@ -1,11 +1,11 @@
 import Breadcrums from "./Breadcrums";
 
-const TitleBanner = () => {
+const TitleBanner = ({ children }) => {
   return (
     <section className="h-96 flex flex-col justify-center bg-[url(/assets/Fractal-Glass.webp)] bg-no-repeat bg-cover relative">
-      <div className="h-52 absolute top-0 bg-linear-to-t from-transparent to-gray-950 w-full"></div>
+      <div className="h-36 absolute top-0 bg-linear-to-t from-transparent via-gray-900 to-gray-950 w-full"></div>
       <div className="max-w-[1426px] mx-auto p-5 flex flex-col items-center">
-        <h1 className="text-5xl font-semibold text-center">About Us</h1>
+        <h1 className="text-5xl font-semibold text-center">{children}</h1>
         <Breadcrums />
       </div>
     </section>

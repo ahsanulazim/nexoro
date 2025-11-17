@@ -1,4 +1,5 @@
 import ClientLogo from "../ClientLogo";
+import GradText from "../ui/GradText";
 
 const PartnerShip = () => {
   return (
@@ -9,8 +10,8 @@ const PartnerShip = () => {
             A True Partnership
           </h3>
           <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold text-balance text-center">
-            We work hand-in-hand with our clients to turn ideas into real
-            results.
+            We work hand-in-hand with our clients to turn ideas into{" "}
+            <GradText>Real Results </GradText>
           </h2>
         </div>
       </section>

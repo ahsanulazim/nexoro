@@ -25,10 +25,12 @@ export default function Hero() {
             excepturi exercitationem quasi. In deleniti eaque aut repudiandae et
             a id nisi.
           </p>
-          <Button>Get Started</Button>
-          <button className="btn sm:btn-lg btn-link no-underline text-white hover:text-main shadow-none">
-            Portfolio <IoIosArrowForward className="size-5 text-main" />
-          </button>
+          <div className="max-xs:mt-5">
+            <Button>Get Started</Button>
+            <button className="btn sm:btn-lg btn-link no-underline text-white hover:text-main shadow-none">
+              Portfolio <IoIosArrowForward className="size-5 text-main" />
+            </button>
+          </div>
         </div>
       </div>
     </div>

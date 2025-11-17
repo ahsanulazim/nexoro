@@ -25,11 +25,13 @@ export default function Navbar() {
       <div className="navbar w-full max-w-[1426px] mx-auto py-5">
         <div className="navbar-start">
           <div className="mx-2 flex-1 px-2">
-            <img
-              className="w-full max-w-36"
-              src="/assets/nexoro_logo.png"
-              alt="Nexoro Logo"
-            />
+            <Link href="/">
+              <img
+                className="w-full max-w-36"
+                src="/assets/nexoro_logo.png"
+                alt="Nexoro Logo"
+              />
+            </Link>
           </div>
         </div>
         <div className="navbar-center hidden lg:flex">
@@ -37,16 +39,19 @@ export default function Navbar() {
             <li className="dots-before dots-after">
               <Link href="/">Home</Link>
             </li>
+            <li className="dots-after">
+              <Link href="/#services">Services</Link>
+            </li>
             <li>
-              <Link href="/about-us">About</Link>
+              <Link href="/pricing">Pricing</Link>
             </li>
             <li className="dots-before dots-after">
-              <Link href="#">Services</Link>
+              <Link href="/about-us">About</Link>
             </li>
           </ul>
         </div>
         <div className="navbar-end">
-          <Link href="#">
+          <Link href="/#contact">
             <Button>Contact</Button>
           </Link>
           <div className="flex-none lg:hidden">

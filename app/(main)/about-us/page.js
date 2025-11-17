@@ -6,7 +6,7 @@ import TitleBanner from "@/components/ui/TitleBanner";
 const About = () => {
   return (
     <main>
-      <TitleBanner />
+      <TitleBanner>About Us</TitleBanner>
       <CompanyDetails />
       <PartnerShip />
     </main>
