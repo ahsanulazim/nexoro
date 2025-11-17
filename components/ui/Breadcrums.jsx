@@ -2,7 +2,7 @@ import Link from "next/link";
 import React from "react";
 import { LuHouse } from "react-icons/lu";
 
-const Breadcrums = () => {
+const Breadcrums = ({ children }) => {
   return (
     <div className="breadcrumbs">
       <ul>
@@ -11,7 +11,7 @@ const Breadcrums = () => {
             <LuHouse />
           </Link>
         </li>
-        <li>About</li>
+        <li>{children}</li>
       </ul>
     </div>
   );
