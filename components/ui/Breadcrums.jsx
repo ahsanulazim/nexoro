@@ -4,7 +4,7 @@ import { LuHouse } from "react-icons/lu";
 
 const Breadcrums = ({ children }) => {
   return (
-    <div className="breadcrumbs">
+    <div className="breadcrumbs max-md:text-sm">
       <ul>
         <li>
           <Link href="/">
