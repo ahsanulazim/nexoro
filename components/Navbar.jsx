@@ -18,9 +18,8 @@ export default function Navbar() {
 
   return (
     <header
-      className={`fixed top-0 w-full z-20 transition-colors ${
-        scrolled ? "bg-base-300 shadow-md" : "bg-transparent"
-      }`}
+      className={`fixed top-0 w-full z-20 transition-colors ${scrolled ? "bg-base-300 shadow-md" : "bg-transparent"
+        }`}
     >
       <div className="navbar w-full max-w-[1426px] mx-auto py-5">
         <div className="navbar-start">
@@ -42,11 +41,14 @@ export default function Navbar() {
             <li className="dots-after">
               <Link href="/#services">Services</Link>
             </li>
-            <li>
+            <li className="dots-after">
               <Link href="/pricing">Pricing</Link>
             </li>
-            <li className="dots-before dots-after">
+            <li>
               <Link href="/about-us">About</Link>
+            </li>
+            <li className="dots-before dots-after">
+              <Link href="/login">Account</Link>
             </li>
           </ul>
         </div>
