@@ -31,16 +31,18 @@ const Plans = () => {
           </li>
         </ul>
       </div>
-      <div className="text-center flex justify-center mb-10">
+      <div className="text-center flex justify-center mb-10 bg-base-300 p-5 rounded-lg max-w-72 mx-auto">
         <fieldset className="fieldset">
-          <legend className="fieldset-legend">Select Services</legend>
+          <legend className="fieldset-legend text-sm">Select Services</legend>
           <select
             defaultValue={prices}
-            className="select"
+            className="select bg-main border-main outline-none rounded-full"
             onChange={(e) => setPrices(e.target.value)}
           >
             {services.map((service) => (
-              <option key={service.title}>{service.title}</option>
+              <option key={service.title} className="hover:bg-base-100">
+                {service.title}
+              </option>
             ))}
           </select>
         </fieldset>
