@@ -1,0 +1,47 @@
+[
+
+    {
+        "id":0,
+        "name":"Md Shakil H",
+        "post": "CEO/Digital Marketer",
+        "email": "shakilhr.bd@gmail.com",
+        "company": "Nexoro Solution",
+        "image": "/assets/team/1"  
+    },
+    {
+        "id":1,
+        "name":"Zishan Rahman",
+        "post": "Graphic Designer & Visualizer",
+        "company": "Nexoro Solution",
+        "image": "/assets/team/4"
+    },
+    {
+        "id":2,
+        "name":"Jisan Ahamad",
+        "post": "Lead generation expert",
+        "company": "Nexoro Solution",
+        "image": "/assets/team/5"  
+    },
+    {
+        "id":3,
+        "name":"Ahsanul Azim Plabon",
+        "post": "Web Developer",
+        "company": "Nexoro Solution",
+        "image": "/assets/team/4"  
+    },
+    {
+        "id":4,
+        "name":"Al Sneha",
+        "post": "Google ADS Expert",
+        "company": "Nexoro Solution",
+        "image": "/assets/team/3"  
+    },
+    {
+        "id":5,
+        "name":"Rajia Sultana",
+        "post": "Facebook ADS expert",
+        "company": "Nexoro Solution",
+        "image": "/assets/team/2"  
+    }
+    
+]

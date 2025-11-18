@@ -4,6 +4,7 @@ import Contact from "@/components/Home/Contact";
 import Portfolio from "@/components/Home/Portfolio";
 import Review from "@/components/Home/Review";
 import Services from "@/components/Home/Services";
+import Teams from "@/components/Home/Teams";
 
 export default function page() {
   return (
@@ -12,6 +13,7 @@ export default function page() {
       <ClientLogo />
       <Services />
       <Portfolio />
+      <Teams />
       <Contact />
       <Review />
     </main>
