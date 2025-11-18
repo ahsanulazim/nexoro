@@ -4,7 +4,6 @@ import GradText from "../ui/GradText";
 import services from "@/json/services.json";
 import PricingCard from "../ui/PricingCard";
 import { useState } from "react";
-import styles from "./Plans.module.css";
 
 const Plans = () => {
   const [prices, setPrices] = useState(services[0].title);
@@ -32,9 +31,7 @@ const Plans = () => {
           </li>
         </ul>
       </div>
-      <div
-        className={`text-center flex justify-center mb-10 bg-base-300 p-5 rounded-lg max-w-72 mx-auto`}
-      >
+      <div className="text-center flex justify-center mb-10 bg-base-300 p-5 rounded-lg max-w-72 mx-auto cardAnimation">
         <fieldset className="fieldset">
           <legend className=" text-sm">Select Services</legend>
           <select

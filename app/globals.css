@@ -9,6 +9,7 @@
   --color-main: hsl(273, 100%, 50%);
   --color-main-light: hsl(273, 100%, 70%);
   --breakpoint-xs: 480px;
+  --animate-gradient: gradient 5s ease infinite;
 }
 
 .dots-before {
@@ -43,6 +44,32 @@
   }
 }
 
-@theme {
-  --animate-gradient: gradient 5s ease infinite;
+@property --gradient-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.cardAnimation {
+  @apply relative before:content-[""] before:absolute before:-inset-px before:rounded-[inherit] after:rounded-[inherit] after:content-[""] after:absolute after:-inset-px  after:blur-lg;
+}
+
+.cardAnimation::after,
+.cardAnimation::before {
+  background: conic-gradient(
+    from var(--gradient-angle),
+    hsl(273, 100%, 50%),
+    hsl(273, 100%, 70%)
+  );
+  z-index: -1;
+  animation: rotation 5s linear infinite;
+}
+
+@keyframes rotation {
+  0% {
+    --gradient-angle: 0deg;
+  }
+  100% {
+    --gradient-angle: 360deg;
+  }
 }
