@@ -1,6 +1,11 @@
+"use client";
+import auth from "@/firebase/firebase.config";
+import { useSignOut } from "react-firebase-hooks/auth";
 import { LuLogOut, LuSettings, LuUser } from "react-icons/lu";
 
 const UserDropDown = () => {
+  const [signOut] = useSignOut(auth);
+
   return (
     <ul
       tabIndex="-1"
@@ -20,9 +25,9 @@ const UserDropDown = () => {
         </a>
       </li>
       <li className="text-error">
-        <a>
+        <div onClick={signOut}>
           <LuLogOut /> Logout
-        </a>
+        </div>
       </li>
     </ul>
   );

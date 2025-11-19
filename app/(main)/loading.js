@@ -1,11 +1,7 @@
-import { BarLoader } from "react-spinners";
+import Loader from "@/components/ui/loader";
 
 const loading = () => {
-  return (
-    <main className="min-h-dvh flex items-center justify-center">
-      <BarLoader />
-    </main>
-  );
+  return <Loader />;
 };
 
 export default loading;

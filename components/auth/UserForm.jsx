@@ -1,11 +1,55 @@
+"use client";
+
+import auth from "@/firebase/firebase.config";
 import Link from "next/link";
 import { LuKey, LuMail, LuUser } from "react-icons/lu";
+import {
+  useCreateUserWithEmailAndPassword,
+  useSendEmailVerification,
+  useSignInWithEmailAndPassword,
+  useUpdateProfile,
+} from "react-firebase-hooks/auth";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 const UserForm = ({ login }) => {
-  console.log(login);
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  const [createUser] = useCreateUserWithEmailAndPassword(auth);
+  const [signInUserWithEmailAndPassword] = useSignInWithEmailAndPassword(auth);
+  const [sendEmailVerification] = useSendEmailVerification(auth);
+  const [updateProfile] = useUpdateProfile(auth);
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    const email = e.target.email.value;
+    const pass = e.target.pass.value;
+    await signInUserWithEmailAndPassword(email, pass);
+    router.push("/dashboard");
+    setLoading(false);
+  };
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    const userName = e.target.fullname.value;
+    const email = e.target.email.value;
+    const pass = e.target.pass.value;
+    const res = await createUser(email, pass);
+    if (res?.user) {
+      // Save username in Firebase Auth profile
+      await updateProfile({ displayName: userName });
+      await sendEmailVerification();
+      router.push("/dashboard");
+      setLoading(false);
+    }
+  };
 
   return (
-    <form className="fieldset bg-base-200 border-base-300 rounded-box w-full sm:max-w-lg border p-5 sm:p-10 mx-auto">
+    <form
+      className="fieldset bg-base-200 border-base-300 rounded-box w-full sm:max-w-lg border p-5 sm:p-10 mx-auto"
+      onSubmit={(e) => (login ? handleLogin(e) : handleRegister(e))}
+    >
       <h1 className=" text-center font-semibold text-2xl sm:text-4xl mb-5">
         {login ? "Login" : "Register"}
       </h1>
@@ -61,14 +105,17 @@ const UserForm = ({ login }) => {
       {/* email & pass login */}
       {!login && (
         <>
-          <label className="label text-base">Full Name</label>
+          <label className="label text-base" htmlFor="fullname">
+            Full Name
+          </label>
           <label className="input input-lg w-full validator">
             <LuUser className="size-4 opacity-50" />
             <input
               type="text"
               required
               placeholder="Name"
-              pattern="[A-Za-z][A-Za-z]*"
+              name="fullname"
+              pattern="[A-Za-z ]{3,30}"
               minLength="3"
               maxLength="30"
               title="Only letters"
@@ -81,18 +128,23 @@ const UserForm = ({ login }) => {
           </p>
         </>
       )}
-      <label className="label text-base">Email</label>
+      <label className="label text-base" htmlFor="email">
+        Email
+      </label>
       <label className="input input-lg w-full validator">
         <LuMail className="size-4 opacity-50" />
-        <input type="email" placeholder="mail@site.com" required />
+        <input type="email" placeholder="mail@site.com" name="email" required />
       </label>
       <div className="validator-hint hidden">Enter valid email address</div>
 
-      <label className="label text-base">Password</label>
+      <label className="label text-base" htmlFor="pass">
+        Password
+      </label>
       <label className="input input-lg w-full validator">
         <LuKey className="opacity-50 size-4" />
         <input
           type="password"
+          name="pass"
           required
           placeholder="Password"
           minLength="8"
@@ -113,8 +165,28 @@ const UserForm = ({ login }) => {
         </Link>
       )}
 
-      <button className="btn btn-primary btn-lg rounded-md bg-main hover:bg-main-dark hover:border-main-dark border-main mt-4 shadow-none">
-        Login
+      <button
+        className={`btn btn-primary btn-lg rounded-md ${
+          !loading &&
+          "bg-main hover:bg-main-dark hover:border-main-dark border-main"
+        } mt-4 shadow-none`}
+        disabled={loading ? true : false}
+      >
+        {login ? (
+          loading ? (
+            <>
+              <span className="loading loading-spinner"></span>Login
+            </>
+          ) : (
+            "Login"
+          )
+        ) : loading ? (
+          <>
+            <span className="loading loading-spinner"></span>Register
+          </>
+        ) : (
+          "Register"
+        )}
       </button>
       <p className="text-base text-center text-balance">
         {login ? "Don't Have an Account?" : "Already Have an Account?"}{" "}
