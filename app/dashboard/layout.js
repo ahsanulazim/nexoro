@@ -1,7 +1,5 @@
+import DashDrawer from "@/components/dashboard/DashDrawer";
+
 export default function layout({ children }) {
-    return (
-        <div>
-            {children}
-        </div>
-    )
+  return <DashDrawer>{children}</DashDrawer>;
 }

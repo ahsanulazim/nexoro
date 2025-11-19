@@ -116,7 +116,7 @@ const UserForm = ({ login }) => {
       <button className="btn btn-primary btn-lg rounded-md bg-main hover:bg-main-dark hover:border-main-dark border-main mt-4 shadow-none">
         Login
       </button>
-      <p className="text-lg text-center">
+      <p className="text-base text-center text-balance">
         {login ? "Don't Have an Account?" : "Already Have an Account?"}{" "}
         <Link
           href={login ? "/register" : "/login"}

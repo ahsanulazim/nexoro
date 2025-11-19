@@ -4,7 +4,7 @@ import UserForm from "./UserForm";
 const AuthPage = ({ login }) => {
   return (
     <main>
-      <div className="p-10">
+      <div className="p-5 sm:p-10">
         <Link href="/">
           <img
             className="w-full max-w-36"

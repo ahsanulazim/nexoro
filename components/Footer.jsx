@@ -13,20 +13,22 @@ const Footer = () => {
       <footer className="bg-base-200">
         <div className="footer sm:footer-horizontal text-base-content p-10 px-5 max-w-[1426px] mx-auto">
           <aside>
-            <img
-              src="/assets/nexoro_logo.png"
-              alt="nexoro logo"
-              className="max-w-36"
-            />
+            <Link href="/">
+              <img
+                src="/assets/nexoro_logo.png"
+                alt="nexoro logo"
+                className="max-w-36"
+              />
+            </Link>
             <p>Creative strategy that drives real results</p>
           </aside>
           <nav>
             <h6 className="footer-title">Quick Links</h6>
-            <Link href="/" className="link link-hover">
-              Home
-            </Link>
             <Link href="/#services" className="link link-hover">
               Services
+            </Link>
+            <Link href="/pricing" className="link link-hover">
+              Pricing
             </Link>
             <Link href="/about-us" className="link link-hover">
               About us
