@@ -11,9 +11,12 @@ import {
   useUpdateProfile,
 } from "react-firebase-hooks/auth";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useContext, useState } from "react";
+import { MyContext } from "@/context/MyProvider";
 
 const UserForm = ({ login }) => {
+  const { serverUrl } = useContext(MyContext);
+
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const [signInWithGoogle] = useSignInWithGoogle(auth);
@@ -27,6 +30,19 @@ const UserForm = ({ login }) => {
       const res = await signInWithGoogle();
       if (res?.user) {
         // এখানে চাইলে Firestore এ ইউজারের ডেটা সেভ করতে পারেন
+        const userName = res.user.displayName;
+        const email = res.user.email;
+        const google = true;
+        const userRes = await fetch(`${serverUrl}/users`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            userName,
+            google,
+            email,
+          }),
+        });
+        const data = await userRes.json();
         router.push("/dashboard");
       }
     } catch (err) {
@@ -52,11 +68,23 @@ const UserForm = ({ login }) => {
     const email = e.target.email.value;
     const pass = e.target.pass.value;
     const res = await createUser(email, pass);
+    const google = false;
     if (res?.user) {
       // Save username in Firebase Auth profile
       console.log(res.user);
       await updateProfile({ displayName: userName });
       await sendEmailVerification();
+      //send Data to server
+      const userRes = await fetch(`${serverUrl}/users`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userName,
+          google,
+          email,
+        }),
+      });
+      const data = await userRes.json();
       router.push("/dashboard");
       setLoading(false);
     }
@@ -183,9 +211,10 @@ const UserForm = ({ login }) => {
         )}
 
         <button
-          className={`btn btn-primary btn-lg rounded-md ${!loading &&
+          className={`btn btn-primary btn-lg rounded-md ${
+            !loading &&
             "bg-main hover:bg-main-dark hover:border-main-dark border-main"
-            } mt-4 shadow-none`}
+          } mt-4 shadow-none`}
           disabled={loading ? true : false}
         >
           {login ? (

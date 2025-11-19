@@ -1,5 +1,6 @@
 import { Space_Grotesk } from "next/font/google";
 import "./globals.css";
+import MyProvider from "@/context/MyProvider";
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
@@ -17,7 +18,7 @@ export default function RootLayout({ children }) {
       <body
         className={`${spaceGrotesk.variable} font-space-grotesk antialiased`}
       >
-        {children}
+        <MyProvider>{children}</MyProvider>
       </body>
     </html>
   );
