@@ -1,4 +1,14 @@
-import { LuLayoutDashboard } from "react-icons/lu";
+import {
+  LuBookUser,
+  LuFlag,
+  LuLayoutDashboard,
+  LuMessageCircle,
+  LuPackage,
+  LuSettings,
+  LuStore,
+  LuUsers,
+  LuUsersRound,
+} from "react-icons/lu";
 import DashNav from "./DashNav";
 
 const DashDrawer = ({ children }) => {
@@ -25,14 +35,77 @@ const DashDrawer = ({ children }) => {
             <li>
               <button
                 className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
-                data-tip="Homepage"
+                data-tip="Dashboard"
               >
                 {/* Home icon */}
                 <LuLayoutDashboard className="my-1.5 inline-block size-4" />
-                <span className="is-drawer-close:hidden">Homepage</span>
+                <span className="is-drawer-close:hidden">Dashboard</span>
               </button>
             </li>
 
+            <li>
+              <button
+                className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                data-tip="Orders"
+              >
+                <LuPackage className="my-1.5 inline-block size-4" />
+                <span className="is-drawer-close:hidden">Orders</span>
+              </button>
+            </li>
+            <li>
+              <button
+                className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                data-tip="Inbox"
+              >
+                <LuMessageCircle className="my-1.5 inline-block size-4" />
+                <span className="is-drawer-close:hidden">Inbox</span>
+              </button>
+            </li>
+            <li>
+              <button
+                className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                data-tip="Services"
+              >
+                <LuFlag className="my-1.5 inline-block size-4" />
+                <span className="is-drawer-close:hidden">Services</span>
+              </button>
+            </li>
+            <li>
+              <button
+                className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                data-tip="Portfolio"
+              >
+                <LuBookUser className="my-1.5 inline-block size-4" />
+                <span className="is-drawer-close:hidden">Portfolio</span>
+              </button>
+            </li>
+            <li>
+              <button
+                className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                data-tip="Users"
+              >
+                <LuUsersRound className="my-1.5 inline-block size-4" />
+                <span className="is-drawer-close:hidden">Users</span>
+              </button>
+            </li>
+            <li>
+              <button
+                className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                data-tip="Team"
+              >
+                <LuUsers className="my-1.5 inline-block size-4" />
+                <span className="is-drawer-close:hidden">Team</span>
+              </button>
+            </li>
+            <li>
+              <button
+                className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                data-tip="Clients"
+              >
+                <LuStore className="my-1.5 inline-block size-4" />
+                <span className="is-drawer-close:hidden">Clients</span>
+              </button>
+            </li>
             {/* List item */}
             <li>
               <button
@@ -40,21 +113,7 @@ const DashDrawer = ({ children }) => {
                 data-tip="Settings"
               >
                 {/* Settings icon */}
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  strokeLinejoin="round"
-                  strokeLinecap="round"
-                  strokeWidth="2"
-                  fill="none"
-                  stroke="currentColor"
-                  className="my-1.5 inline-block size-4"
-                >
-                  <path d="M20 7h-9"></path>
-                  <path d="M14 17H5"></path>
-                  <circle cx="17" cy="17" r="3"></circle>
-                  <circle cx="7" cy="7" r="3"></circle>
-                </svg>
+                <LuSettings className="my-1.5 inline-block size-4" />
                 <span className="is-drawer-close:hidden">Settings</span>
               </button>
             </li>
