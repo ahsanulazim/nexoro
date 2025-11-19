@@ -1,3 +1,4 @@
+import Link from "next/link";
 import Footer from "./Footer";
 import Navbar from "./Navbar";
 import DrawerNav from "./drawer/DrawerNav";
@@ -38,14 +39,21 @@ export default function Header({ children }) {
           aria-label="close sidebar"
           className="drawer-overlay"
         ></label>
-        <ul className="menu bg-base-200 min-h-full w-80 p-4">
-          {/* Sidebar content here */}
-          {navItem.map((item) => (
-            <DrawerNav key={item.title} link={item.link}>
-              {item.title}
-            </DrawerNav>
-          ))}
-        </ul>
+        <div className="flex flex-col bg-base-200 min-h-full w-80 p-4">
+          <ul className="menu p-0 w-full grow">
+            {/* Sidebar content here */}
+            {navItem.map((item) => (
+              <DrawerNav key={item.title} link={item.link}>
+                {item.title}
+              </DrawerNav>
+            ))}
+          </ul>
+          <Link href="/login">
+            <button className="btn btn-primary bg-main border-main hover:bg-main-dark hover:border-main-dark w-full rounded-md shadow-none">
+              Login
+            </button>
+          </Link>
+        </div>
       </div>
     </div>
   );
