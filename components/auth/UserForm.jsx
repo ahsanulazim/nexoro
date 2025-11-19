@@ -7,6 +7,7 @@ import {
   useCreateUserWithEmailAndPassword,
   useSendEmailVerification,
   useSignInWithEmailAndPassword,
+  useSignInWithGoogle,
   useUpdateProfile,
 } from "react-firebase-hooks/auth";
 import { useRouter } from "next/navigation";
@@ -15,10 +16,25 @@ import { useState } from "react";
 const UserForm = ({ login }) => {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const [createUser] = useCreateUserWithEmailAndPassword(auth);
+  const [signInWithGoogle] = useSignInWithGoogle(auth);
+  const [createUser, error] = useCreateUserWithEmailAndPassword(auth);
   const [signInUserWithEmailAndPassword] = useSignInWithEmailAndPassword(auth);
   const [sendEmailVerification] = useSendEmailVerification(auth);
   const [updateProfile] = useUpdateProfile(auth);
+
+  const handleGoogle = async () => {
+    try {
+      const res = await signInWithGoogle();
+      if (res?.user) {
+        // এখানে চাইলে Firestore এ ইউজারের ডেটা সেভ করতে পারেন
+        router.push("/dashboard");
+      }
+    } catch (err) {
+      console.error("Google sign-in error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -46,16 +62,16 @@ const UserForm = ({ login }) => {
   };
 
   return (
-    <form
-      className="fieldset bg-base-200 border-base-300 rounded-box w-full sm:max-w-lg border p-5 sm:p-10 mx-auto"
-      onSubmit={(e) => (login ? handleLogin(e) : handleRegister(e))}
-    >
+    <div className="bg-base-200 border-base-300 rounded-box w-full sm:max-w-lg border p-5 sm:p-10 mx-auto">
       <h1 className=" text-center font-semibold text-2xl sm:text-4xl mb-5">
         {login ? "Login" : "Register"}
       </h1>
       {/* Social Login */}
       <div className="flex gap-5">
-        <button className="btn bg-white text-black border-[#e5e5e5] grow py-6 rounded-lg">
+        <button
+          className="btn bg-white text-black border-[#e5e5e5] grow py-6 rounded-lg"
+          onClick={handleGoogle}
+        >
           <svg
             aria-label="Google logo"
             width="20"
@@ -102,102 +118,121 @@ const UserForm = ({ login }) => {
         </button>
       </div>
       <div className="divider">OR</div>
-      {/* email & pass login */}
-      {!login && (
-        <>
-          <label className="label text-base" htmlFor="fullname">
-            Full Name
-          </label>
-          <label className="input input-lg w-full validator">
-            <LuUser className="size-4 opacity-50" />
-            <input
-              type="text"
-              required
-              placeholder="Name"
-              name="fullname"
-              pattern="[A-Za-z ]{3,30}"
-              minLength="3"
-              maxLength="30"
-              title="Only letters"
-            />
-          </label>
-          <p className="validator-hint hidden">
-            Must be 3 to 30 characters
-            <br />
-            containing only letters
-          </p>
-        </>
-      )}
-      <label className="label text-base" htmlFor="email">
-        Email
-      </label>
-      <label className="input input-lg w-full validator">
-        <LuMail className="size-4 opacity-50" />
-        <input type="email" placeholder="mail@site.com" name="email" required />
-      </label>
-      <div className="validator-hint hidden">Enter valid email address</div>
 
-      <label className="label text-base" htmlFor="pass">
-        Password
-      </label>
-      <label className="input input-lg w-full validator">
-        <LuKey className="opacity-50 size-4" />
-        <input
-          type="password"
-          name="pass"
-          required
-          placeholder="Password"
-          minLength="8"
-          pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
-          title="Must be more than 8 characters, including number, lowercase letter, uppercase letter"
-        />
-      </label>
-      <p className="validator-hint hidden">
-        Must be more than 8 characters, including
-        <br />
-        At least one number <br />
-        At least one lowercase letter <br />
-        At least one uppercase letter
-      </p>
-      {login && (
-        <Link href="#" className="text-base text-purple-500">
-          Forogot Password?
-        </Link>
-      )}
-
-      <button
-        className={`btn btn-primary btn-lg rounded-md ${
-          !loading &&
-          "bg-main hover:bg-main-dark hover:border-main-dark border-main"
-        } mt-4 shadow-none`}
-        disabled={loading ? true : false}
+      <form
+        className="fieldset"
+        onSubmit={(e) => (login ? handleLogin(e) : handleRegister(e))}
       >
-        {login ? (
-          loading ? (
+        {/* email & pass login */}
+        {!login && (
+          <>
+            <label className="label text-base" htmlFor="fullname">
+              Full Name
+            </label>
+            <label className="input input-lg w-full validator">
+              <LuUser className="size-4 opacity-50" />
+              <input
+                type="text"
+                required
+                placeholder="Name"
+                name="fullname"
+                pattern="[A-Za-z ]{3,30}"
+                minLength="3"
+                maxLength="30"
+                title="Only letters"
+              />
+            </label>
+            <p className="validator-hint hidden">
+              Must be 3 to 30 characters
+              <br />
+              containing only letters
+            </p>
+          </>
+        )}
+        <label className="label text-base" htmlFor="email">
+          Email
+        </label>
+        <label className="input input-lg w-full validator">
+          <LuMail className="size-4 opacity-50" />
+          <input
+            type="email"
+            placeholder="mail@site.com"
+            name="email"
+            required
+          />
+        </label>
+        <div className="validator-hint hidden">Enter valid email address</div>
+        {/* Error message UI */}
+        {error && (
+          <p className="text-red-500 text-sm mt-2">
+            {error.code === "auth/email-already-in-use"
+              ? "This email is already registered. Try logging in with Google."
+              : error.message}
+          </p>
+        )}
+
+        <label className="label text-base" htmlFor="pass">
+          Password
+        </label>
+        <label className="input input-lg w-full validator">
+          <LuKey className="opacity-50 size-4" />
+          <input
+            type="password"
+            name="pass"
+            required
+            placeholder="Password"
+            minLength="8"
+            pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
+            title="Must be more than 8 characters, including number, lowercase letter, uppercase letter"
+          />
+        </label>
+        <p className="validator-hint hidden">
+          Must be more than 8 characters, including
+          <br />
+          At least one number <br />
+          At least one lowercase letter <br />
+          At least one uppercase letter
+        </p>
+        {login && (
+          <Link href="#" className="text-base text-purple-500">
+            Forogot Password?
+          </Link>
+        )}
+
+        <button
+          className={`btn btn-primary btn-lg rounded-md ${
+            !loading &&
+            "bg-main hover:bg-main-dark hover:border-main-dark border-main"
+          } mt-4 shadow-none`}
+          disabled={loading ? true : false}
+        >
+          {login ? (
+            loading ? (
+              <>
+                <span className="loading loading-spinner"></span>Login
+              </>
+            ) : (
+              "Login"
+            )
+          ) : loading ? (
             <>
-              <span className="loading loading-spinner"></span>Login
+              <span className="loading loading-spinner"></span>Register
             </>
           ) : (
-            "Login"
-          )
-        ) : loading ? (
-          <>
-            <span className="loading loading-spinner"></span>Register
-          </>
-        ) : (
-          "Register"
-        )}
-      </button>
-      <p className="text-base text-center text-balance">
-        {login ? "Don't Have an Account?" : "Already Have an Account?"}{" "}
-        <Link
-          href={login ? "/register" : "/login"}
-          className="link text-purple-500"
-        >
-          {login ? "Register Now" : "Login Now"}
-        </Link>
-      </p>
-    </form>
+            "Register"
+          )}
+        </button>
+        <p className="text-base text-center text-balance">
+          {login ? "Don't Have an Account?" : "Already Have an Account?"}{" "}
+          <Link
+            href={login ? "/register" : "/login"}
+            className="link text-purple-500"
+          >
+            {login ? "Register Now" : "Login Now"}
+          </Link>
+        </p>
+      </form>
+    </div>
   );
 };
 
