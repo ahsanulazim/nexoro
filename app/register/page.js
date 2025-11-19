@@ -1,9 +1,7 @@
-const page = () => {
-    return (
-        <div>
-            register
-        </div>
-    )
-}
+import AuthPage from "@/components/auth/AuthPage";
 
-export default page
+const Register = () => {
+  return <AuthPage login={false} />;
+};
+
+export default Register;

@@ -1,10 +1,14 @@
 import Link from "next/link";
-import { LuKey, LuMail } from "react-icons/lu";
+import { LuKey, LuMail, LuUser } from "react-icons/lu";
 
-const UserForm = () => {
+const UserForm = ({ login }) => {
+  console.log(login);
+
   return (
-    <form className="fieldset bg-base-200 border-base-300 rounded-box max-w-lg border p-10 mx-auto">
-      <h1 className=" text-center font-semibold text-4xl mb-5">Login</h1>
+    <form className="fieldset bg-base-200 border-base-300 rounded-box w-full sm:max-w-lg border p-5 sm:p-10 mx-auto">
+      <h1 className=" text-center font-semibold text-2xl sm:text-4xl mb-5">
+        {login ? "Login" : "Register"}
+      </h1>
       {/* Social Login */}
       <div className="flex gap-5">
         <button className="btn bg-white text-black border-[#e5e5e5] grow py-6 rounded-lg">
@@ -55,6 +59,28 @@ const UserForm = () => {
       </div>
       <div className="divider">OR</div>
       {/* email & pass login */}
+      {!login && (
+        <>
+          <label className="label text-base">Full Name</label>
+          <label className="input input-lg w-full validator">
+            <LuUser className="size-4 opacity-50" />
+            <input
+              type="text"
+              required
+              placeholder="Name"
+              pattern="[A-Za-z][A-Za-z]*"
+              minLength="3"
+              maxLength="30"
+              title="Only letters"
+            />
+          </label>
+          <p className="validator-hint hidden">
+            Must be 3 to 30 characters
+            <br />
+            containing only letters
+          </p>
+        </>
+      )}
       <label className="label text-base">Email</label>
       <label className="input input-lg w-full validator">
         <LuMail className="size-4 opacity-50" />
@@ -69,7 +95,7 @@ const UserForm = () => {
           type="password"
           required
           placeholder="Password"
-          minlength="8"
+          minLength="8"
           pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
           title="Must be more than 8 characters, including number, lowercase letter, uppercase letter"
         />
@@ -81,15 +107,22 @@ const UserForm = () => {
         At least one lowercase letter <br />
         At least one uppercase letter
       </p>
-      <p className="text-base">Forogot Password?</p>
+      {login && (
+        <Link href="#" className="text-base text-purple-500">
+          Forogot Password?
+        </Link>
+      )}
 
-      <button className="btn btn-primary btn-lg rounded-md bg-main hover:bg-main-dark hover:border-main-dark border-main mt-4">
+      <button className="btn btn-primary btn-lg rounded-md bg-main hover:bg-main-dark hover:border-main-dark border-main mt-4 shadow-none">
         Login
       </button>
       <p className="text-lg text-center">
-        Don&apos;t Have an Account?{" "}
-        <Link href="/register" className="link">
-          Register Now
+        {login ? "Don't Have an Account?" : "Already Have an Account?"}{" "}
+        <Link
+          href={login ? "/register" : "/login"}
+          className="link text-purple-500"
+        >
+          {login ? "Register Now" : "Login Now"}
         </Link>
       </p>
     </form>

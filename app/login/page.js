@@ -1,20 +1,7 @@
-import UserForm from "@/components/auth/UserForm";
+import AuthPage from "@/components/auth/AuthPage";
 
-const page = () => {
-  return (
-    <main>
-      <div className="p-10">
-        <img
-          className="w-full max-w-36"
-          src="/assets/nexoro_logo.png"
-          alt="Nexoro Logo"
-        />
-      </div>
-      <div>
-        <UserForm />
-      </div>
-    </main>
-  );
+const Login = () => {
+  return <AuthPage login={true} />;
 };
 
-export default page;
+export default Login;
