@@ -7,6 +7,7 @@
 @theme {
   --font-space-grotesk: var(--font-space-grotesk);
   --color-main: hsl(273, 100%, 50%);
+  --color-main-dark: hsl(273, 100%, 40%);
   --color-main-light: hsl(273, 100%, 70%);
   --breakpoint-xs: 480px;
   --animate-gradient: gradient 5s ease infinite;

@@ -1,9 +1,20 @@
-const page = () => {
-    return (
-        <div>
-            login
-        </div>
-    )
-}
+import UserForm from "@/components/auth/UserForm";
 
-export default page
+const page = () => {
+  return (
+    <main>
+      <div className="p-10">
+        <img
+          className="w-full max-w-36"
+          src="/assets/nexoro_logo.png"
+          alt="Nexoro Logo"
+        />
+      </div>
+      <div>
+        <UserForm />
+      </div>
+    </main>
+  );
+};
+
+export default page;
