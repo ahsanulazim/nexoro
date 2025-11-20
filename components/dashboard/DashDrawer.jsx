@@ -82,13 +82,14 @@ const DashDrawer = ({ children }) => {
               </button>
             </li>
             <li>
-              <button
+              <Link
+                href="/dashboard/users"
                 className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
                 data-tip="Users"
               >
                 <LuUsersRound className="my-1.5 inline-block size-4" />
                 <span className="is-drawer-close:hidden">Users</span>
-              </button>
+              </Link>
             </li>
             <li>
               <button

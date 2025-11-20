@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { LuLayoutDashboard } from "react-icons/lu";
 
 const DashBread = ({ title }) => {
@@ -5,7 +6,9 @@ const DashBread = ({ title }) => {
     <div className="breadcrumbs text-sm">
       <ul>
         <li>
-          <LuLayoutDashboard />
+          <Link href="/dashboard">
+            <LuLayoutDashboard />
+          </Link>
         </li>
         <li>{title}</li>
       </ul>
