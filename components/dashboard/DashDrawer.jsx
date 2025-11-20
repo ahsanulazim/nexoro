@@ -10,6 +10,7 @@ import {
   LuUsersRound,
 } from "react-icons/lu";
 import DashNav from "./DashNav";
+import Link from "next/link";
 
 const DashDrawer = ({ children }) => {
   return (
@@ -33,14 +34,15 @@ const DashDrawer = ({ children }) => {
           <ul className="menu w-full grow">
             {/* List item */}
             <li>
-              <button
+              <Link
+                href="/dashboard"
                 className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
                 data-tip="Dashboard"
               >
                 {/* Home icon */}
                 <LuLayoutDashboard className="my-1.5 inline-block size-4" />
                 <span className="is-drawer-close:hidden">Dashboard</span>
-              </button>
+              </Link>
             </li>
 
             <li>
