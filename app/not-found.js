@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
-const notFound = () => {
+const NotFound = () => {
   return (
     <main className="flex flex-col items-center justify-center min-h-dvh py-5">
       <Image
@@ -29,4 +29,4 @@ const notFound = () => {
   );
 };
 
-export default notFound;
+export default NotFound;
