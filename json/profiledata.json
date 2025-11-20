@@ -1,0 +1,14 @@
+[
+    {
+    "id":0,
+    "title":"Personal Information",
+    "icon":"LuIdCard",
+    "info":["name", "address", "phone", "company"]
+},
+    {
+    "id":1,
+    "title":"Account Settings",
+    "icon":"LuUser",
+    "info":["email", "password", "joined"]
+}
+]
