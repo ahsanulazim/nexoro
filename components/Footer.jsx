@@ -36,6 +36,9 @@ const Footer = () => {
             <Link href="/privacy-policy" className="link link-hover">
               Privacy Policy
             </Link>
+            <Link href="/terms-and-conditions" className="link link-hover">
+              Terms and Conditions
+            </Link>
           </nav>
           <nav>
             <h6 className="footer-title">Contact</h6>

@@ -2,11 +2,10 @@
 
 import auth from "@/firebase/firebase.config";
 import Link from "next/link";
-import { LuKey, LuMail, LuUser } from "react-icons/lu";
+import { LuCheck, LuEye, LuKey, LuMail, LuUser, LuX } from "react-icons/lu";
 import {
   useCreateUserWithEmailAndPassword,
   useSendEmailVerification,
-  useSignInWithEmailAndPassword,
   useSignInWithGoogle,
   useUpdateProfile,
 } from "react-firebase-hooks/auth";
@@ -14,18 +13,24 @@ import { useRouter } from "next/navigation";
 import { useContext, useState } from "react";
 import { MyContext } from "@/context/MyProvider";
 import { toast } from "react-toastify";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import PasswordField from "./PassField";
 
 const UserForm = ({ login }) => {
-  const { serverUrl } = useContext(MyContext);
 
+  const { serverUrl } = useContext(MyContext);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
+  const [showPass, setShowPass] = useState(false);
+  const [password, setPassword] = useState("");
   const router = useRouter();
   const [signInWithGoogle] = useSignInWithGoogle(auth);
-  const [createUser, error] = useCreateUserWithEmailAndPassword(auth);
-  const [signInUserWithEmailAndPassword] = useSignInWithEmailAndPassword(auth);
+  const [createUser] = useCreateUserWithEmailAndPassword(auth);
   const [sendEmailVerification] = useSendEmailVerification(auth);
   const [updateProfile] = useUpdateProfile(auth);
 
+
+  //Google Sign in Logic
   const handleGoogle = async () => {
     try {
       const res = await signInWithGoogle();
@@ -58,10 +63,22 @@ const UserForm = ({ login }) => {
     setLoading(true);
     const email = e.target.email.value;
     const pass = e.target.pass.value;
-    await signInUserWithEmailAndPassword(email, pass);
-    router.push("/dashboard");
-    setLoading(false);
+    signInWithEmailAndPassword(auth, email, pass)
+      .then(() => {
+        setError(false)
+        router.push("/dashboard")
+        setLoading(false);
+        // ...
+      })
+      .catch((error) => {
+        setLoading(false);
+        setError(true)
+      });
+
   };
+
+  //Registration Logic
+
   const handleRegister = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -79,7 +96,6 @@ const UserForm = ({ login }) => {
     const google = false;
     if (res?.user) {
       // Save username in Firebase Auth profile
-      console.log(res.user);
       await updateProfile({ displayName: userName });
       await sendEmailVerification();
       //send Data to server
@@ -135,6 +151,7 @@ const UserForm = ({ login }) => {
             ></path>
           </g>
         </svg>
+        <span>Continue with Google</span>
       </button>
       <div className="divider">OR</div>
 
@@ -142,6 +159,9 @@ const UserForm = ({ login }) => {
         className="fieldset"
         onSubmit={(e) => (login ? handleLogin(e) : handleRegister(e))}
       >
+        {error && <p role="alert" className="alert alert-error mb-2">
+          The provided login credentials are incorrect.
+        </p>}
         {/* email & pass login */}
         {!login && (
           <>
@@ -181,40 +201,12 @@ const UserForm = ({ login }) => {
           />
         </label>
         <div className="validator-hint hidden">Enter valid email address</div>
-        {/* Error message UI */}
-        {error && (
-          <p className="text-red-500 text-sm mt-2">
-            {error.code === "auth/email-already-in-use"
-              ? "This email is already registered. Try logging in with Google."
-              : error.message}
-          </p>
-        )}
 
-        <label className="label text-sm" htmlFor="pass">
-          Password
-        </label>
-        <label className="input input-lg w-full validator">
-          <LuKey className="opacity-50 size-4" />
-          <input
-            type="password"
-            name="pass"
-            required
-            placeholder="Password"
-            minLength="8"
-            pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
-            title="Must be more than 8 characters, including number, lowercase letter, uppercase letter"
-          />
-        </label>
-        <p className="validator-hint hidden">
-          Must be more than 8 characters, including
-          <br />
-          At least one number <br />
-          At least one lowercase letter <br />
-          At least one uppercase letter
-        </p>
+        <PasswordField login={login} />
+
         {login && (
           <Link href="#" className="text-sm text-purple-500">
-            Forogot Password?
+            Forgot Password?
           </Link>
         )}
 
