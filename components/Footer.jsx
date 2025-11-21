@@ -36,6 +36,9 @@ const Footer = () => {
             <Link href="/privacy-policy" className="link link-hover">
               Privacy Policy
             </Link>
+            <Link href="/refund-policy" className="link link-hover">
+              Refund Policy
+            </Link>
             <Link href="/terms-and-conditions" className="link link-hover">
               Terms and Conditions
             </Link>
@@ -70,7 +73,7 @@ const Footer = () => {
           </nav>
         </div>
       </footer>
-      <footer className="footer sm:footer-horizontal footer-center bg-base-300 text-base-content p-4">
+      <footer className="footer sm:footer-horizontal footer-center bg-purple-700 text-base-content p-3">
         <aside>
           <p>
             Copyright © {new Date().getFullYear()} - All right reserved by
