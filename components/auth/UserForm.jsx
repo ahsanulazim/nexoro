@@ -13,6 +13,7 @@ import {
 import { useRouter } from "next/navigation";
 import { useContext, useState } from "react";
 import { MyContext } from "@/context/MyProvider";
+import { toast } from "react-toastify";
 
 const UserForm = ({ login }) => {
   const { serverUrl } = useContext(MyContext);
@@ -67,6 +68,13 @@ const UserForm = ({ login }) => {
     const userName = e.target.name.value;
     const email = e.target.email.value;
     const pass = e.target.pass.value;
+    const userExists = await fetch(`${serverUrl}/users/${email}`);
+    const userData = await userExists.json();
+    if (userData.success) {
+      setLoading(false);
+      toast.error("User already exists!");
+      return;
+    }
     const res = await createUser(email, pass);
     const google = false;
     if (res?.user) {
@@ -211,10 +219,9 @@ const UserForm = ({ login }) => {
         )}
 
         <button
-          className={`btn btn-primary btn-lg rounded-md ${
-            !loading &&
+          className={`btn btn-primary btn-lg rounded-md ${!loading &&
             "bg-main hover:bg-main-dark hover:border-main-dark border-main"
-          } mt-4 shadow-none`}
+            } mt-4 shadow-none`}
           disabled={loading ? true : false}
         >
           {login ? (
