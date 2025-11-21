@@ -1,7 +1,9 @@
 "use client";
 
 import { MyContext } from "@/context/MyProvider";
+import auth from "@/firebase/firebase.config";
 import { useContext, useState } from "react";
+import { useAuthState } from "react-firebase-hooks/auth";
 import { FaTriangleExclamation } from "react-icons/fa6";
 import { toast } from "react-toastify";
 
@@ -9,13 +11,27 @@ export default function Modal({ ref, remove }) {
   //Loader Button State
   const [loading, setLoading] = useState(false);
   const { serverUrl } = useContext(MyContext);
+  const [user] = useAuthState(auth);
 
   const handleRemove = async () => {
     setLoading(true);
     try {
+      const token = await user?.getIdToken();
+      console.log(token);
+
       const response = await fetch(`${serverUrl}/users/${remove}`, {
         method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
       });
+
+      if (response.status === 403) {
+        setLoading(false);
+        toast.error("You do not have permission to delete users.");
+        return;
+      }
 
       const result = await response.json();
 
@@ -33,9 +49,10 @@ export default function Modal({ ref, remove }) {
       setLoading(false);
       toast.error("Something went wrong while deleting");
       ref.current.close();
+    } finally {
+      setLoading(false);
+      ref.current.close();
     }
-    setLoading(false);
-    ref.current.close();
   };
 
   return (
