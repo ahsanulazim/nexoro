@@ -1,19 +1,10 @@
 "use client";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import ClientRow from "./ClientRow";
 import Modal from "@/components/modal/Modal";
 import { LuStore } from "react-icons/lu";
-import { MyContext } from "@/context/MyProvider";
 
-const ClientTable = () => {
-  const { serverUrl } = useContext(MyContext);
-  const [clients, setClients] = useState(null);
-
-  useEffect(() => {
-    fetch(`${serverUrl}/users`)
-      .then((res) => res.json())
-      .then((data) => setClients(data));
-  }, [clients, serverUrl]);
+const ClientTable = ({ users }) => {
 
   const [remove, setRemove] = useState(null);
   const deleteUser = useRef();
@@ -33,11 +24,11 @@ const ClientTable = () => {
         </h1>
         <table className="table rounded-t-none">
           <tbody>
-            {clients?.map((client, i) => (
+            {users?.map((user, i) => (
               <ClientRow
                 key={i}
-                client={client}
-                btn={() => handleUserRemove(client.email)}
+                client={user}
+                btn={() => handleUserRemove(user.email)}
               />
             ))}
           </tbody>
