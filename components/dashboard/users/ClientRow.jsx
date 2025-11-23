@@ -1,6 +1,11 @@
-import React from "react";
+"use client";
+
+import auth from "@/firebase/firebase.config";
+import { useAuthState } from "react-firebase-hooks/auth";
 
 const ClientRow = ({ client, btn }) => {
+  const [user] = useAuthState(auth);
+
   return (
     <>
       <tr className="hover:bg-base-300">
@@ -11,7 +16,7 @@ const ClientRow = ({ client, btn }) => {
         <td>
           <button
             className="btn btn-error btn-sm md:btn-md rounded-md"
-            disabled={client.role === "Admin" ? true : false}
+            disabled={client.email === user.email ? true : false}
             onClick={btn}
           >
             Remove
