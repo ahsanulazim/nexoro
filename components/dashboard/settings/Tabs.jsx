@@ -26,7 +26,7 @@ const Tabs = () => {
   ];
 
   return (
-    <div role="tablist" className="tabs tabs-box">
+    <div role="tablist" className="tabs max-[380px]:tabs-xs max-xs:tabs-sm max-xs:flex-nowrap max-xs:overflow-x-scroll tabs-box *:shrink-0">
       {settings.map((setting) => (
         <Link
           href={setting.href}

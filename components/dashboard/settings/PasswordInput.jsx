@@ -3,10 +3,10 @@
 import { useState } from "react";
 import { LuEye, LuEyeOff } from "react-icons/lu";
 
-const PasswordInput = ({ label, name, placeholder }) => {
+const PasswordInput = ({ label, name, placeholder, onChange, value }) => {
   const [visible, setVisible] = useState(false);
   return (
-    <div className="mb-4">
+    <div>
       <label className="label" htmlFor={name}>
         {label}
       </label>
@@ -15,6 +15,8 @@ const PasswordInput = ({ label, name, placeholder }) => {
           type={visible ? "text" : "password"}
           name={name}
           placeholder={placeholder}
+          value={value ?? ""}
+          onChange={onChange}
           required
           className="flex-1"
         />

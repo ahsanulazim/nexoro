@@ -9,7 +9,7 @@ const layout = ({ children }) => {
         <h1 className="text-4xl font-semibold">Settings</h1>
       </section>
       <Tabs />
-      {children}
+      <section className="bg-base-200 p-5 rounded-md inset-shadow-sm">{children}</section>
     </main>
   );
 };
