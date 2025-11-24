@@ -1,3 +1,5 @@
+"use client";
+
 import {
   LuBookUser,
   LuFlag,
@@ -11,8 +13,12 @@ import {
 } from "react-icons/lu";
 import DashNav from "./DashNav";
 import Link from "next/link";
+import { useContext } from "react";
+import { MyContext } from "@/context/MyProvider";
 
 const DashDrawer = ({ children }) => {
+  const { isAdmin } = useContext(MyContext);
+
   return (
     <div className="drawer lg:drawer-open">
       <input id="my-drawer-4" type="checkbox" className="drawer-toggle" />
@@ -82,16 +88,18 @@ const DashDrawer = ({ children }) => {
                 <span className="is-drawer-close:hidden">Portfolio</span>
               </button>
             </li>
-            <li>
-              <Link
-                href="/dashboard/users"
-                className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
-                data-tip="Users"
-              >
-                <LuUsersRound className="my-1.5 inline-block size-4" />
-                <span className="is-drawer-close:hidden">Users</span>
-              </Link>
-            </li>
+            {isAdmin && (
+              <li>
+                <Link
+                  href="/dashboard/users"
+                  className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                  data-tip="Users"
+                >
+                  <LuUsersRound className="my-1.5 inline-block size-4" />
+                  <span className="is-drawer-close:hidden">Users</span>
+                </Link>
+              </li>
+            )}
             <li>
               <button
                 className="is-drawer-close:tooltip is-drawer-close:tooltip-right"

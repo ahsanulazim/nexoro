@@ -2,33 +2,28 @@
 
 import auth from "@/firebase/firebase.config";
 import Link from "next/link";
-import { LuCheck, LuEye, LuKey, LuMail, LuUser, LuX } from "react-icons/lu";
+import { LuMail, LuUser } from "react-icons/lu";
 import {
-  useCreateUserWithEmailAndPassword,
   useSendEmailVerification,
   useSignInWithGoogle,
   useUpdateProfile,
 } from "react-firebase-hooks/auth";
 import { useRouter } from "next/navigation";
-import { useContext, useState } from "react";
-import { MyContext } from "@/context/MyProvider";
-import { toast } from "react-toastify";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { useState } from "react";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
 import PasswordField from "./PassField";
 
 const UserForm = ({ login }) => {
-
-  const { serverUrl } = useContext(MyContext);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(false);
-  const [showPass, setShowPass] = useState(false);
-  const [password, setPassword] = useState("");
+  const [loginError, setLoginError] = useState(false);
+  const [regError, setRegError] = useState(false);
   const router = useRouter();
   const [signInWithGoogle] = useSignInWithGoogle(auth);
-  const [createUser] = useCreateUserWithEmailAndPassword(auth);
   const [sendEmailVerification] = useSendEmailVerification(auth);
   const [updateProfile] = useUpdateProfile(auth);
-
 
   //Google Sign in Logic
   const handleGoogle = async () => {
@@ -39,15 +34,18 @@ const UserForm = ({ login }) => {
         const userName = res.user.displayName;
         const email = res.user.email;
         const google = true;
-        const userRes = await fetch(`${serverUrl}/users`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            userName,
-            google,
-            email,
-          }),
-        });
+        const userRes = await fetch(
+          `${process.env.NEXT_PUBLIC_API_BASE}/users`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              userName,
+              google,
+              email,
+            }),
+          }
+        );
         const data = await userRes.json();
         router.push("/dashboard");
       }
@@ -65,16 +63,15 @@ const UserForm = ({ login }) => {
     const pass = e.target.pass.value;
     signInWithEmailAndPassword(auth, email, pass)
       .then(() => {
-        setError(false)
-        router.push("/dashboard")
+        setLoginError(false);
+        router.push("/dashboard");
         setLoading(false);
         // ...
       })
       .catch((error) => {
         setLoading(false);
-        setError(true)
+        setLoginError(true);
       });
-
   };
 
   //Registration Logic
@@ -85,21 +82,14 @@ const UserForm = ({ login }) => {
     const userName = e.target.name.value;
     const email = e.target.email.value;
     const pass = e.target.pass.value;
-    const userExists = await fetch(`${serverUrl}/users/${email}`);
-    const userData = await userExists.json();
-    if (userData.success) {
-      setLoading(false);
-      toast.error("User already exists!");
-      return;
-    }
-    const res = await createUser(email, pass);
     const google = false;
-    if (res?.user) {
-      // Save username in Firebase Auth profile
+    try {
+      //Firebase User Register
+      const userCred = await createUserWithEmailAndPassword(auth, email, pass);
       await updateProfile({ displayName: userName });
       await sendEmailVerification();
-      //send Data to server
-      const userRes = await fetch(`${serverUrl}/users`, {
+      //Backend User Data Transfer
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/users`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -108,8 +98,9 @@ const UserForm = ({ login }) => {
           email,
         }),
       });
-      const data = await userRes.json();
-      router.push("/dashboard");
+      setLoading(false);
+    } catch (err) {
+      setRegError(true);
       setLoading(false);
     }
   };
@@ -159,9 +150,16 @@ const UserForm = ({ login }) => {
         className="fieldset"
         onSubmit={(e) => (login ? handleLogin(e) : handleRegister(e))}
       >
-        {error && <p role="alert" className="alert alert-error mb-2">
-          The provided login credentials are incorrect.
-        </p>}
+        {loginError && (
+          <p role="alert" className="alert alert-error mb-2">
+            The provided login credentials are incorrect.
+          </p>
+        )}
+        {!login && regError && (
+          <p role="alert" className="alert alert-error mb-2">
+            The provided Email is Already Registered.
+          </p>
+        )}
         {/* email & pass login */}
         {!login && (
           <>
@@ -211,9 +209,10 @@ const UserForm = ({ login }) => {
         )}
 
         <button
-          className={`btn btn-primary btn-lg rounded-md ${!loading &&
+          className={`btn btn-primary btn-lg rounded-md ${
+            !loading &&
             "bg-main hover:bg-main-dark hover:border-main-dark border-main"
-            } mt-4 shadow-none`}
+          } mt-4 shadow-none`}
           disabled={loading ? true : false}
         >
           {login ? (

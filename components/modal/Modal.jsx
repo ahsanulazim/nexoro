@@ -17,8 +17,6 @@ export default function Modal({ ref, remove }) {
     setLoading(true);
     try {
       const token = await user?.getIdToken();
-      console.log(token);
-
       const response = await fetch(`${serverUrl}/users/${remove}`, {
         method: "DELETE",
         headers: {
