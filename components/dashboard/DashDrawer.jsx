@@ -120,14 +120,15 @@ const DashDrawer = ({ children }) => {
             </li>
             {/* List item */}
             <li>
-              <button
+              <Link
+                href="/dashboard/settings"
                 className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
                 data-tip="Settings"
               >
                 {/* Settings icon */}
                 <LuSettings className="my-1.5 inline-block size-4" />
                 <span className="is-drawer-close:hidden">Settings</span>
-              </button>
+              </Link>
             </li>
           </ul>
         </div>

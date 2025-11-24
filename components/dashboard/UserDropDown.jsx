@@ -25,10 +25,10 @@ const UserDropDown = () => {
         </Link>
       </li>
       <li>
-        <a>
+        <Link href="/dashboard/settings">
           <LuSettings />
           Settings
-        </a>
+        </Link>
       </li>
       <li className="text-error">
         <div onClick={signOut}>
