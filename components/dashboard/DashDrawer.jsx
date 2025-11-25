@@ -89,16 +89,27 @@ const DashDrawer = ({ children }) => {
               </button>
             </li>
             {isAdmin && (
-              <li>
-                <Link
-                  href="/dashboard/users"
-                  className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
-                  data-tip="Users"
-                >
-                  <LuUsersRound className="my-1.5 inline-block size-4" />
-                  <span className="is-drawer-close:hidden">Users</span>
-                </Link>
-              </li>
+              <>
+                <li>
+                  <Link href="/dashboard/clients"
+                    className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                    data-tip="Clients"
+                  >
+                    <LuStore className="my-1.5 inline-block size-4" />
+                    <span className="is-drawer-close:hidden">Clients</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/dashboard/users"
+                    className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                    data-tip="Users"
+                  >
+                    <LuUsersRound className="my-1.5 inline-block size-4" />
+                    <span className="is-drawer-close:hidden">Users</span>
+                  </Link>
+                </li>
+              </>
             )}
             <li>
               <button
@@ -107,15 +118,6 @@ const DashDrawer = ({ children }) => {
               >
                 <LuUsers className="my-1.5 inline-block size-4" />
                 <span className="is-drawer-close:hidden">Team</span>
-              </button>
-            </li>
-            <li>
-              <button
-                className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
-                data-tip="Clients"
-              >
-                <LuStore className="my-1.5 inline-block size-4" />
-                <span className="is-drawer-close:hidden">Clients</span>
               </button>
             </li>
             {/* List item */}

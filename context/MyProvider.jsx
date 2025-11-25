@@ -16,7 +16,7 @@ const MyProvider = ({ children }) => {
     fetch(`${process.env.NEXT_PUBLIC_API_BASE}/users/${email}`)
       .then((res) => res.json())
       .then((data) => {
-        if (data.role === "admin") {
+        if (data?.user?.role === "admin") {
           setIsAdmin(true);
         } else {
           setIsAdmin(false);
