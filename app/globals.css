@@ -74,3 +74,6 @@
     --gradient-angle: 360deg;
   }
 }
+.btn-nexoro-primary {
+  @apply bg-main border-main hover:bg-main-dark hover:border-main-dark;
+}
