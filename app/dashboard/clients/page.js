@@ -3,18 +3,31 @@
 import ClientForm from "@/components/dashboard/clients/ClientForm";
 import ClientsTable from "@/components/dashboard/clients/ClientsTable";
 import DashBread from "@/components/dashboard/DashBread";
-import { useEffect, useRef, useState } from "react";
+import { MyContext } from "@/context/MyProvider";
+import { useContext, useEffect, useRef, useState } from "react";
 import { LuPlus } from "react-icons/lu";
 
 const Clients = () => {
+  const { isAdmin } = useContext(MyContext);
   const addClientForm = useRef();
   const [clientData, setClientData] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!isAdmin) return;
+
     const fetchClients = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/clients`);
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/clients`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        if (!res.ok) {
+          console.error("Failed to fetch clients");
+          return;
+        }
         const data = await res.json();
         setClientData(data);
       } catch (error) {
@@ -25,9 +38,7 @@ const Clients = () => {
     };
 
     fetchClients();
-  }, []);
-
-  console.log(clientData);
+  }, [isAdmin]);
 
   return (
     <>

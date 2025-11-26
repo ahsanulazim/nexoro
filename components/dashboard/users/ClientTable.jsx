@@ -5,7 +5,6 @@ import Modal from "@/components/modal/Modal";
 import { LuStore } from "react-icons/lu";
 
 const ClientTable = ({ users }) => {
-
   const [remove, setRemove] = useState(null);
   const deleteUser = useRef();
 

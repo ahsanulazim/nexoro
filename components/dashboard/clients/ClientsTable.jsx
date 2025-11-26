@@ -1,4 +1,4 @@
-import { LuEllipsisVertical } from "react-icons/lu";
+import { LuEllipsisVertical, LuSquarePen, LuTrash2 } from "react-icons/lu";
 
 const ClientsTable = ({ clientData }) => {
   return (
@@ -66,10 +66,16 @@ const ClientsTable = ({ clientData }) => {
                     className="dropdown-content menu bg-base-100 rounded-box z-1 hn w-52 p-2 shadow-sm"
                   >
                     <li>
-                      <a>Edit</a>
+                      <a>
+                        <LuSquarePen />
+                        Edit
+                      </a>
                     </li>
                     <li>
-                      <a>Delete</a>
+                      <a className="text-error hover:bg-error hover:text-error-content">
+                        <LuTrash2 />
+                        Delete
+                      </a>
                     </li>
                   </ul>
                 </div>
