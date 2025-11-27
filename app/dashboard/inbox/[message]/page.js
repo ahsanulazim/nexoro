@@ -4,6 +4,13 @@ import MsgFull from "@/components/dashboard/inbox/MsgFull";
 const page = async ({ params }) => {
     const { message } = await params;
 
+    const read = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/messages/${message}`, {
+        method: "PATCH",
+        headers: {
+            "Content-Type": "application/json",
+        },
+    });
+
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/messages/${message}`, {
         method: "GET",
         headers: {
