@@ -61,15 +61,6 @@ const DashDrawer = ({ children }) => {
               </button>
             </li>
             <li>
-              <button
-                className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
-                data-tip="Inbox"
-              >
-                <LuMessageCircle className="my-1.5 inline-block size-4" />
-                <span className="is-drawer-close:hidden">Inbox</span>
-              </button>
-            </li>
-            <li>
               <Link
                 href="/dashboard/services"
                 className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
@@ -90,6 +81,15 @@ const DashDrawer = ({ children }) => {
             </li>
             {isAdmin && (
               <>
+                <li>
+                  <Link href="/dashboard/inbox"
+                    className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                    data-tip="Inbox"
+                  >
+                    <LuMessageCircle className="my-1.5 inline-block size-4" />
+                    <span className="is-drawer-close:hidden">Inbox</span>
+                  </Link>
+                </li>
                 <li>
                   <Link href="/dashboard/clients"
                     className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
