@@ -3,7 +3,7 @@ import { FaEllipsisVertical, FaEnvelope, FaEye, FaPhone, FaRegCalendarDays, FaTr
 
 export default function MsgList({ msg }) {
     return (
-        <li className="list-row items-center" key={msg._id}>
+        <li className={`list-row items-center ${msg.read ? "" : "bg-main-dark/40"}`} key={msg._id}>
             <Link href={`/dashboard/inbox/${msg._id}`} className="list-col-grow flex-1 min-w-0">
                 <h3 className="font-bold uppercase">{msg.name}{" "}{!msg.read &&
                     <span className="text-main">*</span>}</h3>
@@ -15,7 +15,7 @@ export default function MsgList({ msg }) {
                 })}</span>
             </Link>
             <div className="dropdown dropdown-end">
-                <button tabIndex={0} role="button" className="btn m-1 btn-soft btn-info btn-square btn-sm md:btn-md"><FaEllipsisVertical /></button>
+                <button tabIndex={0} role="button" className="btn m-1 btn-soft btn-primary btn-square btn-sm md:btn-md"><FaEllipsisVertical /></button>
                 <ul tabIndex={0} className="dropdown-content menu bg-base-200 rounded-box z-1 w-52 p-2 shadow-md">
                     <li><Link href={`/dashboard/inbox/${msg._id}`} className="list-col-grow "><FaEye className="text-success" /> View</Link></li>
                     {msg.phone && <li><a href={`tel:${msg.phone}`}><FaPhone className="text-info" /> Call</a></li>}

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import MsgList from "./MsgList";
+import MsgEmpty from "./MsgEmpty";
 
 const MsgFilter = ({ msgs }) => {
 
@@ -18,7 +19,7 @@ const MsgFilter = ({ msgs }) => {
 
     return (
         <>
-            <li className="p-4 pb-2 tracking-wide flex gap-2">
+            <li className="p-4 pb-2 tracking-wide flex gap-2 flex-wrap">
                 <button className={`btn btn-sm rounded-md ${filter === "all" ? "btn-primary btn-nexoro-primary" : "btn-outline opacity-60"}`} onClick={() => setFilter("all")}>
                     All
                 </button>
@@ -29,7 +30,7 @@ const MsgFilter = ({ msgs }) => {
                     Read
                 </button>
             </li>
-            {filteredMsgs.map((msg) => (
+            {filteredMsgs.length === 0 ? <MsgEmpty /> : filteredMsgs.map((msg) => (
                 <MsgList key={msg._id} msg={msg} />
             ))}
         </>

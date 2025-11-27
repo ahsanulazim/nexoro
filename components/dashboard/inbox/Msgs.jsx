@@ -1,5 +1,4 @@
 import MsgFilter from "./MsgFilter";
-import MsgList from "./MsgList";
 
 const Msgs = async () => {
 
