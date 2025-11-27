@@ -1,37 +1,25 @@
 import Marquee from "react-fast-marquee";
 
-const LogoMarquee = () => {
-  const logos = [
-    {
-      image: "/assets/brand/logoipsum-398.svg",
-      title: "Brand 1",
+const LogoMarquee = async () => {
+
+  const clientData = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/clients`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
     },
-    {
-      image: "/assets/brand/logoipsum-400.svg",
-      title: "Brand 2",
-    },
-    {
-      image: "/assets/brand/logoipsum-402.svg",
-      title: "Brand 3",
-    },
-    {
-      image: "/assets/brand/logoipsum-408.svg",
-      title: "Brand 4",
-    },
-    {
-      image: "/assets/brand/logoipsum-410.svg",
-      title: "Brand 5",
-    },
-  ];
+  })
+
+  const logos = await clientData.json();
 
   return (
     <Marquee autoFill={true}>
       {logos.map((logo) => (
         <img
-          className="max-w-32 sm:max-w-40 xl:max-w-60 mr-10"
-          src={logo.image}
-          alt={logo.title}
-          key={logo.title}
+          className="max-w-32 sm:max-w-40 xl:max-w-60 max-h-14 mr-10"
+          src={logo.logo}
+          alt={logo.company}
+          key={logo.company}
+          draggable="false"
         />
       ))}
     </Marquee>
