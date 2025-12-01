@@ -2,7 +2,7 @@ const PricingCard = ({ title, price, benefits }) => {
   return (
     <div className="card bg-base-300 shadow-sm">
       <div className="card-body">
-        <span className="badge badge-xs badge-warning">Most Popular</span>
+        <span className="badge badge-xs badge-warning hidden">Most Popular</span>
         <div className="flex justify-between flex-col lg:flex-row">
           <h2 className="text-xl lg:text-2xl xl:text-3xl">{title}</h2>
           <span className="font-semibold text-3xl lg:text-xl">${price}</span>

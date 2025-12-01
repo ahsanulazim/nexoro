@@ -1,7 +1,9 @@
 [
   {
     "title": "Facebook Ads Campaigns",
+    "icon":"/assets/icons/fb.svg",
     "description": "Highly targeted and result-driven Facebook ad campaigns designed to maximize ROI. From audience research and custom segmentation to creative ad copy and A/B testing, we ensure your ads reach the right people, drive meaningful engagement, and convert clicks into loyal customers.",
+    "short":"Targeted and result-driven ad campaigns to boost sales and engagement",
     "plans": [
       {
         "title": "Starter Ads",
@@ -41,7 +43,9 @@
   },
   {
     "title": "Google Ads Management",
+    "icon":"/assets/icons/google.svg",
     "description": "Comprehensive Google Ads management with smart bidding strategies, keyword optimization, and performance tracking. We craft tailored campaigns that place your business in front of the right audience at the right time, ensuring higher click-through rates, reduced ad spend waste, and measurable growth.",
+    "short":"Smart ad strategies to reach the right audience at the right time",
     "plans": [
       {
         "title": "Starter PPC",
@@ -77,7 +81,9 @@
   },
   {
     "title": "SEO Optimization",
+    "icon":"/assets/icons/seo.svg",
     "description": "End-to-end SEO solutions including on-page optimization, technical audits, and keyword strategy to help your website rank higher on search engines. We focus on improving site speed, mobile responsiveness, and structured data while building a strong content and backlink profile for long-term visibility.",
+    "short":"Rank higher on search engines with on-page and technical SEO",
     "plans": [
       {
         "title": "On-Page SEO",
@@ -109,7 +115,9 @@
   },
   {
     "title": "YouTube SEO & Thumbnails",
+    "icon":"/assets/icons/yt.svg",
     "description": "Boost your video performance with optimized titles, descriptions, tags, and playlists. We design eye-catching, click-worthy thumbnails that increase watch time and subscriber growth, while applying proven YouTube SEO techniques to help your content appear in search results and suggested feeds.",
+    "short":"Optimize videos and design eye-catching thumbnails for better views",
     "plans": [
       {
         "title": "Video SEO Setup",
@@ -145,72 +153,83 @@
   },
   {
     "title": "Social Media Post Design",
+    "icon":"/assets/icons/brush.svg",
     "description": "Engaging and creative social media visuals tailored to your brand identity. From carousel posts and infographics to story highlights and reels, we design content that resonates with your audience, strengthens brand presence, and encourages shares, likes, and meaningful interactions.",
+    "short":"Creative visuals that connect with your audience and grow your brand",
     "plans": [
       {
-        "title": "Video SEO Setup",
-        "price": 25,
+        "title": "Single Design Package",
+        "price": 7,
         "benefits": [
-          "1 Video SEO + Tags",
-          "Title",
-          "Description",
-          "Thumbnail Tips"
+          "1 Premium Social Media Post Design",
+          "Designed based on your brand colors and style",
+          "High-resolution output",
+          "Fast delivery",
+          "1 revision included"
         ]
       },
       {
-        "title": "Channel Growth",
-        "price": 69,
+        "title": "Weekly Package",
+        "price": 40,
         "benefits": [
-          "3 Videos SEO",
-          "Hashtags",
-          "Playlist SEO",
-          "Ranking Report"
+          "7 Custom Social Media Designs",
+          "Consistent weekly branding",
+          "Content idea support (if needed)",
+          "Optimized for all social platforms",
+          "2 revisions included"
         ]
       },
       {
-        "title": "Full SEO",
-        "price": 199,
+        "title": "Monthly Package",
+        "price": 150,
         "benefits": [
-          "10 Videos SEO",
-          "Channel Audit",
-          "End Screen Strategy",
-          "Competitor Research"
+          "30 High-quality unique designs",
+          "Full-month content support",
+          "Complete visual branding consistency",
+          "Priority delivery and premium support",
+          "Unlimited minor revisions"
         ]
       }
     ]
   },
   {
     "title": "Logo & Branding",
+    "icon":"/assets/icons/logo.svg",
     "description": "Professional logo design and complete branding solutions that capture your business's essence. We create unique visual identities including color palettes, typography, and brand guidelines to ensure consistency across all platforms, helping your brand stand out and leave a lasting impression.",
+    "short":"Professional brand identity design to make your business stand out",
     "plans": [
       {
-        "title": "Video SEO Setup",
-        "price": 25,
+        "title": "Basic Package",
+        "price": 40,
         "benefits": [
-          "1 Video SEO + Tags",
-          "Title",
-          "Description",
-          "Thumbnail Tips"
+          "1 Custom Logo Design",
+          "2 Logo Concepts",
+          "High-resolution files (PNG, JPG)",
+          "Transparent background version",
+          "2 Revisions"
         ]
       },
       {
-        "title": "Channel Growth",
-        "price": 69,
+        "title": "Standard Package",
+        "price": 75,
         "benefits": [
-          "3 Videos SEO",
-          "Hashtags",
-          "Playlist SEO",
-          "Ranking Report"
+          "1 Professional Logo (3 Concepts)",
+          "Color Palette + Font Suggestions",
+          "High-resolution files (PNG, JPG, PDF)",
+          "Social Media Profile Logo",
+          "5 Revisions"
         ]
       },
       {
-        "title": "Full SEO",
-        "price": 199,
+        "title": "Premium Package",
+        "price": 120,
         "benefits": [
-          "10 Videos SEO",
-          "Channel Audit",
-          "End Screen Strategy",
-          "Competitor Research"
+          "1 Premium Logo (3-5 Concepts)",
+          "Full Branding Kit (colors, fonts, typography)",
+          "Social Media Branding (Profile + Cover)",
+          "High-resolution files (PNG, JPG, PDF, SVG)",
+          "Brand Guideline Document",
+          "Unlimited Revisions"
         ]
       }
     ]
