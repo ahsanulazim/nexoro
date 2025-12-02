@@ -1,81 +1,82 @@
-const ServiceModal = () => {
+"use client";
+
+import { useState } from "react";
+
+const ServiceModal = ({ ref }) => {
+  const [loading, setLoading] = useState();
+
   return (
-    <dialog ref={ref} id="clientModal" className="modal">
+    <dialog ref={ref} id="serviceModal" className="modal">
       <div className="modal-box">
         <form className="fieldset">
-          <h1 className="text-xl font-semibold">Client Details</h1>
+          <h1 className="text-xl font-semibold">Service Details</h1>
 
-          <label className="label" htmlFor="clientName">
-            Client Name<span className="text-red-600">*</span>
+          <label className="label" htmlFor="serviceTitle">
+            Service Title<span className="text-red-600">*</span>
           </label>
           <input
             type="text"
             className="input w-full"
-            placeholder="Write Client's Name"
-            name="clientName"
+            placeholder="Write Service Title"
+            name="serviceTitle"
             required
           />
-          <label className="label" htmlFor="company">
-            Company Name<span className="text-red-600">*</span>
+          <label className="label" htmlFor="slug">
+            Slug<span className="text-red-600">*</span>
           </label>
           <input
             type="text"
             className="input w-full"
-            placeholder="Write Client's Name"
-            name="company"
+            placeholder="Set a Slug for The Service"
+            name="slug"
             required
           />
+          <label className="label">
+            Price<span className="text-red-600">*</span>
+          </label>
+          <div className="flex items-center gap-5">
+            <label className="input">
+              <span className="label">BDT</span>
+              <input
+                type="number"
+                className="w-full"
+                placeholder="Set BDT Price"
+                name="BDT"
+                required
+              />
+            </label>
+            <label className="input">
+              <span className="label">USD</span>
+              <input
+                type="number"
+                className="w-full"
+                placeholder="Set USD Price"
+                name="USD"
+                required
+              />
+            </label>
+          </div>
+          <label className="label" htmlFor="shortDes">
+            Short Description<span className="text-red-600">*</span>
+          </label>
+          <textarea
+            name="shortDes"
+            placeholder="Write a short Description"
+            className="textarea w-full"
+          ></textarea>
+          <label className="label" htmlFor="longDes">
+            Long Description<span className="text-red-600">*</span>
+          </label>
+          <textarea
+            name="longDes"
+            rows="4"
+            placeholder="Write a Long Description"
+            className="textarea w-full"
+          ></textarea>
 
-          <label className="label" htmlFor="clientRole">
-            Client Role<span className="text-red-600">*</span>
-          </label>
-          <input
-            type="text"
-            className="input w-full"
-            placeholder="Write client's role in the Brand"
-            name="clientRole"
-            required
-          />
-          <label className="label" htmlFor="clientEmail">
-            Email<span className="text-red-600">*</span>
-          </label>
-          <input
-            type="email"
-            className="input w-full"
-            placeholder="Write client's Email Address"
-            name="clientEmail"
-            required
-          />
-
-          <label className="label" htmlFor="country">
-            Country<span className="text-red-600">*</span>
-          </label>
-          <select
-            defaultValue="Select Country"
-            className="select w-full"
-            name="country"
-            required
-          >
-            <option disabled={true}>Select Country</option>
-            <option>Bangladesh</option>
-            <option>United States</option>
-            <option>Canada</option>
-            <option>United Kingdom</option>
-            <option>Australia</option>
-          </select>
-          <label className="label" htmlFor="logo">
-            Upload Logo
-          </label>
-          <input
-            type="file"
-            className="file-input"
-            accept="image/*"
-            name="logo"
-          />
-          <p className="italic">Size limit 5MB</p>
           <div className="modal-action">
             <button
-              type="submit"
+              type="button"
               className="btn btn-error"
               onClick={() => ref.current.close()}
             >
@@ -89,7 +90,7 @@ const ServiceModal = () => {
               disabled={loading ? true : false}
             >
               {loading && <span className="loading loading-spinner"></span>} Add
-              Client
+              Service
             </button>
           </div>
         </form>
