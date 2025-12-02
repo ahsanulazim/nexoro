@@ -37,7 +37,7 @@ const ServiceStep = () => {
               <p className="opacity-50 max-md:text-sm text-base">
                 {service.description}
               </p>
-              <BtnNeutral>Learn More</BtnNeutral>
+              <BtnNeutral link={service.link}>Learn More</BtnNeutral>
             </div>
           );
         })}

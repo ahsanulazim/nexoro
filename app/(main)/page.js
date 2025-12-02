@@ -1,5 +1,4 @@
 import ClientLogo from "@/components/ClientLogo";
-import Hero from "@/components/Hero";
 import HeroTwo from "@/components/HeroTwo";
 import Contact from "@/components/Home/Contact";
 import Portfolio from "@/components/Home/Portfolio";
@@ -12,7 +11,6 @@ export default function page() {
   return (
     <main>
       <HeroTwo />
-      {/* <Hero /> */}
       <ClientLogo />
       <Services />
       <Portfolio />

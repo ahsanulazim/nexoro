@@ -1,9 +1,10 @@
 [
   {
     "title": "Facebook Ads Campaigns",
-    "icon":"/assets/icons/fb.svg",
+    "link": "facebook-ads-management",
+    "icon": "/assets/icons/fb.svg",
     "description": "Highly targeted and result-driven Facebook ad campaigns designed to maximize ROI. From audience research and custom segmentation to creative ad copy and A/B testing, we ensure your ads reach the right people, drive meaningful engagement, and convert clicks into loyal customers.",
-    "short":"Targeted and result-driven ad campaigns to boost sales and engagement",
+    "short": "Targeted and result-driven ad campaigns to boost sales and engagement",
     "plans": [
       {
         "title": "Starter Ads",
@@ -43,9 +44,10 @@
   },
   {
     "title": "Google Ads Management",
-    "icon":"/assets/icons/google.svg",
+    "link": "google-ads-management",
+    "icon": "/assets/icons/google.svg",
     "description": "Comprehensive Google Ads management with smart bidding strategies, keyword optimization, and performance tracking. We craft tailored campaigns that place your business in front of the right audience at the right time, ensuring higher click-through rates, reduced ad spend waste, and measurable growth.",
-    "short":"Smart ad strategies to reach the right audience at the right time",
+    "short": "Smart ad strategies to reach the right audience at the right time",
     "plans": [
       {
         "title": "Starter PPC",
@@ -81,9 +83,10 @@
   },
   {
     "title": "SEO Optimization",
-    "icon":"/assets/icons/seo.svg",
+    "link": "seo-optimization",
+    "icon": "/assets/icons/seo.svg",
     "description": "End-to-end SEO solutions including on-page optimization, technical audits, and keyword strategy to help your website rank higher on search engines. We focus on improving site speed, mobile responsiveness, and structured data while building a strong content and backlink profile for long-term visibility.",
-    "short":"Rank higher on search engines with on-page and technical SEO",
+    "short": "Rank higher on search engines with on-page and technical SEO",
     "plans": [
       {
         "title": "On-Page SEO",
@@ -115,9 +118,10 @@
   },
   {
     "title": "YouTube SEO & Thumbnails",
-    "icon":"/assets/icons/yt.svg",
+    "link": "youtube-seo-thumbnails",
+    "icon": "/assets/icons/yt.svg",
     "description": "Boost your video performance with optimized titles, descriptions, tags, and playlists. We design eye-catching, click-worthy thumbnails that increase watch time and subscriber growth, while applying proven YouTube SEO techniques to help your content appear in search results and suggested feeds.",
-    "short":"Optimize videos and design eye-catching thumbnails for better views",
+    "short": "Optimize videos and design eye-catching thumbnails for better views",
     "plans": [
       {
         "title": "Video SEO Setup",
@@ -153,9 +157,10 @@
   },
   {
     "title": "Social Media Post Design",
-    "icon":"/assets/icons/brush.svg",
+    "link": "social-media-post-design",
+    "icon": "/assets/icons/brush.svg",
     "description": "Engaging and creative social media visuals tailored to your brand identity. From carousel posts and infographics to story highlights and reels, we design content that resonates with your audience, strengthens brand presence, and encourages shares, likes, and meaningful interactions.",
-    "short":"Creative visuals that connect with your audience and grow your brand",
+    "short": "Creative visuals that connect with your audience and grow your brand",
     "plans": [
       {
         "title": "Single Design Package",
@@ -194,9 +199,10 @@
   },
   {
     "title": "Logo & Branding",
-    "icon":"/assets/icons/logo.svg",
+    "link": "logo-branding",
+    "icon": "/assets/icons/logo.svg",
     "description": "Professional logo design and complete branding solutions that capture your business's essence. We create unique visual identities including color palettes, typography, and brand guidelines to ensure consistency across all platforms, helping your brand stand out and leave a lasting impression.",
-    "short":"Professional brand identity design to make your business stand out",
+    "short": "Professional brand identity design to make your business stand out",
     "plans": [
       {
         "title": "Basic Package",
