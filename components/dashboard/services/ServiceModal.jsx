@@ -1,14 +1,72 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "react-toastify";
 
 const ServiceModal = ({ ref }) => {
-  const [loading, setLoading] = useState();
+  const [loading, setLoading] = useState(false);
+
+  const handleService = (e) => {
+    e.preventDefault();
+    setLoading(true);
+    const title = e.target.serviceTitle.value;
+    const slug = e.target.slug.value;
+    const bdtPrice = e.target.bdt.value;
+    const usdPrice = e.target.usd.value;
+    const shortDes = e.target.shortDes.value;
+    const longDes = e.target.longDes.value;
+    const icon = e.target.icon.files[0];
+
+    const formData = new FormData();
+    formData.append("title", title);
+    formData.append("slug", slug);
+    formData.append("bdtPrice", bdtPrice);
+    formData.append("usdPrice", usdPrice);
+    formData.append("shortDes", shortDes);
+    formData.append("longDes", longDes);
+
+    if (!icon) {
+      setLoading(false);
+      return;
+    } else {
+      const maxSize = 2 * 1024 * 1024;
+      if (icon.size <= maxSize) {
+        formData.append("icon", icon);
+      } else {
+        toast.error("Icon size must be less than 2MB");
+        setLoading(false);
+        return;
+      }
+    }
+    //send data to server
+    fetch(`${process.env.NEXT_PUBLIC_API_BASE}/services`, {
+      method: "POST",
+      body: formData,
+    })
+      .then(async (res) => {
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.message);
+        }
+        return data;
+      })
+      .then((data) => {
+        setLoading(false);
+        ref.current.close();
+        e.target.reset();
+        toast.success("Service added successfully");
+      })
+      .catch((error) => {
+        setLoading(false);
+        console.log(error.message);
+        toast.error(error.message);
+      });
+  }
 
   return (
     <dialog ref={ref} id="serviceModal" className="modal">
       <div className="modal-box">
-        <form className="fieldset">
+        <form className="fieldset" onSubmit={handleService}>
           <h1 className="text-xl font-semibold">Service Details</h1>
 
           <label className="label" htmlFor="serviceTitle">
@@ -41,7 +99,7 @@ const ServiceModal = ({ ref }) => {
                 type="number"
                 className="w-full"
                 placeholder="Set BDT Price"
-                name="BDT"
+                name="bdt"
                 required
               />
             </label>
@@ -51,11 +109,14 @@ const ServiceModal = ({ ref }) => {
                 type="number"
                 className="w-full"
                 placeholder="Set USD Price"
-                name="USD"
+                name="usd"
                 required
               />
             </label>
           </div>
+          <label className="label">Set Icon</label>
+          <input type="file" className="file-input" name="icon" />
+          <label className="label italic">Max size 2MB</label>
           <label className="label" htmlFor="shortDes">
             Short Description<span className="text-red-600">*</span>
           </label>
@@ -84,9 +145,8 @@ const ServiceModal = ({ ref }) => {
             </button>
             <button
               type="submit"
-              className={`btn btn-primary ${
-                loading ? "" : "btn-nexoro-primary"
-              }`}
+              className={`btn btn-primary ${loading ? "" : "btn-nexoro-primary"
+                }`}
               disabled={loading ? true : false}
             >
               {loading && <span className="loading loading-spinner"></span>} Add

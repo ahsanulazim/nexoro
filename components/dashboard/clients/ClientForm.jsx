@@ -4,11 +4,11 @@ import { useState } from "react";
 import { toast } from "react-toastify";
 
 const ClientForm = ({ ref }) => {
-  const [loading, setloading] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleClient = (e) => {
     e.preventDefault();
-    setloading(true);
+    setLoading(true);
     const client = e.target.clientName.value;
     const company = e.target.company.value;
     const role = e.target.clientRole.value;
@@ -47,14 +47,14 @@ const ClientForm = ({ ref }) => {
         return data;
       })
       .then((data) => {
-        setloading(false);
+        setLoading(false);
         ref.current.close();
         e.target.reset();
         toast.success("Client added successfully");
         // Optionally, you can add logic to close the modal or reset the form here
       })
       .catch((error) => {
-        setloading(false);
+        setLoading(false);
         toast.error(error.message);
       });
   };
@@ -143,9 +143,8 @@ const ClientForm = ({ ref }) => {
             </button>
             <button
               type="submit"
-              className={`btn btn-primary ${
-                loading ? "" : "btn-nexoro-primary"
-              }`}
+              className={`btn btn-primary ${loading ? "" : "btn-nexoro-primary"
+                }`}
               disabled={loading ? true : false}
             >
               {loading && <span className="loading loading-spinner"></span>} Add
