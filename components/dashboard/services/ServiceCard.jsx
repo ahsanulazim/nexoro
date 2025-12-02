@@ -24,7 +24,7 @@ const ServiceCard = ({ service }) => {
           <h3 className="font-semibold">Short Description:</h3>
           <p className="line-clamp-1 opacity-50">{service.short}</p>
           <h3 className="font-semibold">Long Description:</h3>
-          <p className="line-clamp-3 opacity-50">{service.description}</p>
+          <p className="line-clamp-2 opacity-50">{service.description}</p>
         </div>
       </div>
     </div>
