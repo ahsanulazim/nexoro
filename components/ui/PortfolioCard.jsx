@@ -12,7 +12,7 @@ const PortfolioCard = ({ project }) => {
       </figure>
       <div className="card-body flex-row items-center justify-between gap-3">
         <h2 className="card-title max-xs:text-sm">{project.title}</h2>
-        <div className="card-actions justify-end">
+        <div className="card-actions justify-end hidden">
           <button className="btn btn-nexoro">
             See More <IoArrowForwardCircle className="size-8" />
           </button>
