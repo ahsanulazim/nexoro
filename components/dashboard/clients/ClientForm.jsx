@@ -22,6 +22,7 @@ const ClientForm = ({ ref }) => {
     formData.append("company", company);
     formData.append("country", country);
     formData.append("email", email);
+    formData.append("folder", "clients");
 
     // logo optional + size check
     if (logo) {

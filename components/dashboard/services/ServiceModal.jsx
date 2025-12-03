@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { toast } from "react-toastify";
 
-const ServiceModal = ({ ref }) => {
+const ServiceModal = ({ ref, onServiceAdded }) => {
   const [loading, setLoading] = useState(false);
 
   const handleService = (e) => {
@@ -24,16 +24,17 @@ const ServiceModal = ({ ref }) => {
     formData.append("usdPrice", usdPrice);
     formData.append("shortDes", shortDes);
     formData.append("longDes", longDes);
+    formData.append("folder", "icons");
 
     if (!icon) {
       setLoading(false);
       return;
     } else {
-      const maxSize = 2 * 1024 * 1024;
+      const maxSize = 5 * 1024 * 1024;
       if (icon.size <= maxSize) {
         formData.append("icon", icon);
       } else {
-        toast.error("Icon size must be less than 2MB");
+        toast.error("Icon size must be less than 5MB");
         setLoading(false);
         return;
       }
@@ -53,6 +54,7 @@ const ServiceModal = ({ ref }) => {
       .then((data) => {
         setLoading(false);
         ref.current.close();
+        onServiceAdded(data);
         e.target.reset();
         toast.success("Service added successfully");
       })
@@ -116,7 +118,7 @@ const ServiceModal = ({ ref }) => {
           </div>
           <label className="label">Set Icon</label>
           <input type="file" className="file-input" name="icon" />
-          <label className="label italic">Max size 2MB</label>
+          <label className="label italic">Max size 5MB</label>
           <label className="label" htmlFor="shortDes">
             Short Description<span className="text-red-600">*</span>
           </label>

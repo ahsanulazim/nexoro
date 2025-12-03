@@ -1,11 +1,3 @@
-import Link from "next/link";
-import {
-  FaEllipsisVertical,
-  FaEnvelope,
-  FaEye,
-  FaPhone,
-  FaTrashCan,
-} from "react-icons/fa6";
 import { LuCalendar } from "react-icons/lu";
 import ServiceDrop from "./ServiceDrop";
 
@@ -26,6 +18,9 @@ const ServiceCard = ({ service }) => {
           <h3 className="font-semibold">Long Description:</h3>
           <p className="line-clamp-2 opacity-50">{service.description}</p>
         </div>
+        <h4 className="opacity-50 flex gap-2 items-center justify-end">
+          <LuCalendar />2 Dec, 2025
+        </h4>
       </div>
     </div>
   );
