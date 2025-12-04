@@ -1,4 +1,4 @@
-// lib/api.js
+// add a service
 export const addService = async (formData) => {
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/services`, {
     method: "POST",
@@ -12,6 +12,7 @@ export const addService = async (formData) => {
   return data;
 };
 
+//get all services
 export const fetchServices = async () => {
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/services`, {
     method: "GET",
@@ -27,6 +28,8 @@ export const fetchServices = async () => {
   return res.json();
 };
 
+
+//delete services
 export const deleteService = async (slug, public_id) => {
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_API_BASE}/services/${slug}`,
@@ -41,3 +44,18 @@ export const deleteService = async (slug, public_id) => {
   }
   return res.json();
 };
+
+// Update existing service
+export const updateService = async (id, formData) => {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/services/${id}`, {
+    method: "PUT",
+    body: formData,
+  });
+
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data.message || "Failed to update service");
+  }
+  return data;
+};
+

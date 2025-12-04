@@ -7,9 +7,9 @@ const ServiceCard = ({ service }) => {
       <div className="card-body">
         <div className="flex items-center justify-between gap-5">
           <div className="flex items-center gap-2">
-            <div className="shrink-0 bg-white rounded-box">
+            <div className="shrink-0 bg-white rounded-box size-12 p-3">
               <img
-                className="size-12 contain"
+                className="contain"
                 src={service.icon}
                 alt={service.title}
               />
@@ -18,7 +18,7 @@ const ServiceCard = ({ service }) => {
               <h2 className="card-title line-clamp-2">{service.title}</h2>
             </div>
           </div>
-          <ServiceDrop slug={service.slug} public_id={service.public_id} />
+          <ServiceDrop service={service} />
         </div>
 
         <div>

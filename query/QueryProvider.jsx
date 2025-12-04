@@ -9,7 +9,7 @@ const QueryProvider = ({ children }) => {
   return (
     <QueryClientProvider client={queryClient}>
       {children}
-      <TanStackDevtools />
+      <TanStackDevtools config={{ hideUntilHover: true }} />
     </QueryClientProvider>
   );
 };

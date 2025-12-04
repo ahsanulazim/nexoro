@@ -85,12 +85,13 @@ const ServiceModal = ({ ref, onServiceAdded }) => {
             name="slug"
             required
           />
-          <label className="label">Set Icon</label>
+          <label className="label">Set Icon<span className="text-red-600">*</span></label>
           <input
             type="file"
             className="file-input"
             name="icon"
             accept=".svg,image/svg+xml"
+            required
           />
           <label className="label italic">SVG Only. Max size 5MB</label>
           <label className="label" htmlFor="shortDes">
@@ -121,9 +122,8 @@ const ServiceModal = ({ ref, onServiceAdded }) => {
             </button>
             <button
               type="submit"
-              className={`btn btn-primary ${
-                loading ? "" : "btn-nexoro-primary"
-              }`}
+              className={`btn btn-primary ${loading ? "" : "btn-nexoro-primary"
+                }`}
               disabled={loading ? true : false}
             >
               {loading && <span className="loading loading-spinner"></span>} Add
