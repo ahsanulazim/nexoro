@@ -26,3 +26,18 @@ export const fetchServices = async () => {
 
   return res.json();
 };
+
+export const deleteService = async (slug, public_id) => {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_BASE}/services/${slug}`,
+    {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ public_id }),
+    }
+  );
+  if (!res.ok) {
+    throw new Error("Failed to delete service");
+  }
+  return res.json();
+};

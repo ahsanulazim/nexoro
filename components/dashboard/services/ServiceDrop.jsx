@@ -1,8 +1,31 @@
-import Link from "next/link";
+"use client";
+
+import { deleteService } from "@/api/fetchServices";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { FaEllipsisVertical, FaTrashCan } from "react-icons/fa6";
 import { LuSquarePen } from "react-icons/lu";
 
-const ServiceDrop = ({ link }) => {
+const ServiceDrop = ({ slug, public_id }) => {
+  const queryClient = useQueryClient();
+
+  const { mutate: removeService, isPending } = useMutation({
+    mutationFn: ({ slug, public_id }) => deleteService(slug, public_id),
+    onMutate: async ({ slug }) => {
+      await queryClient.cancelQueries({ queryKey: ["services"] });
+      const previousServices = queryClient.getQueryData(["services"]);
+      queryClient.setQueryData(["services"], (oldServices) =>
+        oldServices.filter((service) => service.slug !== slug)
+      );
+      return { previousServices };
+    },
+    onError: (err, slug, context) => {
+      queryClient.setQueryData(["services"], context.previousServices);
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["services"] });
+    },
+  });
+
   return (
     <div className="dropdown dropdown-end">
       <button
@@ -17,12 +40,15 @@ const ServiceDrop = ({ link }) => {
         className="dropdown-content menu bg-base-200 rounded-box z-1 w-52 p-2 shadow-md"
       >
         <li>
-          <Link href={`/dashboard/inbox/${link}`} className="list-col-grow ">
+          <button>
             <LuSquarePen className="text-success" /> Edit
-          </Link>
+          </button>
         </li>
         <li>
-          <button>
+          <button
+            onClick={() => removeService({ slug, public_id })}
+            disabled={isPending}
+          >
             <FaTrashCan className="text-error" /> Delete
           </button>
         </li>
