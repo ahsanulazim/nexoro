@@ -1,10 +1,30 @@
 "use client";
 
+import { addService } from "@/api/fetchServices";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "react-toastify";
 
 const ServiceModal = ({ ref, onServiceAdded }) => {
   const [loading, setLoading] = useState(false);
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: addService,
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({
+        queryKey: ["services"],
+      });
+      ref.current.close();
+      toast.success("Service added successfully");
+    },
+    onError: (error) => {
+      toast.error(error.massage);
+    },
+    onSettled: () => {
+      setLoading(false);
+    },
+  });
 
   const handleService = (e) => {
     e.preventDefault();
@@ -39,31 +59,9 @@ const ServiceModal = ({ ref, onServiceAdded }) => {
         return;
       }
     }
-    //send data to server
-    fetch(`${process.env.NEXT_PUBLIC_API_BASE}/services`, {
-      method: "POST",
-      body: formData,
-    })
-      .then(async (res) => {
-        const data = await res.json();
-        if (!res.ok) {
-          throw new Error(data.message);
-        }
-        return data;
-      })
-      .then((data) => {
-        setLoading(false);
-        ref.current.close();
-        onServiceAdded(data);
-        e.target.reset();
-        toast.success("Service added successfully");
-      })
-      .catch((error) => {
-        setLoading(false);
-        console.log(error.message);
-        toast.error(error.message);
-      });
-  }
+    mutation.mutate(formData);
+    e.target.reset();
+  };
 
   return (
     <dialog ref={ref} id="serviceModal" className="modal">
@@ -147,8 +145,9 @@ const ServiceModal = ({ ref, onServiceAdded }) => {
             </button>
             <button
               type="submit"
-              className={`btn btn-primary ${loading ? "" : "btn-nexoro-primary"
-                }`}
+              className={`btn btn-primary ${
+                loading ? "" : "btn-nexoro-primary"
+              }`}
               disabled={loading ? true : false}
             >
               {loading && <span className="loading loading-spinner"></span>} Add

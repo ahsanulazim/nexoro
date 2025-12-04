@@ -2,6 +2,7 @@ import { IoIosArrowForward } from "react-icons/io";
 import Button from "./ui/Button";
 import HeroMarquee from "./HeroMarquee";
 import Badge from "./Badge";
+import Link from "next/link";
 
 const HeroTwo = () => {
   return (
@@ -19,10 +20,14 @@ const HeroTwo = () => {
               to drive their growth.
             </p>
             <div className="max-xs:mt-5">
-              <Button>Get Started</Button>
-              <button className="btn sm:btn-lg btn-link no-underline text-white hover:text-main shadow-none">
-                Portfolio <IoIosArrowForward className="size-5 text-main" />
-              </button>
+              <Link href="/pricing">
+                <Button>Get Started</Button>
+              </Link>
+              <Link href="/#portfolio">
+                <button className="btn sm:btn-lg btn-link no-underline text-white hover:text-main shadow-none">
+                  Portfolio <IoIosArrowForward className="size-5 text-main" />
+                </button>
+              </Link>
             </div>
           </div>
         </div>
