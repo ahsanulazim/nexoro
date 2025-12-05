@@ -4,6 +4,7 @@ import { fetchServices } from "@/api/fetchServices";
 import DashBread from "@/components/dashboard/DashBread";
 import ServiceCard from "@/components/dashboard/services/ServiceCard";
 import ServiceModal from "@/components/dashboard/services/ServiceModal";
+import ServiceSkeleton from "@/components/dashboard/skeleton/ServiceSkeleton";
 import { useQuery } from "@tanstack/react-query";
 import { useRef } from "react";
 import { LuPlus } from "react-icons/lu";
@@ -40,6 +41,7 @@ const Services = () => {
           </div>
         </section>
         <section>
+          {isLoading && <ServiceSkeleton />}
           {services?.length === 0 ? (
             <p>No Services Added Yet</p>
           ) : (
