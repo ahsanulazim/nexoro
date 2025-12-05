@@ -1,7 +1,6 @@
-import { LuEllipsisVertical, LuSquarePen, LuTrash2 } from "react-icons/lu";
 import ClientsDrop from "./ClientsDrop";
 
-const ClientsTable = ({ clientData }) => {
+const ClientsTable = ({ clientData, onEdit }) => {
   return (
     <div className="max-sm:overflow-x-scroll bg-base-300 shadow-md rounded-lg grow">
       <table className="table">
@@ -54,7 +53,7 @@ const ClientsTable = ({ clientData }) => {
                 })}
               </td>
               <th>
-                <ClientsDrop client={client} />
+                <ClientsDrop client={client} onEdit={onEdit} />
               </th>
             </tr>
           ))}

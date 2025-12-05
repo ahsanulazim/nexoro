@@ -1,13 +1,29 @@
 "use client";
 
-import { addClient } from "@/api/fetchClients";
+import { addClient, updateClient } from "@/api/fetchClients";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "react-toastify";
 
-const ClientForm = ({ ref }) => {
+const ClientForm = ({ ref, isEditing, client }) => {
+
   const [loading, setLoading] = useState(false);
   const queryClient = useQueryClient();
+
+  const mutationUpdate = useMutation({
+    mutationFn: ({ id, formData }) => updateClient(id, formData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["clientData"] });
+      ref.current.close();
+      toast.success("Client updated successfully");
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+    onSettled: () => {
+      setLoading(false);
+    },
+  });
 
   const mutation = useMutation({
     mutationFn: addClient,
@@ -29,7 +45,7 @@ const ClientForm = ({ ref }) => {
   const handleClient = (e) => {
     e.preventDefault();
     setLoading(true);
-    const client = e.target.clientName.value;
+    const clientName = e.target.clientName.value;
     const company = e.target.company.value;
     const role = e.target.clientRole.value;
     const email = e.target.clientEmail.value;
@@ -37,7 +53,7 @@ const ClientForm = ({ ref }) => {
     const logo = e.target.logo.files[0];
 
     const formData = new FormData();
-    formData.append("client", client);
+    formData.append("client", clientName);
     formData.append("role", role);
     formData.append("company", company);
     formData.append("country", country);
@@ -54,6 +70,12 @@ const ClientForm = ({ ref }) => {
         return; // stop submit if invalid
       }
     }
+
+    if (isEditing) {
+      mutationUpdate.mutate({ id: client._id, formData });
+      e.target.reset();
+      return;
+    }
     mutation.mutate(formData);
     e.target.reset();
   };
@@ -62,58 +84,62 @@ const ClientForm = ({ ref }) => {
     <dialog ref={ref} id="clientModal" className="modal">
       <div className="modal-box">
         <form className="fieldset" onSubmit={(e) => handleClient(e)}>
-          <h1 className="text-xl font-semibold">Client Details</h1>
+          <h1 className="text-xl font-semibold">{isEditing ? "Edit Client Details" : "Add Client Details"}</h1>
 
           <label className="label" htmlFor="clientName">
-            Client Name<span className="text-red-600">*</span>
+            Client Name<span className={isEditing ? "hidden" : "text-red-600"}>*</span>
           </label>
           <input
             type="text"
             className="input w-full"
             placeholder="Write Client's Name"
             name="clientName"
-            required
+            defaultValue={isEditing ? client.client : ""}
+            required={isEditing ? false : true}
           />
           <label className="label" htmlFor="company">
-            Company Name<span className="text-red-600">*</span>
+            Company Name<span className={isEditing ? "hidden" : "text-red-600"}>*</span>
           </label>
           <input
             type="text"
             className="input w-full"
             placeholder="Write Client's Name"
             name="company"
-            required
+            defaultValue={isEditing ? client.company : ""}
+            required={isEditing ? false : true}
           />
 
           <label className="label" htmlFor="clientRole">
-            Client Role<span className="text-red-600">*</span>
+            Client Role<span className={isEditing ? "hidden" : "text-red-600"}>*</span>
           </label>
           <input
             type="text"
             className="input w-full"
             placeholder="Write client's role in the Brand"
             name="clientRole"
-            required
+            defaultValue={isEditing ? client.role : ""}
+            required={isEditing ? false : true}
           />
           <label className="label" htmlFor="clientEmail">
-            Email<span className="text-red-600">*</span>
+            Email<span className={isEditing ? "hidden" : "text-red-600"}>*</span>
           </label>
           <input
             type="email"
             className="input w-full"
             placeholder="Write client's Email Address"
             name="clientEmail"
-            required
+            defaultValue={isEditing ? client.email : ""}
+            required={isEditing ? false : true}
           />
 
           <label className="label" htmlFor="country">
-            Country<span className="text-red-600">*</span>
+            Country<span className={isEditing ? "hidden" : "text-red-600"}>*</span>
           </label>
           <select
-            defaultValue="Select Country"
             className="select w-full"
             name="country"
-            required
+            defaultValue={isEditing ? client.country : "Select Country"}
+            required={isEditing ? false : true}
           >
             <option disabled={true}>Select Country</option>
             <option>Bangladesh</option>
@@ -121,6 +147,11 @@ const ClientForm = ({ ref }) => {
             <option>Canada</option>
             <option>United Kingdom</option>
             <option>Australia</option>
+            <option>Brazil</option>
+            <option>Finland</option>
+            <option>France</option>
+            <option>Germany</option>
+            <option>Europe</option>
           </select>
           <label className="label" htmlFor="logo">
             Upload Logo
@@ -134,7 +165,7 @@ const ClientForm = ({ ref }) => {
           <p className="italic">Size limit 5MB</p>
           <div className="modal-action">
             <button
-              type="submit"
+              type="button"
               className="btn btn-error"
               onClick={() => ref.current.close()}
             >
@@ -146,8 +177,7 @@ const ClientForm = ({ ref }) => {
                 }`}
               disabled={loading ? true : false}
             >
-              {loading && <span className="loading loading-spinner"></span>} Add
-              Client
+              {loading && <span className="loading loading-spinner"></span>} {isEditing ? "Update" : "Add Client"}
             </button>
           </div>
         </form>

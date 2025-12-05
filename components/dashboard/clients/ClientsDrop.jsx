@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { LuEllipsisVertical, LuSquarePen, LuTrash2 } from "react-icons/lu"
 import { toast } from "react-toastify";
 
-const ClientsDrop = ({ client }) => {
+const ClientsDrop = ({ client, onEdit }) => {
 
     const { email, public_id } = client;
 
@@ -51,10 +51,7 @@ const ClientsDrop = ({ client }) => {
                 className="dropdown-content menu bg-base-100 rounded-box z-1 hn w-52 p-2 shadow-sm"
             >
                 <li>
-                    <a>
-                        <LuSquarePen />
-                        Edit
-                    </a>
+                    <button onClick={() => onEdit(client)}><LuSquarePen /> Edit</button>
                 </li>
                 <li>
                     <button className="text-error hover:bg-error hover:text-error-content" onClick={() => removeClient({ email, public_id })}

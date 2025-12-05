@@ -43,3 +43,17 @@ export const deleteClient = async (email, public_id) => {
     }
     return res.json();
 };
+
+// Update existing client
+export const updateClient = async (id, formData) => {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/clients/${id}`, {
+        method: "PUT",
+        body: formData,
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+        throw new Error(data.message || "Failed to update client");
+    }
+    return data;
+};
