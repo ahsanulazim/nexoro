@@ -1,44 +1,27 @@
 "use client";
 
+import { fetchClients } from "@/api/fetchClients";
 import ClientForm from "@/components/dashboard/clients/ClientForm";
 import ClientsTable from "@/components/dashboard/clients/ClientsTable";
 import DashBread from "@/components/dashboard/DashBread";
-import { MyContext } from "@/context/MyProvider";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import { useRef } from "react";
 import { LuPlus } from "react-icons/lu";
 
 const Clients = () => {
-  const { isAdmin } = useContext(MyContext);
   const addClientForm = useRef();
-  const [clientData, setClientData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
-  useEffect(() => {
-    if (!isAdmin) return;
+  const { data: clientData, isLoading, isError } = useQuery({
+    queryKey: ["clientData"],
+    queryFn: fetchClients,
+  });
 
-    const fetchClients = async () => {
-      try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/clients`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-        if (!res.ok) {
-          console.error("Failed to fetch clients");
-          return;
-        }
-        const data = await res.json();
-        setClientData(data);
-      } catch (error) {
-        console.error("Error fetching clients:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchClients();
-  }, [isAdmin]);
+  if (isError) {
+    router.push("/dashboard");
+    return null;
+  }
 
   return (
     <>

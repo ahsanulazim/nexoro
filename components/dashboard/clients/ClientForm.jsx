@@ -1,10 +1,30 @@
 "use client";
 
+import { addClient } from "@/api/fetchClients";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "react-toastify";
 
 const ClientForm = ({ ref }) => {
   const [loading, setLoading] = useState(false);
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: addClient,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["clientData"],
+      });
+      ref.current.close();
+      toast.success("Client added successfully");
+    },
+    onError: (error) => {
+      toast.error(error.massage);
+    },
+    onSettled: () => {
+      setLoading(false);
+    },
+  });
 
   const handleClient = (e) => {
     e.preventDefault();
@@ -34,30 +54,8 @@ const ClientForm = ({ ref }) => {
         return; // stop submit if invalid
       }
     }
-
-    //send data to server
-    fetch(`${process.env.NEXT_PUBLIC_API_BASE}/clients`, {
-      method: "POST",
-      body: formData,
-    })
-      .then(async (res) => {
-        const data = await res.json();
-        if (!res.ok) {
-          throw new Error(data.message);
-        }
-        return data;
-      })
-      .then((data) => {
-        setLoading(false);
-        ref.current.close();
-        e.target.reset();
-        toast.success("Client added successfully");
-        // Optionally, you can add logic to close the modal or reset the form here
-      })
-      .catch((error) => {
-        setLoading(false);
-        toast.error(error.message);
-      });
+    mutation.mutate(formData);
+    e.target.reset();
   };
 
   return (
