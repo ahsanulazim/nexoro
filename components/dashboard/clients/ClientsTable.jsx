@@ -1,4 +1,5 @@
 import { LuEllipsisVertical, LuSquarePen, LuTrash2 } from "react-icons/lu";
+import ClientsDrop from "./ClientsDrop";
 
 const ClientsTable = ({ clientData }) => {
   return (
@@ -53,32 +54,7 @@ const ClientsTable = ({ clientData }) => {
                 })}
               </td>
               <th>
-                <div className="dropdown dropdown-end">
-                  <button
-                    tabIndex={0}
-                    role="button"
-                    className="btn btn-soft btn-square"
-                  >
-                    <LuEllipsisVertical />
-                  </button>
-                  <ul
-                    tabIndex="-1"
-                    className="dropdown-content menu bg-base-100 rounded-box z-1 hn w-52 p-2 shadow-sm"
-                  >
-                    <li>
-                      <a>
-                        <LuSquarePen />
-                        Edit
-                      </a>
-                    </li>
-                    <li>
-                      <a className="text-error hover:bg-error hover:text-error-content">
-                        <LuTrash2 />
-                        Delete
-                      </a>
-                    </li>
-                  </ul>
-                </div>
+                <ClientsDrop client={client} />
               </th>
             </tr>
           ))}

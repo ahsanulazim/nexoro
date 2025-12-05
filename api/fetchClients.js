@@ -27,3 +27,19 @@ export const addClient = async (formData) => {
     }
     return data;
 };
+
+//delete a client
+export const deleteClient = async (email, public_id) => {
+    const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE}/clients/${email}`,
+        {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ public_id }),
+        }
+    );
+    if (!res.ok) {
+        throw new Error("Failed to delete service");
+    }
+    return res.json();
+};
