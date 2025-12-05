@@ -1,57 +1,32 @@
 "use client";
 
-import { MyContext } from "@/context/MyProvider";
+import { deleteUser } from "@/api/fetchUsers";
 import auth from "@/firebase/firebase.config";
-import { useContext, useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { FaTriangleExclamation } from "react-icons/fa6";
 import { toast } from "react-toastify";
 
 export default function Modal({ ref, remove }) {
-  //Loader Button State
-  const [loading, setLoading] = useState(false);
-  const { serverUrl } = useContext(MyContext);
   const [user] = useAuthState(auth);
+  const queryClient = useQueryClient();
 
-  const handleRemove = async () => {
-    setLoading(true);
-    try {
-      const token = await user?.getIdToken();
-      const response = await fetch(`${serverUrl}/users/${remove}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (response.status === 403) {
-        setLoading(false);
-        toast.error("You do not have permission to delete users.");
-        return;
-      }
-
-      const result = await response.json();
-
-      if (result.success) {
-        setLoading(false);
-        toast.success("User deleted successfully");
-        ref.current.close();
-        // Optionally redirect or refresh
+  const { mutate, isPending } = useMutation({
+    mutationFn: () => deleteUser(remove),
+    onSuccess: (data) => {
+      if (data.success) {
+        toast.success("User removed successfully");
+        queryClient.invalidateQueries({ queryKey: ["users", user?.uid] });
       } else {
-        setLoading(false);
-        toast.error(result.message || "Deletion failed");
-        ref.current.close();
+        toast.error(data.message || "Failed to remove user");
       }
-    } catch (error) {
-      setLoading(false);
+      ref.current.close();
+    },
+    onError: () => {
       toast.error("Something went wrong while deleting");
       ref.current.close();
-    } finally {
-      setLoading(false);
-      ref.current.close();
-    }
-  };
+    },
+  })
 
   return (
     <>
@@ -78,11 +53,11 @@ export default function Modal({ ref, remove }) {
 
             <button
               type="submit"
-              onClick={handleRemove}
+              onClick={() => mutate()}
               className="btn btn-error rounded-md"
-              disabled={loading ? true : false}
+              disabled={isPending}
             >
-              {loading ? (
+              {isPending ? (
                 <>
                   <span className="loading loading-spinner"></span>
                   loading

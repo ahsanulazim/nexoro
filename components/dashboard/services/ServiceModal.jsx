@@ -5,7 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "react-toastify";
 
-const ServiceModal = ({ ref, onServiceAdded }) => {
+const ServiceModal = ({ ref }) => {
   const [loading, setLoading] = useState(false);
   const queryClient = useQueryClient();
 

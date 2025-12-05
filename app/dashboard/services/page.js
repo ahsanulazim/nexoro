@@ -12,11 +12,7 @@ import { LuPlus } from "react-icons/lu";
 const Services = () => {
   const addService = useRef();
 
-  const {
-    data: services,
-    isLoading,
-    error,
-  } = useQuery({
+  const { data: services, isLoading, error, } = useQuery({
     queryKey: ["services"],
     queryFn: fetchServices,
   });
