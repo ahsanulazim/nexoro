@@ -46,8 +46,8 @@ const Footer = () => {
           <nav>
             <h6 className="footer-title">Contact</h6>
             <a href="tel:+8801408431173">+8801408431173</a>
-            <a href="mailto:nexorosolution@gmail.com">
-              nexorosolution@gmail.com
+            <a href="mailto:contact@nexorosolution.com">
+              contact@nexorosolution.com
             </a>
             <p>Khulna, Bagerhat-9300</p>
           </nav>
