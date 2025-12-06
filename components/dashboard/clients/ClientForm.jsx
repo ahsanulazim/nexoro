@@ -154,7 +154,7 @@ const ClientForm = ({ ref, isEditing, client }) => {
             <option>Europe</option>
           </select>
           <label className="label" htmlFor="logo">
-            Upload Logo
+            Upload Logo <span className={isEditing ? "hidden" : "text-red-600"}>*</span>
           </label>
           <input
             type="file"

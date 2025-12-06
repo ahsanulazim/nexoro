@@ -27,3 +27,33 @@ export const fetchMembers = async () => {
 
     return res.json();
 };
+
+//delete a team member
+export const deleteMember = async (id, public_id) => {
+    const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE}/team/${id}`,
+        {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ public_id }),
+        }
+    );
+    if (!res.ok) {
+        throw new Error("Failed to delete Member");
+    }
+    return res.json();
+};
+
+// Update existing member
+export const updateMember = async (id, formData) => {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/team/${id}`, {
+        method: "PUT",
+        body: formData,
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+        throw new Error(data.message || "Failed to update Member");
+    }
+    return data;
+};

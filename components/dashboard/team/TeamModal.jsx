@@ -8,10 +8,26 @@ import { LuGlobe } from "react-icons/lu";
 import { MdEmail } from "react-icons/md";
 import { toast } from "react-toastify";
 
-const TeamModal = ({ ref, isEditing }) => {
+const TeamModal = ({ ref, isEditing, selectedMember }) => {
 
     const [loading, setLoading] = useState(false);
     const queryClient = useQueryClient();
+
+    //Edit Mutation
+    const mutationEdit = useMutation({
+        mutationFn: ({ id, formData }) => updateService(id, formData),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["services"] });
+            ref.current.close();
+            toast.success("Service updated successfully");
+        },
+        onError: (error) => {
+            toast.error(error.message);
+        },
+        onSettled: () => {
+            setLoading(false);
+        },
+    });
 
     //Add Mutation
     const mutation = useMutation({
@@ -38,6 +54,7 @@ const TeamModal = ({ ref, isEditing }) => {
         const formData = new FormData();
         formData.append("memberName", e.target.memberName.value);
         formData.append("role", e.target.role.value);
+        formData.append("gender", e.target.gender.value);
         if (e.target.website.value) {
             formData.append("website", `https://${e.target.website.value}`);
         }
@@ -86,7 +103,7 @@ const TeamModal = ({ ref, isEditing }) => {
                         className="input w-full"
                         placeholder="Member Full Name"
                         name="memberName"
-                        defaultValue={isEditing ? selectedService.title : ""}
+                        defaultValue={isEditing ? selectedMember.memberName : ""}
                         required={isEditing ? false : true}
                     />
                     <label className="label" htmlFor="role">
@@ -97,9 +114,22 @@ const TeamModal = ({ ref, isEditing }) => {
                         className="input w-full"
                         placeholder="Set a Role of the Member"
                         name="role"
-                        defaultValue={isEditing ? selectedService.slug : ""}
+                        defaultValue={isEditing ? selectedMember.role : ""}
                         required={isEditing ? false : true}
                     />
+                    <label className="label" htmlFor="gender">
+                        Gender<span className={isEditing ? "hidden" : "text-red-600"}>*</span>
+                    </label>
+                    <select
+                        className="select w-full"
+                        name="gender"
+                        defaultValue={isEditing ? selectedMember.gender : "Select Gender"}
+                        required={isEditing ? false : true}
+                    >
+                        <option disabled={true}>Select Gender</option>
+                        <option>Male</option>
+                        <option>Female</option>
+                    </select>
                     <label className="label">Set Profile Pic<span className={isEditing ? "hidden" : "text-red-600"}>*</span></label>
                     <input
                         type="file"
@@ -112,23 +142,23 @@ const TeamModal = ({ ref, isEditing }) => {
                     <label className="label">Important Links</label>
                     <label className="input w-full">
                         <span className="label"><LuGlobe /></span>
-                        <input type="text" placeholder="website.com" name="website" />
+                        <input type="url" placeholder="website.com" name="website" defaultValue={isEditing ? selectedMember.website : ""} />
                     </label>
                     <label className="input w-full">
                         <span className="label"><MdEmail /></span>
-                        <input type="text" placeholder="member@email.com" name="email" />
+                        <input type="email" placeholder="member@email.com" name="email" defaultValue={isEditing ? selectedMember.email : ""} />
                     </label>
                     <label className="input w-full">
                         <span className="label"><FaBehance /></span>
-                        <input type="text" placeholder="username" name="behance" />
+                        <input type="text" placeholder="username" name="behance" defaultValue={isEditing ? selectedMember.behance ? new URL(selectedMember.behance).pathname.replace("/", "") : "" : ""} />
                     </label>
                     <label className="input w-full">
                         <span className="label"><FaGithub /></span>
-                        <input type="text" placeholder="username" name="github" />
+                        <input type="text" placeholder="username" name="github" defaultValue={isEditing ? selectedMember.github ? new URL(selectedMember.github).pathname.replace("/", "") : "" : ""} />
                     </label>
                     <label className="input w-full">
                         <span className="label"><FaLinkedinIn /></span>
-                        <input type="text" placeholder="username" name="linkedin" />
+                        <input type="text" placeholder="username" name="linkedin" defaultValue={isEditing ? selectedMember.linkedin ? new URL(selectedMember.linkedin).pathname.split("/").pop() : "" : ""} />
                     </label>
                     <div className="modal-action">
                         <button type="button" className="btn btn-error" onClick={() => ref.current.close()}>Close</button>
