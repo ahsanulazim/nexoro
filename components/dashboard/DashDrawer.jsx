@@ -110,17 +110,17 @@ const DashDrawer = ({ children }) => {
                     <span className="is-drawer-close:hidden">Users</span>
                   </Link>
                 </li>
+                <li>
+                  <Link href="/dashboard/team"
+                    className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                    data-tip="Team"
+                  >
+                    <LuUsers className="my-1.5 inline-block size-4" />
+                    <span className="is-drawer-close:hidden">Team</span>
+                  </Link>
+                </li>
               </>
             )}
-            <li>
-              <button
-                className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
-                data-tip="Team"
-              >
-                <LuUsers className="my-1.5 inline-block size-4" />
-                <span className="is-drawer-close:hidden">Team</span>
-              </button>
-            </li>
             {/* List item */}
             <li>
               <Link
