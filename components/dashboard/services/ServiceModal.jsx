@@ -59,19 +59,17 @@ const ServiceModal = ({ ref, isEditing, selectedService }) => {
     formData.append("longDes", longDes);
     formData.append("folder", "icons");
 
-    if (!icon) {
-      setLoading(false);
-      return;
-    } else {
+    //icon condition
+    if (icon) {
       const maxSize = 5 * 1024 * 1024;
       if (icon.size <= maxSize) {
         formData.append("icon", icon);
       } else {
         toast.error("Icon size must be less than 5MB");
-        setLoading(false);
-        return;
+        return; // stop submit if invalid
       }
     }
+
 
     if (isEditing) {
       mutationEdit.mutate({ id: selectedService._id, formData });
