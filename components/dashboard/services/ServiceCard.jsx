@@ -1,7 +1,7 @@
 import { LuCalendar } from "react-icons/lu";
 import ServiceDrop from "./ServiceDrop";
 
-const ServiceCard = ({ service }) => {
+const ServiceCard = ({ service, onEdit }) => {
   return (
     <div className="card max-lg:card-sm bg-base-300 shadow-sm">
       <div className="card-body">
@@ -18,7 +18,7 @@ const ServiceCard = ({ service }) => {
               <h2 className="card-title line-clamp-2">{service.title}</h2>
             </div>
           </div>
-          <ServiceDrop service={service} />
+          <ServiceDrop service={service} onEdit={onEdit} />
         </div>
 
         <div>

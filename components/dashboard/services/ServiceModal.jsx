@@ -1,14 +1,31 @@
 "use client";
 
-import { addService } from "@/api/fetchServices";
+import { addService, updateService } from "@/api/fetchServices";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "react-toastify";
 
-const ServiceModal = ({ ref }) => {
+const ServiceModal = ({ ref, isEditing, selectedService }) => {
   const [loading, setLoading] = useState(false);
   const queryClient = useQueryClient();
 
+  //Edit Mutation
+  const mutationEdit = useMutation({
+    mutationFn: ({ id, formData }) => updateService(id, formData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["services"] });
+      ref.current.close();
+      toast.success("Service updated successfully");
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+    onSettled: () => {
+      setLoading(false);
+    },
+  });
+
+  //Add Mutation
   const mutation = useMutation({
     mutationFn: addService,
     onSuccess: (data) => {
@@ -55,6 +72,11 @@ const ServiceModal = ({ ref }) => {
         return;
       }
     }
+
+    if (isEditing) {
+      mutationEdit.mutate({ id: selectedService._id, formData });
+      return;
+    }
     mutation.mutate(formData);
     e.target.reset();
   };
@@ -63,53 +85,59 @@ const ServiceModal = ({ ref }) => {
     <dialog ref={ref} id="serviceModal" className="modal">
       <div className="modal-box">
         <form className="fieldset" onSubmit={handleService}>
-          <h1 className="text-xl font-semibold">Service Details</h1>
+          <h1 className="text-xl font-semibold">{isEditing ? "Edit" : "Add"} Service</h1>
 
           <label className="label" htmlFor="serviceTitle">
-            Service Title<span className="text-red-600">*</span>
+            Service Title<span className={isEditing ? "hidden" : "text-red-600"}>*</span>
           </label>
           <input
             type="text"
             className="input w-full"
             placeholder="Write Service Title"
             name="serviceTitle"
-            required
+            defaultValue={isEditing ? selectedService.title : ""}
+            required={isEditing ? false : true}
           />
           <label className="label" htmlFor="slug">
-            Slug<span className="text-red-600">*</span>
+            Slug<span className={isEditing ? "hidden" : "text-red-600"}>*</span>
           </label>
           <input
             type="text"
             className="input w-full"
             placeholder="Set a Slug for The Service"
             name="slug"
-            required
+            defaultValue={isEditing ? selectedService.slug : ""}
+            required={isEditing ? false : true}
           />
-          <label className="label">Set Icon<span className="text-red-600">*</span></label>
+          <label className="label">Set Icon<span className={isEditing ? "hidden" : "text-red-600"}>*</span></label>
           <input
             type="file"
             className="file-input"
             name="icon"
             accept=".svg,image/svg+xml"
-            required
+            required={isEditing ? false : true}
           />
           <label className="label italic">SVG Only. Max size 5MB</label>
           <label className="label" htmlFor="shortDes">
-            Short Description<span className="text-red-600">*</span>
+            Short Description<span className={isEditing ? "hidden" : "text-red-600"}>*</span>
           </label>
           <textarea
             name="shortDes"
             placeholder="Write a short Description"
             className="textarea w-full"
+            defaultValue={isEditing ? selectedService.shortDes : ""}
+            required={isEditing ? false : true}
           ></textarea>
           <label className="label" htmlFor="longDes">
-            Long Description<span className="text-red-600">*</span>
+            Long Description<span className={isEditing ? "hidden" : "text-red-600"}>*</span>
           </label>
           <textarea
             name="longDes"
             rows="4"
             placeholder="Write a Long Description"
             className="textarea w-full"
+            defaultValue={isEditing ? selectedService.longDes : ""}
+            required={isEditing ? false : true}
           ></textarea>
 
           <div className="modal-action">
@@ -126,8 +154,7 @@ const ServiceModal = ({ ref }) => {
                 }`}
               disabled={loading ? true : false}
             >
-              {loading && <span className="loading loading-spinner"></span>} Add
-              Service
+              {loading && <span className="loading loading-spinner"></span>} {isEditing ? "Update" : "Add"} Service
             </button>
           </div>
         </form>

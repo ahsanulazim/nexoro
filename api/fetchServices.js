@@ -58,4 +58,3 @@ export const updateService = async (id, formData) => {
   }
   return data;
 };
-

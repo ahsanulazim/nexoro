@@ -2,16 +2,13 @@
 
 import { deleteService } from "@/api/fetchServices";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRef } from "react";
 import { FaEllipsisVertical, FaTrashCan } from "react-icons/fa6";
 import { LuSquarePen } from "react-icons/lu";
-import ServiceEditModal from "./ServiceEditModal";
 
-const ServiceDrop = ({ service }) => {
+const ServiceDrop = ({ service, onEdit }) => {
 
   const { slug, public_id } = service;
 
-  const editService = useRef();
   const queryClient = useQueryClient();
 
   const { mutate: removeService, isPending } = useMutation({
@@ -33,38 +30,37 @@ const ServiceDrop = ({ service }) => {
   });
 
   return (
-    <>
-      <ServiceEditModal ref={editService} service={service} />
-      <div className="dropdown dropdown-end">
-        <button
-          tabIndex={0}
-          role="button"
-          className="btn m-1 btn-soft btn-primary btn-square btn-sm"
-        >
-          <FaEllipsisVertical />
-        </button>
-        <ul
-          tabIndex={0}
-          className="dropdown-content menu bg-base-200 rounded-box z-1 w-52 p-2 shadow-md"
-        >
-          <li>
-            <button onClick={() =>
-              document.getElementById("editServiceModal").showModal()
-            }>
-              <LuSquarePen className="text-success" /> Edit
-            </button>
-          </li>
-          <li>
-            <button
-              onClick={() => removeService({ slug, public_id })}
-              disabled={isPending}
-            >
-              <FaTrashCan className="text-error" /> Delete
-            </button>
-          </li>
-        </ul>
-      </div>
-    </>
+    <div className="dropdown dropdown-end">
+      <button
+        tabIndex={0}
+        role="button"
+        className="btn m-1 btn-soft btn-primary btn-square btn-sm"
+      >
+        <FaEllipsisVertical />
+      </button>
+      <ul
+        tabIndex={0}
+        className="dropdown-content menu bg-base-200 rounded-box z-1 w-52 p-2 shadow-md"
+      >
+        <li>
+          <button onClick={() => {
+            document.getElementById("serviceModal").showModal();
+            onEdit(service);
+          }
+          }>
+            <LuSquarePen className="text-success" /> Edit
+          </button>
+        </li>
+        <li>
+          <button
+            onClick={() => removeService({ slug, public_id })}
+            disabled={isPending}
+          >
+            <FaTrashCan className="text-error" /> Delete
+          </button>
+        </li>
+      </ul>
+    </div>
   );
 };
 

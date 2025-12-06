@@ -6,10 +6,12 @@ import ServiceCard from "@/components/dashboard/services/ServiceCard";
 import ServiceModal from "@/components/dashboard/services/ServiceModal";
 import ServiceSkeleton from "@/components/dashboard/skeleton/ServiceSkeleton";
 import { useQuery } from "@tanstack/react-query";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { LuPlus } from "react-icons/lu";
 
 const Services = () => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [selectedService, setSelectedService] = useState(null);
   const addService = useRef();
 
   const { data: services, isLoading } = useQuery({
@@ -19,7 +21,7 @@ const Services = () => {
 
   return (
     <>
-      <ServiceModal ref={addService} />
+      <ServiceModal ref={addService} isEditing={isEditing} selectedService={selectedService} />
       <main className="flex flex-col gap-4">
         <section className="">
           <DashBread title="Services" />
@@ -27,9 +29,10 @@ const Services = () => {
             <h1 className="text-4xl font-semibold">Services</h1>
             <button
               className="btn btn-primary btn-nexoro-primary"
-              onClick={() =>
-                document.getElementById("serviceModal").showModal()
-              }
+              onClick={() => {
+                document.getElementById("serviceModal").showModal();
+                setIsEditing(false);
+              }}
             >
               <LuPlus />
               Add Service
@@ -43,7 +46,11 @@ const Services = () => {
           ) : (
             <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
               {services?.map((service) => (
-                <ServiceCard key={service.title} service={service} />
+                <ServiceCard key={service.title} service={service} onEdit={(service) => {
+                  setIsEditing(true);
+                  setSelectedService(service);
+                  document.getElementById("serviceModal").showModal();
+                }} />
               ))}
             </div>
           )}
