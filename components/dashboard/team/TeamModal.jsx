@@ -1,6 +1,6 @@
 'use client'
 
-import { addMember } from "@/api/fetchTeam";
+import { addMember, updateMember } from "@/api/fetchTeam";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { FaBehance, FaGithub, FaLinkedinIn } from "react-icons/fa6";
@@ -15,11 +15,11 @@ const TeamModal = ({ ref, isEditing, selectedMember }) => {
 
     //Edit Mutation
     const mutationEdit = useMutation({
-        mutationFn: ({ id, formData }) => updateService(id, formData),
+        mutationFn: ({ id, formData }) => updateMember(id, formData),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["services"] });
+            queryClient.invalidateQueries({ queryKey: ["team"] });
             ref.current.close();
-            toast.success("Service updated successfully");
+            toast.success("Member updated successfully");
         },
         onError: (error) => {
             toast.error(error.message);
@@ -82,6 +82,11 @@ const TeamModal = ({ ref, isEditing, selectedMember }) => {
                 toast.error("Icon size must be less than 5MB");
                 return; // stop submit if invalid
             }
+        }
+
+        if (isEditing) {
+            mutationEdit.mutate({ id: selectedMember._id, formData });
+            return;
         }
 
         mutation.mutate(formData)

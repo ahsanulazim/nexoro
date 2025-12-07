@@ -2,6 +2,7 @@
 
 import { fetchMembers } from "@/api/fetchTeam";
 import DashBread from "@/components/dashboard/DashBread"
+import TeamCardSkeleton from "@/components/dashboard/skeleton/TeamCardSkeleton";
 import TeamCard from "@/components/dashboard/team/TeamCard"
 import TeamModal from "@/components/dashboard/team/TeamModal";
 import { useQuery } from "@tanstack/react-query";
@@ -41,7 +42,7 @@ const Team = () => {
                 </section>
                 <section>
                     <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
-                        {team?.map((member) => <TeamCard key={member.memberName} member={member} setIsEditing={setIsEditing} setSelectedMember={setSelectedMember} onEdit={onEdit} />)}
+                        {isLoading ? Array.from({ length: 10 }).map((_, i) => <TeamCardSkeleton key={i} />) : team.map((member) => <TeamCard key={member.memberName} member={member} setIsEditing={setIsEditing} setSelectedMember={setSelectedMember} onEdit={onEdit} />)}
                     </div>
                 </section>
             </main>
