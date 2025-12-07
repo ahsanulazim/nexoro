@@ -11,7 +11,7 @@ const ReviewMarquee = ({ direction }) => {
       direction={direction}
     >
       {Array.from({ length: 10 }).map((_, i) => (
-        <ReviewCard key={i} />
+        <ReviewCard className="bg-base-100" key={i} />
       ))}
     </Marquee>
   );

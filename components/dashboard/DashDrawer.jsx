@@ -3,10 +3,12 @@
 import {
   LuBookUser,
   LuFlag,
+  LuGalleryThumbnails,
   LuLayoutDashboard,
   LuMessageCircle,
   LuPackage,
   LuSettings,
+  LuStar,
   LuStore,
   LuUsers,
   LuUsersRound,
@@ -50,28 +52,38 @@ const DashDrawer = ({ children }) => {
                 <span className="is-drawer-close:hidden">Dashboard</span>
               </Link>
             </li>
-
-            <li>
-              <button
-                className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
-                data-tip="Orders"
-              >
-                <LuPackage className="my-1.5 inline-block size-4" />
-                <span className="is-drawer-close:hidden">Orders</span>
-              </button>
-            </li>
-
-            <li>
-              <button
-                className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
-                data-tip="Portfolio"
-              >
-                <LuBookUser className="my-1.5 inline-block size-4" />
-                <span className="is-drawer-close:hidden">Portfolio</span>
-              </button>
-            </li>
             {isAdmin && (
               <>
+
+                <li>
+                  <Link href="/dashboard/sliders"
+                    className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                    data-tip="Sliders"
+                  >
+                    <LuGalleryThumbnails className="my-1.5 inline-block size-4" />
+                    <span className="is-drawer-close:hidden">Sliders</span>
+                  </Link>
+                </li>
+                <li>
+                  <button
+                    className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                    data-tip="Orders"
+                  >
+                    <LuPackage className="my-1.5 inline-block size-4" />
+                    <span className="is-drawer-close:hidden">Orders</span>
+                  </button>
+                </li>
+
+                <li>
+                  <button
+                    className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                    data-tip="Portfolio"
+                  >
+                    <LuBookUser className="my-1.5 inline-block size-4" />
+                    <span className="is-drawer-close:hidden">Portfolio</span>
+                  </button>
+                </li>
+
                 <li>
                   <Link
                     href="/dashboard/services"
@@ -98,6 +110,16 @@ const DashDrawer = ({ children }) => {
                   >
                     <LuStore className="my-1.5 inline-block size-4" />
                     <span className="is-drawer-close:hidden">Clients</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/dashboard/review"
+                    className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                    data-tip="Review"
+                  >
+                    <LuStar className="my-1.5 inline-block size-4" />
+                    <span className="is-drawer-close:hidden">Review</span>
                   </Link>
                 </li>
                 <li>

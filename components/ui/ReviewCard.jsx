@@ -1,8 +1,8 @@
 import Rating from "./Rating";
 
-const ReviewCard = () => {
+const ReviewCard = ({ className }) => {
   return (
-    <div className="card bg-base-100 max-xs:w-2xs w-sm mr-4">
+    <div className={`card ${className} max-xs:w-2xs w-sm mr-4`}>
       <div className="card-body">
         <p>
           This is a very versatile WordPress theme. Many features combined with

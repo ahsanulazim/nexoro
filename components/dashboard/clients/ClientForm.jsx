@@ -8,6 +8,10 @@ import { toast } from "react-toastify";
 const ClientForm = ({ ref, isEditing, client }) => {
 
   const [loading, setLoading] = useState(false);
+  const [selectedCountry, setSelectedCountry] = useState("");
+
+  const countries = ["Bangladesh", "United States", "Canada", "United Kingdom", "Australia", "Brazil", "Finland", "France", "Germany", "Europe"];
+
   const queryClient = useQueryClient();
 
   const mutationUpdate = useMutation({
@@ -35,7 +39,7 @@ const ClientForm = ({ ref, isEditing, client }) => {
       toast.success("Client added successfully");
     },
     onError: (error) => {
-      toast.error(error.massage);
+      toast.error(error.message);
     },
     onSettled: () => {
       setLoading(false);
@@ -138,20 +142,12 @@ const ClientForm = ({ ref, isEditing, client }) => {
           <select
             className="select w-full"
             name="country"
-            defaultValue={isEditing ? client.country : "Select Country"}
-            required={isEditing ? false : true}
+            value={isEditing ? client.country : "" || selectedCountry}
+            onChange={(e) => setSelectedCountry(e.target.value)}
+            required={!isEditing}
           >
-            <option disabled={true}>Select Country</option>
-            <option>Bangladesh</option>
-            <option>United States</option>
-            <option>Canada</option>
-            <option>United Kingdom</option>
-            <option>Australia</option>
-            <option>Brazil</option>
-            <option>Finland</option>
-            <option>France</option>
-            <option>Germany</option>
-            <option>Europe</option>
+            <option value="" disabled={true}>Select Country</option>
+            {countries.map((country) => <option key={country} value={country}>{country}</option>)}
           </select>
           <label className="label" htmlFor="logo">
             Upload Logo <span className={isEditing ? "hidden" : "text-red-600"}>*</span>
