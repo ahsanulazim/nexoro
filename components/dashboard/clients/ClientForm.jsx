@@ -163,7 +163,7 @@ const ClientForm = ({ ref, isEditing, client }) => {
             <button
               type="button"
               className="btn btn-error"
-              onClick={() => ref.current.close()}
+              onClick={() => { ref.current.reset(); ref.current.close(); }}
             >
               Close
             </button>

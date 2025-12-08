@@ -29,6 +29,11 @@ const Review = () => {
                 <section>
                     <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
                         <ReviewCard className="bg-base-300" />
+                        <ReviewCard className="bg-base-300" />
+                        <ReviewCard className="bg-base-300" />
+                        <ReviewCard className="bg-base-300" />
+                        <ReviewCard className="bg-base-300" />
+                        <ReviewCard className="bg-base-300" />
                     </div>
                 </section>
             </main>

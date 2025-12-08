@@ -44,7 +44,6 @@ const ServiceDrop = ({ service, onEdit }) => {
       >
         <li>
           <button onClick={() => {
-            document.getElementById("serviceModal").showModal();
             onEdit(service);
           }
           }>

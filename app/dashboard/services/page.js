@@ -3,6 +3,7 @@
 import { fetchServices } from "@/api/fetchServices";
 import DashBread from "@/components/dashboard/DashBread";
 import ServiceCard from "@/components/dashboard/services/ServiceCard";
+import ServiceForm from "@/components/dashboard/services/ServiceForm";
 import ServiceModal from "@/components/dashboard/services/ServiceModal";
 import ServiceSkeleton from "@/components/dashboard/skeleton/ServiceSkeleton";
 import { useQuery } from "@tanstack/react-query";
@@ -13,6 +14,7 @@ const Services = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [selectedService, setSelectedService] = useState(null);
   const addService = useRef();
+  const serviceFormModal = useRef();
 
   const { data: services, isLoading } = useQuery({
     queryKey: ["services"],
@@ -21,22 +23,35 @@ const Services = () => {
 
   return (
     <>
-      <ServiceModal ref={addService} isEditing={isEditing} selectedService={selectedService} />
+      <ServiceForm ref={serviceFormModal} isEditing={isEditing} selectedService={selectedService} />
+      {/* <ServiceModal ref={addService} isEditing={isEditing} selectedService={selectedService} /> */}
       <main className="flex flex-col gap-4">
         <section className="">
           <DashBread title="Services" />
           <div className="flex items-center justify-between gap-5">
             <h1 className="text-4xl font-semibold">Services</h1>
+            {/* new btn */}
             <button
               className="btn btn-primary btn-nexoro-primary"
               onClick={() => {
-                document.getElementById("serviceModal").showModal();
-                setIsEditing(false);
+                serviceFormModal.current.showModal();
+                setIsEditing(false)
               }}
             >
               <LuPlus />
               Add Service
             </button>
+            {/* new btn */}
+            {/* <button
+              className="btn btn-primary btn-nexoro-primary"
+              onClick={() => {
+                addService.current.showModal();
+                setIsEditing(false);
+              }}
+            >
+              <LuPlus />
+              Add Service
+            </button> */}
           </div>
         </section>
         <section>
@@ -46,11 +61,7 @@ const Services = () => {
           ) : (
             <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
               {services?.map((service) => (
-                <ServiceCard key={service.title} service={service} onEdit={(service) => {
-                  setIsEditing(true);
-                  setSelectedService(service);
-                  document.getElementById("serviceModal").showModal();
-                }} />
+                <ServiceCard key={service.title} service={service} setSelectedService={setSelectedService} setIsEditing={setIsEditing} serviceFormModal={serviceFormModal} />
               ))}
             </div>
           )}

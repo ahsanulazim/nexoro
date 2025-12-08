@@ -36,7 +36,7 @@ const ServiceModal = ({ ref, isEditing, selectedService }) => {
       toast.success("Service added successfully");
     },
     onError: (error) => {
-      toast.error(error.massage);
+      toast.error(error.message);
     },
     onSettled: () => {
       setLoading(false);
