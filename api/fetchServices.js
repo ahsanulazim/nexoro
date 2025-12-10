@@ -1,8 +1,14 @@
 // add a service
 export const addService = async (formData) => {
+  const fd = new FormData();
+  fd.append("serviceTitle", formData.serviceTitle);
+  fd.append("slug", formData.slug);
+  fd.append("shortDes", formData.shortDes);
+  fd.append("longDes", formData.longDes);
+  fd.append("icon", formData.icon[0]);
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/services`, {
     method: "POST",
-    body: formData,
+    body: fd,
   });
 
   const data = await res.json();

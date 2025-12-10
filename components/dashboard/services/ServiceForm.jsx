@@ -1,9 +1,32 @@
+import { addService } from "@/api/fetchServices";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { useForm } from "react-hook-form"
-
+import { toast } from "react-toastify";
 
 const ServiceForm = ({ ref }) => {
 
-    const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm({
+    const [loading, setLoading] = useState(false);
+    const queryClient = useQueryClient();
+    //Add Mutation
+    const mutation = useMutation({
+        mutationFn: addService,
+        onSuccess: (data) => {
+            queryClient.invalidateQueries({
+                queryKey: ["services"],
+            });
+            ref.current.close();
+            toast.success("Service added successfully");
+        },
+        onError: (error) => {
+            toast.error(error.message);
+        },
+        onSettled: () => {
+            setLoading(false);
+        }
+    });
+
+    const { register, handleSubmit, reset, formState: { errors } } = useForm({
         defaultValues: {
             serviceTitle: "",
             slug: "",
@@ -14,8 +37,8 @@ const ServiceForm = ({ ref }) => {
     });
 
     const handleService = (data) => {
-        console.log(data);
-
+        setLoading(true);
+        mutation.mutate(data);
     }
 
     const handleClose = () => {
@@ -27,7 +50,7 @@ const ServiceForm = ({ ref }) => {
     return (
         <dialog ref={ref} id="serviceForm" className="modal">
             <div className="modal-box">
-                <form className="fieldset" onSubmit={handleSubmit(handleService)}>
+                <form className="fieldset" onSubmit={handleSubmit(handleService)} disabled={loading}>
                     <h1 className="text-xl font-semibold">Service Details</h1>
 
                     <label className="label" htmlFor="serviceTitle">
@@ -113,10 +136,10 @@ const ServiceForm = ({ ref }) => {
                         <button type="button" className="btn btn-error" onClick={handleClose}>Close</button>
                         <button
                             type="submit"
-                            className={`btn btn-primary ${!isSubmitting ? "btn-nexoro-primary" : ""}`}
-                            disabled={isSubmitting}
+                            className={`btn btn-primary ${!loading ? "btn-nexoro-primary" : ""}`}
+                            disabled={loading}
                         >
-                            {isSubmitting && <span className="loading loading-spinner"></span>} Add Service
+                            {loading && <span className="loading loading-spinner"></span>} Add Service
                         </button>
                     </div>
                 </form>

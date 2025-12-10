@@ -1,11 +1,11 @@
 "use client";
 
-import { addService, updateService } from "@/api/fetchServices";
+import { updateService } from "@/api/fetchServices";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "react-toastify";
 
-const ServiceModal = ({ ref, isEditing, selectedService }) => {
+const ServiceModal = ({ ref }) => {
   const [loading, setLoading] = useState(false);
   const queryClient = useQueryClient();
 
@@ -16,24 +16,6 @@ const ServiceModal = ({ ref, isEditing, selectedService }) => {
       queryClient.invalidateQueries({ queryKey: ["services"] });
       ref.current.close();
       toast.success("Service updated successfully");
-    },
-    onError: (error) => {
-      toast.error(error.message);
-    },
-    onSettled: () => {
-      setLoading(false);
-    },
-  });
-
-  //Add Mutation
-  const mutation = useMutation({
-    mutationFn: addService,
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({
-        queryKey: ["services"],
-      });
-      ref.current.close();
-      toast.success("Service added successfully");
     },
     onError: (error) => {
       toast.error(error.message);
@@ -70,34 +52,34 @@ const ServiceModal = ({ ref, isEditing, selectedService }) => {
       }
     }
 
-
-    if (isEditing) {
-      mutationEdit.mutate({ id: selectedService._id, formData });
-      return;
-    }
-    mutation.mutate(formData);
+    mutationEdit.mutate(formData);
     e.target.reset();
   };
 
   return (
-    <dialog ref={ref} id="serviceModal" className="modal">
+    <dialog ref={ref} className="modal">
       <div className="modal-box">
         <form className="fieldset" onSubmit={handleService}>
-          <h1 className="text-xl font-semibold">{isEditing ? "Edit" : "Add"} Service</h1>
+          <h1 className="text-xl font-semibold">Edit Service</h1>
 
           <label className="label" htmlFor="serviceTitle">
-            Service Title<span className={isEditing ? "hidden" : "text-red-600"}>*</span>
+            Service Title
           </label>
           <input
             type="text"
             className="input w-full"
             placeholder="Write Service Title"
-            name="serviceTitle"
-            defaultValue={isEditing ? selectedService.title : ""}
-            required={isEditing ? false : true}
+            {...register("serviceTitle", {
+              pattern: {
+                value: /^[A-Za-z\s]+$/,
+                message: "Only letters and spaces are allowed",
+              },
+
+            })}
           />
+
           <label className="label" htmlFor="slug">
-            Slug<span className={isEditing ? "hidden" : "text-red-600"}>*</span>
+            Slug
           </label>
           <input
             type="text"
@@ -107,7 +89,7 @@ const ServiceModal = ({ ref, isEditing, selectedService }) => {
             defaultValue={isEditing ? selectedService.slug : ""}
             required={isEditing ? false : true}
           />
-          <label className="label">Set Icon<span className={isEditing ? "hidden" : "text-red-600"}>*</span></label>
+          <label className="label">Set Icon </label>
           <input
             type="file"
             className="file-input"
@@ -117,7 +99,7 @@ const ServiceModal = ({ ref, isEditing, selectedService }) => {
           />
           <label className="label italic">SVG Only. Max size 5MB</label>
           <label className="label" htmlFor="shortDes">
-            Short Description<span className={isEditing ? "hidden" : "text-red-600"}>*</span>
+            Short Description
           </label>
           <textarea
             name="shortDes"
@@ -127,7 +109,7 @@ const ServiceModal = ({ ref, isEditing, selectedService }) => {
             required={isEditing ? false : true}
           ></textarea>
           <label className="label" htmlFor="longDes">
-            Long Description<span className={isEditing ? "hidden" : "text-red-600"}>*</span>
+            Long Description
           </label>
           <textarea
             name="longDes"
