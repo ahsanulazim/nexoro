@@ -1,10 +1,11 @@
 // add a service
 export const addService = async (formData) => {
   const fd = new FormData();
-  fd.append("serviceTitle", formData.serviceTitle);
+  fd.append("title", formData.serviceTitle);
   fd.append("slug", formData.slug);
   fd.append("shortDes", formData.shortDes);
   fd.append("longDes", formData.longDes);
+  fd.append("folder", "icons");
   fd.append("icon", formData.icon[0]);
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/services`, {
     method: "POST",
@@ -53,9 +54,19 @@ export const deleteService = async (slug, public_id) => {
 
 // Update existing service
 export const updateService = async (id, formData) => {
+  const fd = new FormData();
+  fd.append("title", formData.serviceTitle);
+  fd.append("slug", formData.slug);
+  fd.append("shortDes", formData.shortDes);
+  fd.append("longDes", formData.longDes);
+  fd.append("folder", "icons");
+  if (formData.icon) {
+    fd.append("icon", formData.icon[0]);
+  }
+
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/services/${id}`, {
     method: "PUT",
-    body: formData,
+    body: fd,
   });
 
   const data = await res.json();

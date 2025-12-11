@@ -3,10 +3,22 @@
 import { updateService } from "@/api/fetchServices";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 
-const ServiceModal = ({ ref }) => {
+const ServiceModal = ({ ref, service }) => {
   const [loading, setLoading] = useState(false);
+
+  const { register, handleSubmit, reset, formState: { errors, isDirty } } = useForm({
+    defaultValues: {
+      serviceTitle: service?.title,
+      slug: service?.slug,
+      shortDes: service?.shortDes,
+      longDes: service?.longDes,
+      icon: null,
+    }
+  });
+
   const queryClient = useQueryClient();
 
   //Edit Mutation
@@ -25,41 +37,17 @@ const ServiceModal = ({ ref }) => {
     },
   });
 
-  const handleService = (e) => {
-    e.preventDefault();
+  const handleService = (data) => {
     setLoading(true);
-    const title = e.target.serviceTitle.value;
-    const slug = e.target.slug.value;
-    const shortDes = e.target.shortDes.value;
-    const longDes = e.target.longDes.value;
-    const icon = e.target.icon.files[0];
-
-    const formData = new FormData();
-    formData.append("title", title);
-    formData.append("slug", slug);
-    formData.append("shortDes", shortDes);
-    formData.append("longDes", longDes);
-    formData.append("folder", "icons");
-
-    //icon condition
-    if (icon) {
-      const maxSize = 5 * 1024 * 1024;
-      if (icon.size <= maxSize) {
-        formData.append("icon", icon);
-      } else {
-        toast.error("Icon size must be less than 5MB");
-        return; // stop submit if invalid
-      }
-    }
-
-    mutationEdit.mutate(formData);
-    e.target.reset();
+    mutationEdit.mutate({ id: service._id, formData: data });
+    ref.current.close();
+    reset();
   };
 
   return (
     <dialog ref={ref} className="modal">
       <div className="modal-box">
-        <form className="fieldset" onSubmit={handleService}>
+        <form className="fieldset" onSubmit={handleSubmit(handleService)}>
           <h1 className="text-xl font-semibold">Edit Service</h1>
 
           <label className="label" htmlFor="serviceTitle">
@@ -77,7 +65,7 @@ const ServiceModal = ({ ref }) => {
 
             })}
           />
-
+          {errors.serviceTitle && <p className="text-red-600">{errors.serviceTitle.message}</p>}
           <label className="label" htmlFor="slug">
             Slug
           </label>
@@ -85,40 +73,58 @@ const ServiceModal = ({ ref }) => {
             type="text"
             className="input w-full"
             placeholder="Set a Slug for The Service"
-            name="slug"
-            defaultValue={isEditing ? selectedService.slug : ""}
-            required={isEditing ? false : true}
+            {...register("slug", {
+              pattern: {
+                value: /^(?![0-9-]+$)(?:[a-z]{2,}-?|[0-9]-?)+(?<!-)$/,
+                message: "Wrong Slug Pattern",
+              },
+            })}
           />
+          <p className="italic">Only letters and hyphens are allowed</p>
+          {errors.slug && <p className="text-red-600">{errors.slug.message}</p>}
           <label className="label">Set Icon </label>
           <input
             type="file"
             className="file-input"
-            name="icon"
             accept=".svg,image/svg+xml"
-            required={isEditing ? false : true}
+            {...register("icon", {
+              validate: {
+                lessThan5MB: (files) => !files || files.length === 0 || files[0].size <= 5 * 1024 * 1024 || "File size must be less than 5MB"
+              }
+            })}
           />
-          <label className="label italic">SVG Only. Max size 5MB</label>
+          <p className="italic">SVG Only. Max size 5MB</p>
+          {errors.icon && <p className="text-red-600">{errors.icon.message}</p>}
           <label className="label" htmlFor="shortDes">
             Short Description
           </label>
           <textarea
-            name="shortDes"
             placeholder="Write a short Description"
             className="textarea w-full"
-            defaultValue={isEditing ? selectedService.shortDes : ""}
-            required={isEditing ? false : true}
+            {...register("shortDes", {
+              minLength: {
+                value: 50,
+                message: "Write at least 50 Characters"
+              }
+            })}
           ></textarea>
+          {errors.shortDes && <p className="text-red-600">{errors.shortDes.message}</p>}
           <label className="label" htmlFor="longDes">
             Long Description
           </label>
           <textarea
-            name="longDes"
             rows="4"
             placeholder="Write a Long Description"
             className="textarea w-full"
-            defaultValue={isEditing ? selectedService.longDes : ""}
-            required={isEditing ? false : true}
+            {...register("longDes", {
+              minLength: {
+                value: 250,
+                message: "Write at least 250 Characters"
+              }
+            })}
           ></textarea>
+          {errors.longDes && <p className="text-red-600">{errors.longDes.message}</p>}
+
 
           <div className="modal-action">
             <button
@@ -130,12 +136,11 @@ const ServiceModal = ({ ref }) => {
             </button>
             <button
               type="submit"
-              className={`btn btn-primary ${loading ? "" : "btn-nexoro-primary"
+              className={`btn btn-primary ${loading || !isDirty ? "" : "btn-nexoro-primary"
                 }`}
-              disabled={loading ? true : false}
+              disabled={loading || !isDirty ? true : false}
             >
-              {loading && <span className="loading loading-spinner"></span>} {isEditing ? "Update" : "Add"} Service
-            </button>
+              {loading && <span className="loading loading-spinner"></span>} Update Service</button>
           </div>
         </form>
       </div>

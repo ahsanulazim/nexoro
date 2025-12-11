@@ -1,4 +1,4 @@
-// add a client
+// add a team member
 export const addMember = async (formData) => {
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/team`, {
         method: "POST",

@@ -85,6 +85,7 @@ const ServiceForm = ({ ref }) => {
                             },
                         })}
                     />
+                    <p className="italic">Only letters and hyphens are allowed</p>
                     {errors.slug && <p className="text-red-600">{errors.slug.message}</p>}
                     <label className="label">Set Icon<span className="text-red-600">*</span></label>
                     <input
