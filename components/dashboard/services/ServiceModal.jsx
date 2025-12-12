@@ -1,13 +1,9 @@
-"use client";
-
 import { updateService } from "@/api/fetchServices";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 
 const ServiceModal = ({ ref, service }) => {
-  const [loading, setLoading] = useState(false);
 
   const { register, handleSubmit, reset, formState: { errors, isDirty } } = useForm({
     defaultValues: {
@@ -31,14 +27,10 @@ const ServiceModal = ({ ref, service }) => {
     },
     onError: (error) => {
       toast.error(error.message);
-    },
-    onSettled: () => {
-      setLoading(false);
-    },
+    }
   });
 
   const handleService = (data) => {
-    setLoading(true);
     mutationEdit.mutate({ id: service._id, formData: data });
     ref.current.close();
     reset();
@@ -136,11 +128,11 @@ const ServiceModal = ({ ref, service }) => {
             </button>
             <button
               type="submit"
-              className={`btn btn-primary ${loading || !isDirty ? "" : "btn-nexoro-primary"
+              className={`btn btn-primary ${mutationEdit.isPending || !isDirty ? "" : "btn-nexoro-primary"
                 }`}
-              disabled={loading || !isDirty ? true : false}
+              disabled={mutationEdit.isPending || !isDirty ? true : false}
             >
-              {loading && <span className="loading loading-spinner"></span>} Update Service</button>
+              {mutationEdit.isPending && <span className="loading loading-spinner"></span>} Update Service</button>
           </div>
         </form>
       </div>
