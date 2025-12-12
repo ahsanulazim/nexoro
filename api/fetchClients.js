@@ -16,7 +16,6 @@ export const fetchClients = async () => {
 
 // add a client
 export const addClient = async (formData) => {
-    console.log(formData.logo[0]);
 
     const fd = new FormData();
     fd.append("client", formData.clientName);
@@ -58,9 +57,22 @@ export const deleteClient = async (email, public_id) => {
 
 // Update existing client
 export const updateClient = async (id, formData) => {
+
+    const fd = new FormData();
+    fd.append("client", formData.clientName);
+    fd.append("role", formData.clientRole);
+    fd.append("company", formData.company);
+    fd.append("country", formData.country);
+    fd.append("email", formData.clientEmail);
+    fd.append("folder", "clients");
+    if (formData.logo) {
+        fd.append("logo", formData.logo[0]);
+    }
+    fd.append("phone", formData.clientPhone);
+
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/clients/${id}`, {
         method: "PUT",
-        body: formData,
+        body: fd,
     });
 
     const data = await res.json();

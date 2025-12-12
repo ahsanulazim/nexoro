@@ -50,7 +50,7 @@ const ClientForm = ({ ref }) => {
   };
 
   return (
-    <dialog ref={ref} id="clientModal" className="modal">
+    <dialog ref={ref} className="modal">
       <div className="modal-box">
         <form className="fieldset" onSubmit={handleSubmit(handleClient)}>
           <h1 className="text-xl font-semibold">Add Client Details</h1>

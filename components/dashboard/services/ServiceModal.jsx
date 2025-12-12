@@ -119,20 +119,9 @@ const ServiceModal = ({ ref, service }) => {
 
 
           <div className="modal-action">
-            <button
-              type="button"
-              className="btn btn-error"
-              onClick={() => ref.current.close()}
-            >
-              Close
-            </button>
-            <button
-              type="submit"
-              className={`btn btn-primary ${mutationEdit.isPending || !isDirty ? "" : "btn-nexoro-primary"
-                }`}
-              disabled={mutationEdit.isPending || !isDirty ? true : false}
-            >
-              {mutationEdit.isPending && <span className="loading loading-spinner"></span>} Update Service</button>
+            <button type="button" className="btn btn-error" onClick={() => ref.current.close()}>Close</button>
+            <button type="submit" className={`btn btn-primary ${mutationEdit.isPending || !isDirty ? "" : "btn-nexoro-primary"
+              }`} disabled={mutationEdit.isPending || !isDirty ? true : false}>{mutationEdit.isPending && <span className="loading loading-spinner"></span>} Update Service</button>
           </div>
         </form>
       </div>

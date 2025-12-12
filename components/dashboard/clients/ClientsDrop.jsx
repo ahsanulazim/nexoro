@@ -2,9 +2,12 @@ import { deleteClient } from "@/api/fetchClients";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { LuEllipsisVertical, LuSquarePen, LuTrash2 } from "react-icons/lu"
 import { toast } from "react-toastify";
+import ClientEdit from "./ClientEdit";
+import { useRef } from "react";
 
-const ClientsDrop = ({ client, onEdit }) => {
+const ClientsDrop = ({ client }) => {
 
+    const editClient = useRef();
     const { email, public_id } = client;
 
     const queryClient = useQueryClient();
@@ -38,30 +41,33 @@ const ClientsDrop = ({ client, onEdit }) => {
     });
 
     return (
-        <div className="dropdown dropdown-end">
-            <button
-                tabIndex={0}
-                role="button"
-                className="btn btn-soft btn-square"
-            >
-                <LuEllipsisVertical />
-            </button>
-            <ul
-                tabIndex="-1"
-                className="dropdown-content menu bg-base-100 rounded-box z-1 hn w-52 p-2 shadow-sm"
-            >
-                <li>
-                    <button onClick={() => onEdit(client)}><LuSquarePen /> Edit</button>
-                </li>
-                <li>
-                    <button className="text-error hover:bg-error hover:text-error-content" onClick={() => removeClient({ email, public_id })}
-                        disabled={isPending}>
-                        <LuTrash2 />
-                        Delete
-                    </button>
-                </li>
-            </ul>
-        </div>
+        <>
+            <ClientEdit ref={editClient} client={client} />
+            <div className="dropdown dropdown-end">
+                <button
+                    tabIndex={0}
+                    role="button"
+                    className="btn btn-soft btn-square"
+                >
+                    <LuEllipsisVertical />
+                </button>
+                <ul
+                    tabIndex="-1"
+                    className="dropdown-content menu bg-base-100 rounded-box z-1 hn w-52 p-2 shadow-sm"
+                >
+                    <li>
+                        <button onClick={() => editClient.current.showModal()}><LuSquarePen /> Edit</button>
+                    </li>
+                    <li>
+                        <button className="text-error hover:bg-error hover:text-error-content" onClick={() => removeClient({ email, public_id })}
+                            disabled={isPending}>
+                            <LuTrash2 />
+                            Delete
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </>
     )
 }
 

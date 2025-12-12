@@ -1,6 +1,6 @@
 import ClientsDrop from "./ClientsDrop";
 
-const ClientsTable = ({ clientData, onEdit }) => {
+const ClientsTable = ({ clientData }) => {
   return (
     <div className="max-sm:overflow-x-scroll bg-base-300 shadow-md rounded-lg grow">
       <table className="table">
@@ -53,7 +53,7 @@ const ClientsTable = ({ clientData, onEdit }) => {
                 })}
               </td>
               <th>
-                <ClientsDrop client={client} onEdit={onEdit} />
+                <ClientsDrop client={client} />
               </th>
             </tr>
           ))}
