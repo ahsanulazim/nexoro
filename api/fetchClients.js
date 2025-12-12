@@ -16,9 +16,21 @@ export const fetchClients = async () => {
 
 // add a client
 export const addClient = async (formData) => {
+    console.log(formData.logo[0]);
+
+    const fd = new FormData();
+    fd.append("client", formData.clientName);
+    fd.append("role", formData.clientRole);
+    fd.append("company", formData.company);
+    fd.append("country", formData.country);
+    fd.append("email", formData.clientEmail);
+    fd.append("folder", "clients");
+    fd.append("logo", formData.logo[0]);
+    fd.append("phone", formData.clientPhone);
+
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/clients`, {
         method: "POST",
-        body: formData,
+        body: fd,
     });
 
     const data = await res.json();

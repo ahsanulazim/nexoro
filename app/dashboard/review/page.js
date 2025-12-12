@@ -29,8 +29,8 @@ const Review = () => {
                     </div>
                 </section>
                 <section>
-                    <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
-                        {reviews?.map((review) => <ReviewCard key={review._id} controller={true} review={review} className="bg-base-300" />)}
+                    <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+                        {reviews?.map((review) => <ReviewCard key={review._id} controller={true} review={review} className="bg-base-300 shadow-xl" />)}
                     </div>
                 </section>
             </main>

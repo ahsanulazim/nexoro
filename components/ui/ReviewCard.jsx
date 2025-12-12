@@ -41,11 +41,11 @@ const ReviewCard = ({ review, className, controller }) => {
           <p>
             {review?.review || "This is a very versatile WordPress theme. Many features combined with Elementor and solid support."}
           </p>
-          <div className="card-actions max-xs:flex-col-reverse xs:items-center gap-5 justify-between mt-5">
+          <div className="card-actions max-xs:flex-col-reverse xs:items-center gap-5 justify-between mt-3">
             <div className="card-title text-sm">
               <div className="avatar avatar-placeholder">
                 <div className="bg-neutral text-neutral-content w-10 rounded-full">
-                  <span className="text-xs">CN</span>
+                  <span className="text-xs">{review?.clientName?.slice(0, 1) || "CN"}</span>
                 </div>
               </div>
               <div>
