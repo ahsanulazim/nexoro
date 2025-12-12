@@ -1,17 +1,22 @@
-'use client'
-
 import { fetchClients } from "@/api/fetchClients";
 import { addReview } from "@/api/fetchReview";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { FaRegStar, FaStar, FaStarHalfStroke } from "react-icons/fa6";
 import { toast } from "react-toastify";
 
-const ReviewModal = ({ ref, isEditing, selectedReview }) => {
+const ReviewModal = ({ ref }) => {
 
-    const [loading, setLoading] = useState(false);
-    const [selectedClient, setSelectedClient] = useState("");
-    const [rating, setRating] = useState(0);
+    //react hook form
+    const { register, handleSubmit, watch, reset, formState: { errors } } = useForm({
+        defaultValues: {
+            clientName: "",
+            rating: "",
+            review: "",
+        }
+    });
+
+    const rating = watch("rating");
 
     //client data for select
     const { data: clientData, isLoading } = useQuery({
@@ -46,86 +51,79 @@ const ReviewModal = ({ ref, isEditing, selectedReview }) => {
         },
         onError: (error) => {
             toast.error(error.message);
-            setLoading(false);
         },
         onSettled: () => {
-            setLoading(false);
+            reset();
         },
     });
 
-    const handleReview = (e) => {
-        e.preventDefault();
-        setLoading(true);
-        const formData = new FormData();
-        formData.append("clientName", e.target.selectClient.value);
-        formData.append("rating", e.target.rating.value);
-        formData.append("review", e.target.review.value);
-        mutation.mutate(formData);
-        e.target.reset();
+    const handleReview = (data) => {
+        mutation.mutate(data);
     }
+
+    const handleClose = () => {
+        reset();
+        ref.current.close();
+    };
 
     return (
         <dialog ref={ref} id="reviewModal" className="modal">
             <div className="modal-box">
-                <form className="fieldset" onSubmit={handleReview}>
-                    <h1 className="text-xl font-semibold">{isEditing ? "Edit" : "Add"} Review</h1>
+                <form className="fieldset" onSubmit={handleSubmit(handleReview)}>
+                    <h1 className="text-xl font-semibold">Add Review</h1>
 
                     <label className="label" htmlFor="selectClient">
-                        Select Client<span className={isEditing ? "hidden" : "text-red-600"}>*</span>
+                        Select Client <span className="text-red-600">*</span>
                     </label>
-                    <select
-                        className="select w-full"
-                        name="selectClient"
-                        value={isEditing ? selectedReview?.clientName || "" : selectedClient}
-                        onChange={(e) => setSelectedClient(e.target.value)}
-                        required={!isEditing}
-                    >
+                    <select className="select w-full" {...register("clientName", {
+                        required: "Select Client",
+                    })}>
                         <option value="" disabled>Select Client</option>
                         {isLoading ? <option>Loading...</option> : clientData.map((client) => <option key={client.client} value={client.client}>{client.client}</option>)}
                     </select>
+                    {errors.clientName && <p className="text-red-600">{errors.clientName.message}</p>}
                     <label className="label" htmlFor="rating">
-                        Rating<span className={isEditing ? "hidden" : "text-red-600"}>*</span>
+                        Rating <span className="text-red-600">*</span>
                     </label>
                     <div className="flex items-center gap-5">
-                        <input
-                            type="number"
-                            className="input max-w-15"
-                            name="rating"
-                            min="0" max="5"
-                            step="0.1"
-                            onChange={(e) => setRating(Math.max(0, Math.min(5, Number(e.target.value))))}
-                            defaultValue={isEditing ? selectedReview.rating : rating}
-                            required={!isEditing}
+                        <input className="input max-w-15" type="number" step="0.1" min="0" max="5" {...register("rating", {
+                            required: "Rating is required",
+                            validate: (value) =>
+                                value > 0 && value <= 5 || "Rating must be at least 0.1 and maximum 5"
+                        })}
                         />
+
                         <div className="flex items-center gap-1 text-lg">
                             {ratingSystem}
                         </div>
                     </div>
+                    {errors.rating && <p className="text-red-600">{errors.rating.message}</p>}
                     <label className="label" htmlFor="review">
-                        Full Review<span className={isEditing ? "hidden" : "text-red-600"}>*</span>
+                        Full Review <span className="text-red-600">*</span>
                     </label>
                     <textarea
-                        name="review"
-                        placeholder="Write Review"
+                        placeholder="Write a Short Review"
                         className="textarea w-full"
-                        defaultValue={isEditing ? selectedReview.shortDes : ""}
-                        required={!isEditing}
+                        {...register("review", {
+                            required: "Give a Short Review",
+                        })}
                     ></textarea>
+                    {errors.review && <p className="text-red-600">{errors.review.message}</p>}
                     <div className="modal-action">
                         <button
                             type="button"
                             className="btn btn-error"
-                            onClick={() => ref.current.close()}
+                            onClick={handleClose}
                         >
                             Close
                         </button>
                         <button
                             type="submit"
-                            className={`btn btn-primary ${loading ? "" : "btn-nexoro-primary"
+                            className={`btn btn-primary ${mutation.isPending ? "" : "btn-nexoro-primary"
                                 }`}
-                            disabled={loading ? true : false}
+                            disabled={mutation.isPending ? true : false}
                         >
-                            {loading && <span className="loading loading-spinner"></span>} {isEditing ? "Update" : "Add"} Review
+                            {mutation.isPending && <span className="loading loading-spinner"></span>} Add Review
                         </button>
                     </div>
                 </form>
