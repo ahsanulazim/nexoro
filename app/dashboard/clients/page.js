@@ -7,12 +7,13 @@ import DashBread from "@/components/dashboard/DashBread";
 import { useQuery } from "@tanstack/react-query";
 import { useRef } from "react";
 import { LuPlus } from "react-icons/lu";
+import ClientSkeleton from "@/components/dashboard/skeleton/ClientSkeleton";
 
 const Clients = () => {
 
   const addClientForm = useRef();
 
-  const { data: clientData, isLoading, isError } = useQuery({
+  const { data: clientData, isLoading } = useQuery({
     queryKey: ["clientData"],
     queryFn: fetchClients,
   });
@@ -32,6 +33,7 @@ const Clients = () => {
         </section>
         <section>
           <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+            {isLoading && Array.from({ length: 8 }).map((_, i) => <ClientSkeleton key={i} />)}
             {clientData?.map((client) => <ClientCard key={client._id} client={client} />)}
           </div>
         </section>

@@ -57,7 +57,6 @@ export const deleteClient = async (email, public_id) => {
 
 // Update existing client
 export const updateClient = async (id, formData) => {
-
     const fd = new FormData();
     fd.append("client", formData.clientName);
     fd.append("role", formData.clientRole);

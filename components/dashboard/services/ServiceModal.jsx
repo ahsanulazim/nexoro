@@ -12,6 +12,13 @@ const ServiceModal = ({ ref, service }) => {
       shortDes: service?.shortDes,
       longDes: service?.longDes,
       icon: null,
+    },
+    values: {
+      serviceTitle: service?.title,
+      slug: service?.slug,
+      shortDes: service?.shortDes,
+      longDes: service?.longDes,
+      icon: null,
     }
   });
 
@@ -33,7 +40,6 @@ const ServiceModal = ({ ref, service }) => {
   const handleService = (data) => {
     mutationEdit.mutate({ id: service._id, formData: data });
     ref.current.close();
-    reset();
   };
 
   return (

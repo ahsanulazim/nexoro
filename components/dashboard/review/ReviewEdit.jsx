@@ -13,6 +13,11 @@ const ReviewEdit = ({ ref, review }) => {
             clientName: review.clientName,
             rating: parseFloat(review.rating),
             review: review.review,
+        },
+        values: {
+            clientName: review.clientName,
+            rating: parseFloat(review.rating),
+            review: review.review,
         }
     });
 
