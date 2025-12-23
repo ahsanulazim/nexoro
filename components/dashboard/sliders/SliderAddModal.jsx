@@ -1,77 +1,93 @@
-'use client'
+"use client";
 
-import { FaMagnifyingGlass } from "react-icons/fa6"
-import SliderSelected from "./SliderSelected"
-import { useState } from "react"
-import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { addSlider } from "@/api/fetchSliders"
-import { toast } from "react-toastify"
+import { FaMagnifyingGlass } from "react-icons/fa6";
+import SliderSelected from "./SliderSelected";
+import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { addLogo } from "@/api/fetchSliders";
+import { toast } from "react-toastify";
 
 const SliderAddModal = ({ data }) => {
+  const [selected, setSelected] = useState([]);
 
-    const [selected, setSelected] = useState([])
-
-    const handleSelect = (d) => {
-        if (selected.includes(d)) {
-            setSelected(selected.filter((s) => s !== d))
-        } else {
-            setSelected([...selected, d])
-        }
+  const handleSelect = (d) => {
+    if (selected.includes(d)) {
+      setSelected(selected.filter((s) => s !== d));
+    } else {
+      setSelected([...selected, d]);
     }
+  };
 
-    const sliderClient = useQueryClient();
+  const sliderClient = useQueryClient();
 
-    const mutation = useMutation({
-        mutationFn: addSlider,
-        onSuccess: () => {
-            sliderClient.invalidateQueries({
-                queryKey: ["sliderData"],
-            });
-            document.getElementById("sliderModal").close();
-            toast.success("Slider added successfully");
-        },
-        onError: (error) => {
-            toast.error(error.message);
-        },
-    });
+  const mutation = useMutation({
+    mutationFn: addLogo,
+    onSuccess: () => {
+      sliderClient.invalidateQueries({
+        queryKey: ["sliderData"],
+      });
+      document.getElementById("sliderModal").close();
+      toast.success("Slider added successfully");
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
 
-    const handleAdd = () => {
-        console.log(selected);
+  const handleAdd = () => {
+    mutation.mutate(selected);
+  };
 
-        mutation.mutate(selected)
-    }
+  return (
+    <dialog id="sliderModal" className="modal">
+      <div className="modal-box">
+        <label className="input w-full mb-4">
+          <FaMagnifyingGlass className="opacity-50" />
+          <input type="search" className="grow" placeholder="Search" />
+        </label>
+        <div className="flex items-center gap-2 flex-wrap">
+          {selected.map((s) => (
+            <SliderSelected
+              key={s}
+              selected={s}
+              handleSelect={handleSelect}
+              data={data}
+            />
+          ))}
+        </div>
+        <ul className="menu w-full p-0">
+          <li className="menu-title">Available Items</li>
+          {data?.map((d) => (
+            <li key={d._id}>
+              <div onClick={() => handleSelect(d?.email)}>
+                <img
+                  src={d?.logo}
+                  alt={d?.client}
+                  className="size-10 object-contain"
+                />
+                <p>{d?.client}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
+        <div className="modal-action">
+          <form method="dialog">
+            {/* if there is a button in form, it will close the modal */}
+            <button className="btn btn-error">Close</button>
+          </form>
+          <button
+            className={`btn btn-primary ${
+              mutation.isPending ? "" : "btn-nexoro-primary"
+            }`}
+            onClick={handleAdd}
+            disabled={mutation.isPending}
+          >
+            {mutation.isPending ? "Adding..." : "Add"}
+          </button>
+        </div>
+      </div>
+    </dialog>
+  );
+};
 
-    return (
-        <dialog id="sliderModal" className="modal">
-            <div className="modal-box">
-                <label className="input w-full mb-4">
-                    <FaMagnifyingGlass className="opacity-50" />
-                    <input type="search" className="grow" placeholder="Search" />
-                </label>
-                <div className="flex items-center gap-2 flex-wrap">
-                    {selected.map((s) => <SliderSelected key={s} selected={s} handleSelect={handleSelect} data={data} />)}
-                </div>
-                <ul className="menu w-full p-0">
-                    <li className="menu-title">Available Items</li>
-                    {data?.map((d) =>
-                        <li key={d._id}>
-                            <div onClick={() => handleSelect(d?.email)}>
-                                <img src={d?.logo} alt={d?.client} className="size-10 object-contain" />
-                                <p>{d?.client}</p>
-                            </div>
-                        </li>
-                    )}
-                </ul>
-                <div className="modal-action">
-                    <form method="dialog">
-                        {/* if there is a button in form, it will close the modal */}
-                        <button className="btn btn-error">Close</button>
-                    </form>
-                    <button className={`btn btn-primary ${mutation.isPending ? "" : "btn-nexoro-primary"}`} onClick={handleAdd} disabled={mutation.isPending}>{mutation.isPending ? "Adding..." : "Add"}</button>
-                </div>
-            </div>
-        </dialog>
-    )
-}
-
-export default SliderAddModal
+export default SliderAddModal;
