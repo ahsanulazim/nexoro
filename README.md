@@ -1,6 +1,7 @@
 # Nexoro - Digital Agency Web App
 
 Nexoro is a comprehensive web application designed for a digital agency. It provides a platform to showcase services like graphic design, SEO, digital marketing, and web development, along with a dashboard for managing clients and services.
+![Nexoro Homepage](/Nexoro_Hero.jpg)
 
 ## Tech Stack
 
@@ -41,12 +42,14 @@ Follow these steps to set up the project locally.
 ### Installation
 
 1. **Clone the repository:**
+
    ```bash
    git clone <repository-url>
    cd nexoro
    ```
 
 2. **Install dependencies:**
+
    ```bash
    npm install
    # or
@@ -55,6 +58,7 @@ Follow these steps to set up the project locally.
 
 3. **Environment Setup:**
    Create a `.env.local` file in the root directory and add your Firebase configuration keys:
+
    ```env
    NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key
    NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_auth_domain
@@ -65,6 +69,7 @@ Follow these steps to set up the project locally.
    ```
 
 4. **Run the development server:**
+
    ```bash
    npm run dev
    ```
