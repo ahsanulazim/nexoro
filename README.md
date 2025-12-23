@@ -1,7 +1,7 @@
 # Nexoro - Digital Agency Web App
 
 Nexoro is a comprehensive web application designed for a digital agency. It provides a platform to showcase services like graphic design, SEO, digital marketing, and web development, along with a dashboard for managing clients and services.
-![Nexoro Homepage](/Nexoro_Hero.jpg)
+![Nexoro Homepage](./public/Nexoro_Hero.jpg)
 
 ## Tech Stack
 
