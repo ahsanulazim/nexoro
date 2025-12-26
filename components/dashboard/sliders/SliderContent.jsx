@@ -3,7 +3,6 @@ import { LuImage, LuPlus } from "react-icons/lu";
 import SliderAddModal from "./SliderAddModal";
 import { fetchClients } from "@/api/fetchClients";
 import { useQuery } from "@tanstack/react-query";
-import { fetchSliders } from "@/api/fetchSliders";
 import AddedSliders from "./AddedSliders";
 
 const SliderContent = () => {

@@ -1,35 +1,49 @@
-import { fetchSliders } from "@/api/fetchSliders";
-import { useQuery } from "@tanstack/react-query";
+import { removeClientSliders } from "@/api/fetchSliders";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { LuTrash2 } from "react-icons/lu";
+import { toast } from "react-toastify";
 
 const AddedSliders = ({ data }) => {
-  const { data: sliderData, isLoading } = useQuery({
-    queryKey: ["sliderData"],
-    queryFn: fetchSliders,
+
+  const sliders = data?.filter((slider) => slider.slider === true);
+
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: removeClientSliders,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["clientData"] });
+      toast.success("Slider removed successfully");
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
   });
 
-  const sliders = data?.filter((d) =>
-    sliderData?.some((s) => s.logo === d.logo)
-  );
-  console.log(sliders);
 
   return (
-    <section>
-      {isLoading ? (
-        <p>Loading...</p>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {sliderData?.map((slider) => (
-            <div key={slider._id} className="border rounded-lg p-4">
+    <section className="mt-5">
+      {sliders?.length === 0 ?
+        <div className="text-center py-10">
+          <p className="text-gray-500">No sliders selected yet</p>
+        </div>
+        :
+        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
+          {sliders?.map((s) => (
+            <div key={s._id} className="flex flex-col bg-base-300 shadow-xl rounded-lg p-4">
               <img
-                src={slider.logo}
-                alt={slider.client}
-                className="w-full h-32 object-contain"
+                src={s.logo}
+                alt={s.client}
+                className="w-full object-contain grow"
               />
-              <p className="mt-2">{slider.client}</p>
+              <div className="mt-2 flex items-center justify-between">
+                <p className="max-xs:text-sm">{s.client}</p>
+                <button className="btn btn-error btn-xs btn-soft btn-square" onClick={() => mutation.mutate(s._id)}><LuTrash2 /></button>
+              </div>
             </div>
           ))}
         </div>
-      )}
+      }
     </section>
   );
 };

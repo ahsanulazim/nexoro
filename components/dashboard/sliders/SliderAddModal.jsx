@@ -2,17 +2,28 @@
 
 import { FaMagnifyingGlass } from "react-icons/fa6";
 import SliderSelected from "./SliderSelected";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { addLogo } from "@/api/fetchSliders";
 import { toast } from "react-toastify";
+import { clientSliders } from "@/api/fetchSliders";
 
 const SliderAddModal = ({ data }) => {
   const [selected, setSelected] = useState([]);
 
+  useEffect(() => {
+    if (data) {
+      const alreadySelected = data
+        .filter((d) => d.slider === true)
+        .map((d) => d._id);
+      setSelected(alreadySelected);
+    }
+  }, [data]);
+
+
   const handleSelect = (d) => {
     if (selected.includes(d)) {
       setSelected(selected.filter((s) => s !== d));
+
     } else {
       setSelected([...selected, d]);
     }
@@ -21,10 +32,10 @@ const SliderAddModal = ({ data }) => {
   const sliderClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: addLogo,
+    mutationFn: clientSliders,
     onSuccess: () => {
       sliderClient.invalidateQueries({
-        queryKey: ["sliderData"],
+        queryKey: ["clientData"],
       });
       document.getElementById("sliderModal").close();
       toast.success("Slider added successfully");
@@ -59,7 +70,7 @@ const SliderAddModal = ({ data }) => {
           <li className="menu-title">Available Items</li>
           {data?.map((d) => (
             <li key={d._id}>
-              <div onClick={() => handleSelect(d?.email)}>
+              <div onClick={() => handleSelect(d?._id)}>
                 <img
                   src={d?.logo}
                   alt={d?.client}
@@ -76,9 +87,8 @@ const SliderAddModal = ({ data }) => {
             <button className="btn btn-error">Close</button>
           </form>
           <button
-            className={`btn btn-primary ${
-              mutation.isPending ? "" : "btn-nexoro-primary"
-            }`}
+            className={`btn btn-primary ${mutation.isPending ? "" : "btn-nexoro-primary"
+              }`}
             onClick={handleAdd}
             disabled={mutation.isPending}
           >

@@ -9,7 +9,9 @@ const LogoMarquee = async () => {
     },
   })
 
-  const logos = await clientData.json();
+  const res = await clientData.json();
+
+  const logos = res.filter((slider) => slider.slider === true);
 
   return (
     <Marquee autoFill={true}>
