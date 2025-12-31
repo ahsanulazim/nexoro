@@ -77,3 +77,6 @@
 .btn-nexoro-primary {
   @apply bg-main border-main hover:bg-main-dark hover:border-main-dark;
 }
+.btn-nexoro-primary-outline {
+  @apply border-main text-main hover:text-white hover:bg-main;
+}

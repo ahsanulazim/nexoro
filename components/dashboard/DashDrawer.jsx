@@ -13,6 +13,7 @@ import {
   LuUsers,
   LuUsersRound,
 } from "react-icons/lu";
+import { HiOutlineCurrencyBangladeshi } from "react-icons/hi";
 import DashNav from "./DashNav";
 import Link from "next/link";
 import { useContext } from "react";
@@ -54,9 +55,9 @@ const DashDrawer = ({ children }) => {
             </li>
             {isAdmin && (
               <>
-
                 <li>
-                  <Link href="/dashboard/sliders"
+                  <Link
+                    href="/dashboard/sliders"
                     className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
                     data-tip="Sliders"
                   >
@@ -95,7 +96,18 @@ const DashDrawer = ({ children }) => {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/dashboard/inbox"
+                  <Link
+                    href="/dashboard/pricing"
+                    className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                    data-tip="Pricing"
+                  >
+                    <HiOutlineCurrencyBangladeshi className="my-1.5 inline-block size-4" />
+                    <span className="is-drawer-close:hidden">Pricing</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/dashboard/inbox"
                     className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
                     data-tip="Inbox"
                   >
@@ -104,7 +116,8 @@ const DashDrawer = ({ children }) => {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/dashboard/clients"
+                  <Link
+                    href="/dashboard/clients"
                     className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
                     data-tip="Clients"
                   >
@@ -133,7 +146,8 @@ const DashDrawer = ({ children }) => {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/dashboard/team"
+                  <Link
+                    href="/dashboard/team"
                     className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
                     data-tip="Team"
                   >
