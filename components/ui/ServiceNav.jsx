@@ -5,7 +5,7 @@ const ServiceNav = ({ services, activeId }) => {
     <ul className="menu shrink-0 rounded-box hidden lg:flex sticky top-30">
       <li>
         <ul>
-          {services.map((step) => (
+          {services?.map((step) => (
             <li
               key={step.title}
               className={

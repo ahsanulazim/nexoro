@@ -12,7 +12,7 @@ export default function page() {
     <main>
       <HeroTwo />
       <ClientLogo />
-      <Services />
+      {/* <Services /> */}
       <Portfolio />
       <Teams />
       <PreviousWork />

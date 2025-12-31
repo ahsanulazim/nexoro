@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import { LuSquarePen, LuTrash2 } from "react-icons/lu";
 import Rating from "./Rating";
@@ -9,7 +9,6 @@ import { useRef } from "react";
 import ReviewEdit from "../dashboard/review/ReviewEdit";
 
 const ReviewCard = ({ review, className, controller }) => {
-
   const editReview = useRef();
   const queryClient = useQueryClient();
 
@@ -39,37 +38,55 @@ const ReviewCard = ({ review, className, controller }) => {
       <div className={`card ${className}`}>
         <div className="card-body">
           <p>
-            {review?.review || "This is a very versatile WordPress theme. Many features combined with Elementor and solid support."}
+            {review?.review ||
+              "This is a very versatile WordPress theme. Many features combined with Elementor and solid support."}
           </p>
           <div className="card-actions max-xs:flex-col-reverse xs:items-center gap-5 justify-between mt-3">
             <div className="card-title text-sm">
               <div className="avatar avatar-placeholder">
                 <div className="bg-neutral text-neutral-content w-10 rounded-full">
-                  <span className="text-xs">{review?.clientName?.slice(0, 1) || "CN"}</span>
+                  <span className="text-xs">
+                    {review?.clientName?.slice(0, 1) || "CN"}
+                  </span>
                 </div>
               </div>
               <div>
                 <h2>{review?.clientName || "Customer Name"}</h2>
               </div>
-
             </div>
             <Rating rating={review?.rating} />
           </div>
-          {review && <>
-            <div className="divider m-0"></div>
-            <div className="flex items-center justify-between">
-              <p className="text-xs opacity-50">{new Date(review?.added).toLocaleString("en-BD", {
-                timeZone: "Asia/Dhaka",
-                dateStyle: "medium",
-                timeStyle: "short",
-              })}</p>
-              <div className="flex items-center gap-2">
-                <button className="btn btn-sm btn-square btn-soft btn-error" onClick={() => removeReview({ id: review._id })} disabled={isPending}><LuTrash2 /></button>
-                <button className="btn btn-sm btn-square btn-soft btn-primary" onClick={() => editReview.current.showModal()}><LuSquarePen /></button>
+          {controller && (
+            <>
+              <div className="divider m-0"></div>
+              <div className="flex items-center justify-between">
+                <p className="text-xs opacity-50">
+                  {new Date(review?.added).toLocaleString("en-BD", {
+                    timeZone: "Asia/Dhaka",
+                    dateStyle: "medium",
+                    timeStyle: "short",
+                  })}
+                </p>
+                <div className="flex items-center gap-2">
+                  <button
+                    className="btn btn-sm btn-square btn-soft btn-error"
+                    onClick={() => removeReview({ id: review._id })}
+                    disabled={isPending}
+                  >
+                    <LuTrash2 />
+                  </button>
+                  <button
+                    className="btn btn-sm btn-square btn-soft btn-primary"
+                    onClick={() => editReview.current.showModal()}
+                  >
+                    <LuSquarePen />
+                  </button>
+                </div>
               </div>
-            </div></>}
+            </>
+          )}
         </div>
-      </div >
+      </div>
     </>
   );
 };

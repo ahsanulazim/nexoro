@@ -9,9 +9,9 @@ const HeroCard = ({ service }) => {
           <img src={service.icon} alt={service.title} className="w-8" />
         </figure>
         <h2 className="card-title text-2xl">{service.title}</h2>
-        <p className="text-balance">{service.short}</p>
+        <p className="text-balance">{service.shortDes}</p>
         <div className="card-actions">
-          <Link href={service.link}>
+          <Link href={service.slug}>
             <button className="flex items-center gap-2 cursor-pointer font-semibold">
               Learn More <FaCircleArrowRight className="size-5" />
             </button>

@@ -1,8 +1,20 @@
-import React from "react";
+"use client";
+
 import Marquee from "react-fast-marquee";
 import ReviewCard from "./ReviewCard";
+import { useQuery } from "@tanstack/react-query";
+import { fetchReview } from "@/api/fetchReview";
 
 const ReviewMarquee = ({ direction }) => {
+  const {
+    data: reviews,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["reviews"],
+    queryFn: fetchReview,
+  });
+
   return (
     <Marquee
       gradient={true}
@@ -10,8 +22,13 @@ const ReviewMarquee = ({ direction }) => {
       autoFill={true}
       direction={direction}
     >
-      {Array.from({ length: 10 }).map((_, i) => (
-        <ReviewCard controller={false} className="bg-base-100 max-xs:w-2xs w-sm mr-4" key={i} />
+      {reviews?.map((review) => (
+        <ReviewCard
+          controller={false}
+          className="bg-base-100 max-xs:w-2xs w-sm mr-4 min-h-44"
+          key={review.clientName}
+          review={review}
+        />
       ))}
     </Marquee>
   );
