@@ -11,6 +11,11 @@ const Pricing = () => {
   });
 
   const [prices, setPrices] = useState(services?.[0]?.title);
+  const slug = services?.find((s) => s.title === prices)?.slug;
+
+  if (isLoading) {
+    return <p>Loading...</p>;
+  }
 
   return (
     <>
@@ -38,10 +43,10 @@ const Pricing = () => {
         </div>
       </section>
       <section>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          <PriceForm title="Basic" />
-          <PriceForm title="Standard" />
-          <PriceForm title="Premium" />
+        <div className="grid grid-cols-1 items-start md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <PriceForm title="Basic" slug={slug} />
+          <PriceForm title="Standard" slug={slug} />
+          <PriceForm title="Premium" slug={slug} />
         </div>
       </section>
     </>

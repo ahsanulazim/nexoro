@@ -1,0 +1,11 @@
+export const createPlan = (data, slug) => {
+  const res = fetch(`${process.env.NEXT_PUBLIC_API_BASE}/plans/${slug}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  const planData = res.json();
+  return planData;
+};

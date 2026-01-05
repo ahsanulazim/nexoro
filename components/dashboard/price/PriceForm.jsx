@@ -1,8 +1,9 @@
+import { createPlan } from "@/api/fetchPlans";
 import React from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { FaPlus, FaTrash } from "react-icons/fa6";
 
-const PriceForm = ({ title }) => {
+const PriceForm = ({ title, slug }) => {
   const {
     register,
     control,
@@ -16,7 +17,7 @@ const PriceForm = ({ title }) => {
   });
 
   const onSubmit = (data) => {
-    console.log(data);
+    createPlan(data, slug);
   };
 
   return (
