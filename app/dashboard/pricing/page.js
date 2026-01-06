@@ -19,8 +19,8 @@ const Pricing = () => {
     }
   }, [services]);
 
+  const selectedService = services.find((s) => s.title === prices);
 
-  const slug = services?.find((s) => s.title === prices)?.slug;
 
   if (isLoading) {
     return <p>Loading...</p>;
@@ -53,9 +53,14 @@ const Pricing = () => {
       </section>
       <section>
         <div className="grid grid-cols-1 items-start md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {services.map((service) => (
-            service.title === prices && service.plans.map((plan) => <PriceCard key={plan.planName} plan={plan} />)
-          ))}
+          {selectedService?.plans?.length > 0 ? (
+            selectedService.plans.map((plan) => (
+              <PriceCard key={plan.planName} plan={plan} slug={selectedService.slug} />
+            ))
+          ) : (
+            <PriceForm slug={selectedService?.slug} />
+          )}
+
           {/* <PriceForm title="Basic" slug={slug} />
           <PriceForm title="Standard" slug={slug} />
           <PriceForm title="Premium" slug={slug} /> */}

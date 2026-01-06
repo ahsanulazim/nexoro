@@ -3,7 +3,7 @@ import React from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { FaPlus, FaTrash } from "react-icons/fa6";
 
-const PriceForm = ({ title, slug }) => {
+const PriceForm = ({ title, slug, onCancel }) => {
   const {
     register,
     control,
@@ -89,12 +89,10 @@ const PriceForm = ({ title, slug }) => {
       >
         <FaPlus /> Add Benefit
       </button>
-      <button
-        type="submit"
-        className="btn btn-primary btn-nexoro-primary rounded-full mt-4"
-      >
-        Save
-      </button>
+      <div className="mt-4 flex items-center gap-5">
+        <button type="button" className="btn btn-error rounded-full grow" onClick={onCancel}>Cancel</button>
+        <button type="submit" className="btn btn-success rounded-full grow">Save</button>
+      </div>
     </form>
   );
 };
