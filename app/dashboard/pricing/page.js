@@ -1,8 +1,9 @@
 "use client";
 import { fetchServices } from "@/api/fetchServices";
+import PriceCard from "@/components/dashboard/price/PriceCard";
 import PriceForm from "@/components/dashboard/price/PriceForm";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const Pricing = () => {
   const { data: services, isLoading } = useQuery({
@@ -10,7 +11,15 @@ const Pricing = () => {
     queryFn: fetchServices,
   });
 
-  const [prices, setPrices] = useState(services?.[0]?.title);
+  const [prices, setPrices] = useState("");
+
+  useEffect(() => {
+    if (services.length > 0) {
+      setPrices(services[0].title);
+    }
+  }, [services]);
+
+
   const slug = services?.find((s) => s.title === prices)?.slug;
 
   if (isLoading) {
@@ -44,9 +53,12 @@ const Pricing = () => {
       </section>
       <section>
         <div className="grid grid-cols-1 items-start md:grid-cols-2 lg:grid-cols-3 gap-5">
-          <PriceForm title="Basic" slug={slug} />
+          {services.map((service) => (
+            service.title === prices && service.plans.map((plan) => <PriceCard key={plan.planName} plan={plan} />)
+          ))}
+          {/* <PriceForm title="Basic" slug={slug} />
           <PriceForm title="Standard" slug={slug} />
-          <PriceForm title="Premium" slug={slug} />
+          <PriceForm title="Premium" slug={slug} /> */}
         </div>
       </section>
     </>
