@@ -14,17 +14,19 @@ const Pricing = () => {
   const [prices, setPrices] = useState("");
 
   useEffect(() => {
-    if (services.length > 0) {
+    if (services?.length > 0 && !prices) {
       setPrices(services[0].title);
     }
-  }, [services]);
+  }, [services, prices]);
 
-  const selectedService = services.find((s) => s.title === prices);
-
+  const selectedService = services?.find((s) => s.title === prices);
 
   if (isLoading) {
     return <p>Loading...</p>;
   }
+
+  const existingPlans = selectedService?.plans?.length || 0;
+  const formsToShow = Math.max(0, 3 - existingPlans);
 
   return (
     <>
@@ -33,12 +35,13 @@ const Pricing = () => {
           Pricing and Plans for each services
         </h1>
       </div>
+
       <section>
         <div className="text-center flex justify-center mb-10 bg-base-300 p-5 rounded-lg max-w-72 mx-auto">
           <fieldset className="fieldset">
             <legend className=" text-sm">Select Services</legend>
             <select
-              defaultValue={prices}
+              value={prices}
               className="select bg-main border-main outline-none rounded-full"
               onChange={(e) => setPrices(e.target.value)}
             >
@@ -51,19 +54,16 @@ const Pricing = () => {
           </fieldset>
         </div>
       </section>
+
       <section>
         <div className="grid grid-cols-1 items-start md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {selectedService?.plans?.length > 0 ? (
-            selectedService.plans.map((plan) => (
-              <PriceCard key={plan.planName} plan={plan} slug={selectedService.slug} />
-            ))
-          ) : (
-            <PriceForm slug={selectedService?.slug} />
-          )}
+          {selectedService?.plans?.map((plan) => (
+            <PriceCard key={plan.id} plan={plan} slug={selectedService.slug} />
+          ))}
 
-          {/* <PriceForm title="Basic" slug={slug} />
-          <PriceForm title="Standard" slug={slug} />
-          <PriceForm title="Premium" slug={slug} /> */}
+          {Array.from({ length: formsToShow }).map((_, i) => (
+            <PriceForm key={i} slug={selectedService?.slug} />
+          ))}
         </div>
       </section>
     </>

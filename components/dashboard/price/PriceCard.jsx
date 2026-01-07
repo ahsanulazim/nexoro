@@ -9,7 +9,6 @@ const PriceCard = ({ plan, slug }) => {
   if (isEditing) {
     return (
       <PriceForm
-        title={plan.planName}
         slug={slug}
         initialData={plan}
         onCancel={() => setIsEditing(false)}
