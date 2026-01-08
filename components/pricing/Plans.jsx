@@ -76,12 +76,7 @@ const Plans = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
         {loadingPlans ? (
           Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="card bg-base-200 p-5 rounded-lg animate-pulse">
-              <div className="skeleton h-6 w-32 mb-4"></div>
-              <div className="skeleton h-4 w-20 mb-2"></div>
-              <div className="skeleton h-4 w-40 mb-2"></div>
-              <div className="skeleton h-4 w-28"></div>
-            </div>
+            <PlansSkeleton key={i} />
           ))
         ) : (
           Array.isArray(plans) &&
