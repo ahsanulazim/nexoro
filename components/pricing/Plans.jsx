@@ -1,14 +1,39 @@
 "use client";
 import { LuHeadset, LuRefreshCw, LuShieldCheck } from "react-icons/lu";
 import GradText from "../ui/GradText";
-import services from "@/json/services.json";
 import PricingCard from "../ui/PricingCard";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import Loader from "../ui/Loader";
+import { fetchPlans } from "@/api/fetchPlans";
+import { fetchServices } from "@/api/fetchServices";
+import PlansSkeleton from "./PlansSkeleton";
 
 const Plans = () => {
-  const [prices, setPrices] = useState(services[0].title);
 
-  const serviceData = services.find((service) => service.title === prices);
+  const { data: services, isLoading: loadingServices } = useQuery({
+    queryKey: ["services"],
+    queryFn: fetchServices,
+  });
+
+  const [selectedSlug, setSelectedSlug] = useState("");
+
+
+  const { data: plans, isLoading: loadingPlans } = useQuery({
+    queryKey: ["plans", selectedSlug],
+    queryFn: () => fetchPlans(selectedSlug),
+    enabled: !!selectedSlug,
+  });
+
+  useEffect(() => {
+    if (services?.length > 0 && !selectedSlug) {
+      setSelectedSlug(services[0].slug);
+    }
+  }, [services, selectedSlug]);
+
+  if (loadingServices) {
+    return <Loader />;
+  }
 
   return (
     <div className="max-w-[1426px] mx-auto px-5 py-10 sm:py-20">
@@ -35,27 +60,41 @@ const Plans = () => {
         <fieldset className="fieldset">
           <legend className=" text-sm">Select Services</legend>
           <select
-            defaultValue={prices}
+            value={selectedSlug}
             className="select bg-main border-main outline-none rounded-full"
-            onChange={(e) => setPrices(e.target.value)}
+            onChange={(e) => setSelectedSlug(e.target.value)}
           >
-            {services.map((service) => (
-              <option key={service.title} className="hover:bg-base-100">
+            {services?.map((service) => (
+              <option key={service.slug} value={service.slug} className="hover:bg-base-100">
                 {service.title}
               </option>
             ))}
           </select>
+
         </fieldset>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        {serviceData.plans.map((plan) => (
-          <PricingCard
-            key={plan.title}
-            title={plan.title}
-            price={plan.price}
-            benefits={plan.benefits}
-          />
-        ))}
+        {loadingPlans ? (
+          Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="card bg-base-200 p-5 rounded-lg animate-pulse">
+              <div className="skeleton h-6 w-32 mb-4"></div>
+              <div className="skeleton h-4 w-20 mb-2"></div>
+              <div className="skeleton h-4 w-40 mb-2"></div>
+              <div className="skeleton h-4 w-28"></div>
+            </div>
+          ))
+        ) : (
+          Array.isArray(plans) &&
+          plans.map((plan) => (
+            <PricingCard
+              key={plan.id}
+              title={plan.planName}
+              price={plan.price}
+              benefits={plan.benefits.map((b) => b.value)}
+            />
+          ))
+        )}
+
       </div>
     </div>
   );

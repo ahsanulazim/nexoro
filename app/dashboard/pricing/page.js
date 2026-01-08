@@ -2,6 +2,7 @@
 import { fetchServices } from "@/api/fetchServices";
 import PriceCard from "@/components/dashboard/price/PriceCard";
 import PriceForm from "@/components/dashboard/price/PriceForm";
+import Loader from "@/components/ui/Loader";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
@@ -22,7 +23,7 @@ const Pricing = () => {
   const selectedService = services?.find((s) => s.title === prices);
 
   if (isLoading) {
-    return <p>Loading...</p>;
+    return <Loader />;
   }
 
   const existingPlans = selectedService?.plans?.length || 0;

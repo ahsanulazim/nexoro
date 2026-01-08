@@ -6,10 +6,12 @@ import { FaPlus, FaTrash } from "react-icons/fa6";
 import { toast } from "react-toastify";
 
 const PriceForm = ({ slug, onCancel, initialData }) => {
+
   const {
     register,
     control,
     handleSubmit,
+    reset,
     formState: { errors, isDirty },
   } = useForm({
     defaultValues: {
@@ -28,12 +30,21 @@ const PriceForm = ({ slug, onCancel, initialData }) => {
   const queryClient = useQueryClient();
 
   //Mutate Service Plans
-  const addPlan = useMutation({
-    mutationFn: (data) => createPlan(data, slug),
+  const planMutation = useMutation({
+    mutationFn: async (data) => {
+      if (initialData) {
+        return fetch(`${process.env.NEXT_PUBLIC_API_BASE}/plans/${slug}/${initialData.id}`, {
+          method: "PUT",
+          body: JSON.stringify(data),
+          headers: { "Content-Type": "application/json" },
+        }).then((res) => res.json());
+      } else return createPlan(data, slug);
+    },
     onSuccess: () => {
+      reset();
       if (onCancel) onCancel();
       queryClient.invalidateQueries({ queryKey: ["services"] });
-      toast.success("Plan Added Successfully");
+      toast.success(initialData ? "Plan Updated Successfully" : "Plan Added Successfully");
     },
     onError: (error) => {
       toast.error(error.message);
@@ -41,7 +52,7 @@ const PriceForm = ({ slug, onCancel, initialData }) => {
   })
 
   const onSubmit = (data) => {
-    addPlan.mutate(data);
+    planMutation.mutate(data);
   };
 
   return (
@@ -92,7 +103,7 @@ const PriceForm = ({ slug, onCancel, initialData }) => {
               })}
             />
             <button
-              className="btn btn-square btn-sm btn-error"
+              className="btn btn-square btn-error"
               type="button"
               onClick={() => remove(index)}
             >
@@ -115,7 +126,7 @@ const PriceForm = ({ slug, onCancel, initialData }) => {
       </button>
       <div className="mt-4 flex items-center gap-5">
         <button type="button" className="btn btn-error rounded-full grow" onClick={onCancel}>Cancel</button>
-        <button type="submit" className="btn btn-success rounded-full grow" disabled={addPlan.isPending || !isDirty}>{addPlan.isPending && <span className="loading loading-spinner"></span>} Save</button>
+        <button type="submit" className="btn btn-success rounded-full grow" disabled={planMutation.isPending || !isDirty}>{planMutation.isPending && <span className="loading loading-spinner"></span>} Save</button>
       </div>
     </form>
   );

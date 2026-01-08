@@ -11,8 +11,8 @@ const PricingCard = ({ title, price, benefits }) => {
           <button className="btn btn-block btn-primary rounded-full border-none bg-linear-to-r from-main via-main-light to-main bg-[length:200%_200%] animate-gradient">Choose Plan</button>
         </div>
         <ul className="mt-6 flex flex-col gap-2 text-xs grow">
-          {benefits.map((benefit) => (
-            <li key={benefit}>
+          {benefits.map((benefit, i) => (
+            <li key={i}>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="size-4 me-2 inline-block text-success"

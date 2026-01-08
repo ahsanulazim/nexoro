@@ -9,3 +9,9 @@ export const createPlan = async (data, slug) => {
   const planData = await res.json();
   return planData;
 };
+
+export const fetchPlans = async (selectedSlug) => {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/plans/${selectedSlug}`);
+  if (!res.ok) throw new Error("Failed to fetch plans");
+  return res.json();
+};
