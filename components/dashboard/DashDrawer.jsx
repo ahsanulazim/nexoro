@@ -6,6 +6,7 @@ import {
   LuGalleryThumbnails,
   LuLayoutDashboard,
   LuMessageCircle,
+  LuNotebookPen,
   LuPackage,
   LuSettings,
   LuStar,
@@ -55,6 +56,16 @@ const DashDrawer = ({ children }) => {
             </li>
             {isAdmin && (
               <>
+                <li>
+                  <Link
+                    href="/dashboard/blog"
+                    className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                    data-tip="Blog"
+                  >
+                    <LuNotebookPen className="my-1.5 inline-block size-4" />
+                    <span className="is-drawer-close:hidden">Blog</span>
+                  </Link>
+                </li>
                 <li>
                   <Link
                     href="/dashboard/sliders"
