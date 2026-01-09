@@ -35,6 +35,7 @@
 }
 
 @keyframes gradient {
+
   0%,
   100% {
     background-position: 0% 50%;
@@ -52,16 +53,14 @@
 }
 
 .cardAnimation {
-  @apply relative before:content-[""] before:absolute before:-inset-px before:rounded-[inherit] after:rounded-[inherit] after:content-[""] after:absolute after:-inset-px  after:blur-lg;
+  @apply relative before:content-[""] before:absolute before:-inset-px before:rounded-[inherit] after:rounded-[inherit] after:content-[""] after:absolute after:-inset-px after:blur-lg;
 }
 
 .cardAnimation::after,
 .cardAnimation::before {
-  background: conic-gradient(
-    from var(--gradient-angle),
-    hsl(273, 100%, 50%),
-    hsl(273, 100%, 70%)
-  );
+  background: conic-gradient(from var(--gradient-angle),
+      hsl(273, 100%, 50%),
+      hsl(273, 100%, 70%));
   z-index: -1;
   animation: rotation 5s linear infinite;
 }
@@ -70,13 +69,29 @@
   0% {
     --gradient-angle: 0deg;
   }
+
   100% {
     --gradient-angle: 360deg;
   }
 }
+
 .btn-nexoro-primary {
   @apply bg-main border-main hover:bg-main-dark hover:border-main-dark;
 }
+
 .btn-nexoro-primary-outline {
   @apply border-main text-main hover:text-white hover:bg-main;
+}
+
+
+.ql-container {
+  @apply !border-none;
+}
+
+.ql-toolbar {
+  @apply !border-none;
+}
+
+.ql-editor {
+  @apply min-h-[200px];
 }

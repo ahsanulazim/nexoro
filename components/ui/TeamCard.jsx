@@ -20,7 +20,7 @@ const TeamCard = ({ member }) => {
           />
         </figure>
         <div className="card-body">
-          <h2 className="card-title max-xs:text-xl text-lg sm:text-2xl">
+          <h2 className="card-title text-lg">
             {member.memberName}
           </h2>
           <div>
