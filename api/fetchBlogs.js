@@ -1,0 +1,23 @@
+export const postBlog = async (blogData) => {
+    const blogInfo = new FormData();
+    blogInfo.append("author", blogData.author);
+    blogInfo.append("title", blogData.blogTitle);
+    blogInfo.append("slug", blogData.slug);
+    blogInfo.append("description", blogData.blogDescription);
+    blogInfo.append("content", blogData.content);
+    blogInfo.append("category", blogData.category);
+    blogInfo.append("visibility", blogData.visibility);
+    blogInfo.append("folder", "blogs");
+    blogInfo.append("image", blogData.image[0]);
+
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/blogs`, {
+        method: "POST",
+        body: blogInfo,
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+        throw new Error(data.message || "Failed to Post Blog");
+    }
+    return data;
+};
