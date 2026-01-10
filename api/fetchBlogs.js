@@ -21,3 +21,18 @@ export const postBlog = async (blogData) => {
     }
     return data;
 };
+
+export const fetchBlogs = async () => {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/blogs/allBlogs`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+        },
+    });
+
+    if (!res.ok) {
+        throw new Error("Failed to Get Blogs");
+    }
+
+    return res.json();
+}

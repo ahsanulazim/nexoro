@@ -1,20 +1,24 @@
 import { LuCalendar, LuHeart, LuMessageCircle } from "react-icons/lu"
+import DOMPurify from "isomorphic-dompurify"
 
-const BlogCard = () => {
+const BlogCard = ({ blog }) => {
+
+    const clean = DOMPurify.sanitize(blog?.content, { USE_PROFILES: { html: true } });
+
     return (
         <div className="card md:flex-row bg-base-100 overflow-hidden">
             <figure className="md:max-w-52">
                 <img className="object-cover aspect-square"
-                    src="https://img.daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.webp"
-                    alt="Shoes" />
+                    src={blog.image}
+                    alt={blog.title} />
             </figure>
             <div className="card-body">
-                <div className="badge badge-success">Category</div>
+                <div className="badge badge-success">{blog.category.category}</div>
                 <div className="flex max-xs:flex-col xs:gap-2 xs:items-end">
-                    <h2 className="card-title text-xl">Card Title</h2>
-                    <p>by <span className="link link-hover link-info">Author Name</span></p>
+                    <h2 className="card-title text-xl">{blog.title}</h2>
+                    <p>by <span className="link link-hover link-info">{blog.author}</span></p>
                 </div>
-                <p className="line-clamp-2">A card component has a figure, a body part, and inside body there are title and actions parts</p>
+                <p className="line-clamp-2" dangerouslySetInnerHTML={{ __html: clean }} />
                 <div>
                     <button className="btn btn-ghost btn-secondary"><LuHeart />Like</button>
                     <button className="btn btn-ghost btn-info"><LuMessageCircle />Comments</button>
