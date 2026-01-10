@@ -18,6 +18,10 @@ export default function Header({ children }) {
       link: "/pricing",
     },
     {
+      title: "Blog",
+      link: "/blog",
+    },
+    {
       title: "About",
       link: "/about-us",
     },

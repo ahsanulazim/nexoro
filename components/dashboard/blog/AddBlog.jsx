@@ -1,7 +1,7 @@
 'use client'
 
 import { Controller, useForm } from "react-hook-form";
-import { LuArrowLeft } from "react-icons/lu"
+import { LuArrowLeft, LuCirclePlus } from "react-icons/lu"
 import 'react-quill-new/dist/quill.snow.css';
 import ReactQuill from "react-quill-new";
 import { useAuthState } from "react-firebase-hooks/auth";
@@ -9,11 +9,15 @@ import auth from "@/firebase/firebase.config.js";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { postBlog } from "@/api/fetchBlogs";
 import { toast } from "react-toastify";
+import { useRef } from "react";
+import CatModal from "./CatModal";
 
 const AddBlog = () => {
 
     //get user
     const [user] = useAuthState(auth);
+
+    const catRef = useRef();
 
     const { register, control, handleSubmit, formState: { errors } } = useForm({
         defaultValues: {
@@ -53,6 +57,7 @@ const AddBlog = () => {
             <div className="mb-5">
                 <button className="text-lg flex items-center gap-4 cursor-pointer font-bold"><LuArrowLeft />Add A Blog Post</button>
             </div>
+            <CatModal ref={catRef} />
             <form className="grid lg:grid-cols-4 gap-5 items-start" onSubmit={handleSubmit(onSubmit)}>
                 <div className="fieldset lg:col-span-3 bg-base-200 border-base-300 rounded-box border p-5 max-lg:order-2">
                     <label htmlFor="blogTitle" className="label">Title <span className="text-red-600">*</span></label>
@@ -89,6 +94,7 @@ const AddBlog = () => {
                             <option value="Business">Business</option>
                             <option value="Design">Design</option>
                         </select>
+                        <button type="button" onClick={() => catRef.current.show()} className="btn btn-primary btn-nexoro-primary"><LuCirclePlus className="size-4" /> Add New Category</button>
                         {errors.category && <p className="text-red-600">{errors.category.message}</p>}
                     </div>
                     <div className="fieldset bg-base-200 border-base-300 rounded-box border p-5">
