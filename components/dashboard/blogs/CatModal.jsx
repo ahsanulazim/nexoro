@@ -1,14 +1,31 @@
+import { createCategory } from '@/api/fetchCategory';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import React from 'react'
 import { useForm } from 'react-hook-form'
-import { LuAlignJustify, LuClipboardPlus, LuLink2 } from 'react-icons/lu'
+import { LuClipboardPlus, LuLink2 } from 'react-icons/lu'
+import { toast } from 'react-toastify';
 
 const CatModal = ({ ref }) => {
 
     const { register, reset, handleSubmit, formState: { errors } } = useForm();
 
-    const onAdd = (data) => {
-        console.log(data);
+    //Tanstack Mutation
 
+    const queryClient = useQueryClient();
+    const mutation = useMutation({
+        mutationFn: createCategory,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["categories"] });
+            toast.success("Category Added successfully");
+            reset()
+        },
+        onError: (error) => {
+            toast.error(error.message);
+        }
+    });
+
+    const onAdd = (data) => {
+        mutation.mutate(data);
     }
 
     return (
@@ -29,8 +46,8 @@ const CatModal = ({ ref }) => {
                         <input type="text" placeholder="e.g. digital-marketing" {...register("slug", { required: "Slug is Required" })} />
                     </label>
                     {errors.slug && <p className='text-red-600'>{errors.slug.message}</p>}
-                    <label htmlFor="catDes" className='label'>Write Description</label>
-                    <textarea className='w-full textarea' placeholder="Write Description for this Category" {...register("catDes")}></textarea>
+                    <label htmlFor="description" className='label'>Write Description</label>
+                    <textarea className='w-full textarea' placeholder="Write Description for this Category" {...register("description")}></textarea>
                     <div className='flex gap-5 mt-4'>
                         <button type='submit' className="btn btn-success grow">Add</button>
                         <button type='button' onClick={() => { ref.current.close(); reset(); }} className="btn btn-error grow">Close</button>

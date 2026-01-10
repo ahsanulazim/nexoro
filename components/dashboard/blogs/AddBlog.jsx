@@ -6,11 +6,13 @@ import 'react-quill-new/dist/quill.snow.css';
 import ReactQuill from "react-quill-new";
 import { useAuthState } from "react-firebase-hooks/auth";
 import auth from "@/firebase/firebase.config.js";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { postBlog } from "@/api/fetchBlogs";
 import { toast } from "react-toastify";
 import { useRef } from "react";
 import CatModal from "./CatModal";
+import { fetchCategories } from "@/api/fetchCategory";
+import Link from "next/link";
 
 const AddBlog = () => {
 
@@ -47,6 +49,12 @@ const AddBlog = () => {
         }
     });
 
+    //Category Fetch
+    const { data: categories, isLoading } = useQuery({
+        queryKey: ["categories"],
+        queryFn: fetchCategories,
+    });
+
     const onSubmit = (data) => {
         mutation.mutate(data);
     }
@@ -55,7 +63,7 @@ const AddBlog = () => {
     return (
         <>
             <div className="mb-5">
-                <button className="text-lg flex items-center gap-4 cursor-pointer font-bold"><LuArrowLeft />Add A Blog Post</button>
+                <Link href="/dashboard/blogs"><button className="text-lg flex items-center gap-4 cursor-pointer font-bold"><LuArrowLeft />Back to Blogs</button></Link>
             </div>
             <CatModal ref={catRef} />
             <form className="grid lg:grid-cols-4 gap-5 items-start" onSubmit={handleSubmit(onSubmit)}>
@@ -90,9 +98,7 @@ const AddBlog = () => {
                         </label>
                         <select className="select w-full" defaultValue="" {...register("category", { required: "Category is required" })}>
                             <option value="" disabled={true}>Select Category</option>
-                            <option value="Technology">Technology</option>
-                            <option value="Business">Business</option>
-                            <option value="Design">Design</option>
+                            {isLoading ? <option>Loading...</option> : categories.map((category) => <option key={category._id} value={category._id}>{category.category}</option>)}
                         </select>
                         <button type="button" onClick={() => catRef.current.show()} className="btn btn-primary btn-nexoro-primary"><LuCirclePlus className="size-4" /> Add New Category</button>
                         {errors.category && <p className="text-red-600">{errors.category.message}</p>}
