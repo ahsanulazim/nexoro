@@ -12,7 +12,7 @@ const AllBlogs = () => {
 
     return (
         <div className="bg-base-300 p-5 rounded-xl flex flex-col gap-5">
-            {isLoading ? <p>Loading...</p> : blogs.map((blog) => <BlogCard key={blog._id} blog={blog} />)}
+            {isLoading ? <p>Loading...</p> : !blogs || blogs.length === 0 ? <p className="text-center">No Blogs has been posted yet</p> : blogs.map((blog) => <BlogCard key={blog._id} blog={blog} />)}
         </div>
     )
 }
