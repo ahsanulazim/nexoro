@@ -4,7 +4,7 @@ export const postBlog = async (blogData) => {
     blogInfo.append("title", blogData.blogTitle);
     blogInfo.append("slug", blogData.slug);
     blogInfo.append("description", blogData.blogDescription);
-    blogInfo.append("content", blogData.content);
+    blogInfo.append("content", blogData.content.replace(/&nbsp;/g, " "));
     blogInfo.append("category", blogData.category);
     blogInfo.append("visibility", blogData.visibility);
     blogInfo.append("folder", "blogs");
@@ -34,5 +34,17 @@ export const fetchBlogs = async () => {
         throw new Error("Failed to Get Blogs");
     }
 
+    return res.json();
+}
+
+export const deleteBlog = async (id, public_id) => {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/blogs/${id}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ public_id }),
+    })
+    if (!res.ok) {
+        throw new Error("Failed to delete service");
+    }
     return res.json();
 }

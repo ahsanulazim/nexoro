@@ -7,7 +7,7 @@ import { toast } from 'react-toastify';
 
 const CatModal = ({ ref }) => {
 
-    const { register, reset, handleSubmit, formState: { errors } } = useForm();
+    const { register, reset, handleSubmit, formState: { errors, isDirty } } = useForm();
 
     //Tanstack Mutation
 
@@ -49,7 +49,7 @@ const CatModal = ({ ref }) => {
                     <label htmlFor="description" className='label'>Write Description</label>
                     <textarea className='w-full textarea' placeholder="Write Description for this Category" {...register("description")}></textarea>
                     <div className='flex gap-5 mt-4'>
-                        <button type='submit' className="btn btn-success grow">Add</button>
+                        <button type='submit' className="btn btn-success grow" disabled={mutation.isPending || !isDirty}>{mutation.isPending && <span className="loading loading-spinner"></span>} Add</button>
                         <button type='button' onClick={() => { ref.current.close(); reset(); }} className="btn btn-error grow">Close</button>
                     </div>
                 </form>

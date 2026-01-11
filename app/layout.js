@@ -1,5 +1,6 @@
 import { Space_Grotesk } from "next/font/google";
 import "./globals.css";
+import 'react-quill-new/dist/quill.snow.css';
 import MyProvider from "@/context/MyProvider";
 import { Bounce, ToastContainer } from "react-toastify";
 import QueryProvider from "@/query/QueryProvider";

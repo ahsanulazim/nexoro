@@ -1,53 +1,17 @@
 'use client'
 
-import { Controller, useForm } from "react-hook-form";
+import Link from "next/link"
+import CatModal from "./CatModal"
+import { Controller, useForm } from "react-hook-form"
 import { LuArrowLeft, LuCirclePlus } from "react-icons/lu"
-import ReactQuill from "react-quill-new";
-import { useAuthState } from "react-firebase-hooks/auth";
-import auth from "@/firebase/firebase.config.js";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { postBlog } from "@/api/fetchBlogs";
-import { toast } from "react-toastify";
-import { useRef } from "react";
-import CatModal from "./CatModal";
-import { fetchCategories } from "@/api/fetchCategory";
-import Link from "next/link";
+import ReactQuill from "react-quill-new"
+import { useRef } from "react"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { fetchCategories } from "@/api/fetchCategory"
+import { toast } from "react-toastify"
+import { postBlog } from "@/api/fetchBlogs"
 
-const AddBlog = () => {
-
-    //get user
-    const [user] = useAuthState(auth);
-
-    const catRef = useRef();
-
-    const { register, control, reset, handleSubmit, formState: { errors } } = useForm({
-        defaultValues: {
-            blogTitle: "",
-            slug: "",
-            blogDescription: "",
-            content: "",
-            category: "",
-            visibility: "",
-            image: null,
-            author: user?.displayName || "",
-        },
-    });
-
-    //Tanstack Mutation
-
-    const queryClient = useQueryClient();
-
-    const mutation = useMutation({
-        mutationFn: postBlog,
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["blogs"] });
-            toast.success("Blog Posted successfully");
-            reset();
-        },
-        onError: (error) => {
-            toast.error(error.message);
-        }
-    });
+const EditBlog = ({ blog }) => {
 
     //Category Fetch
     const { data: categories, isLoading } = useQuery({
@@ -55,10 +19,41 @@ const AddBlog = () => {
         queryFn: fetchCategories,
     });
 
-    const onSubmit = (data) => {
-        mutation.mutate(data);
-    }
+    //Tanstack Mutation
+    const queryClient = useQueryClient();
 
+    const mutation = useMutation({
+        mutationFn: postBlog,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["blogs"] });
+            toast.success("Blog Updated successfully");
+        },
+        onError: (error) => {
+            toast.error(error.message);
+        }
+    });
+
+    const { register, handleSubmit, control, formState: { errors, isDirty } } = useForm({
+        defaultValues: {
+            blogTitle: blog.title,
+            slug: blog.slug,
+            blogDescription: blog.description,
+            content: blog.content,
+            category: blog.categoryId,
+            visibility: `${blog.visibility}`,
+            image: null,
+            author: blog.author,
+        }
+    })
+
+    console.log(blog)
+
+    const catRef = useRef();
+
+    const onSubmit = (data) => {
+        console.log(data);
+
+    }
 
     return (
         <>
@@ -85,7 +80,7 @@ const AddBlog = () => {
                         render={({ field }) => <ReactQuill theme="snow" className="border border-gray-600 rounded-md" {...field} />}
                     />
                     {errors.content && <p className="text-red-600">{errors.content.message}</p>}
-                    <button className="btn btn-success mt-4" type="submit" disabled={mutation.isPending}>{mutation.isPending && <span className="loading loading-spinner"></span>} Post Blog</button>
+                    <button className="btn btn-success mt-4" type="submit" disabled={mutation.isPending || !isDirty}>{mutation.isPending && <span className="loading loading-spinner"></span>} Update Blog</button>
                 </div>
                 <div className="flex flex-col gap-5 max-lg:order-1 sticky top-20">
                     <div className="fieldset bg-base-200 border-base-300 rounded-box border p-5">
@@ -110,7 +105,8 @@ const AddBlog = () => {
                         {errors.visibility && <p className="text-red-600">{errors.visibility.message}</p>}
                     </div>
                     <div className="fieldset bg-base-200 border-base-300 rounded-box border p-5">
-                        <label className="label">Upload Blog Thumbnail <span className="text-red-600">*</span></label>
+                        <label className="label">Blog Thumbnail <span className="text-red-600">*</span></label>
+                        <img className="w-full rounded-md" src={blog.image} alt={blog.title} />
                         <input type="file" className="file-input w-full" accept="image/png, image/jpg, image/webp, image/avif, image/jpeg" {...register("image", { required: "Blog image is required" })} />
                         {errors.image && <p className="text-red-600">{errors.image.message}</p>}
                         <label className="label">Max size 2MB</label>
@@ -121,4 +117,4 @@ const AddBlog = () => {
     )
 }
 
-export default AddBlog
+export default EditBlog
