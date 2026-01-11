@@ -7,8 +7,6 @@ const Blog = async ({ params }) => {
 
     const blogData = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/blogs/${blog}`).then(res => res.json())
 
-    console.log(blogData);
-
 
     return (
         <main className="flex flex-col gap-4">

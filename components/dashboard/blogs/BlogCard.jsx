@@ -3,6 +3,7 @@ import DOMPurify from "isomorphic-dompurify"
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { deleteBlog } from "@/api/fetchBlogs";
+import Link from "next/link";
 
 const BlogCard = ({ blog }) => {
 
@@ -10,19 +11,19 @@ const BlogCard = ({ blog }) => {
 
     const queryClient = useQueryClient();
 
-    const { mutate: removeClient, isPending } = useMutation({
-        mutationFn: ({ email, public_id }) => deleteBlog(id, public_id),
-        onMutate: async ({ email }) => {
+    const mutation = useMutation({
+        mutationFn: deleteBlog,
+        onMutate: async ({ id }) => {
             await queryClient.cancelQueries({ queryKey: ["blogs"] });
-            const previousClients = queryClient.getQueryData(["blogs"]);
-            queryClient.setQueryData(["blogs"], (oldClients) =>
-                oldClients.filter((client) => client.email !== email)
+            const previousBlogs = queryClient.getQueryData(["blogs"]);
+            queryClient.setQueryData(["blogs"], (oldBlogs) =>
+                oldBlogs.filter((blog) => blog._id !== id)
             );
-            return { previousClients };
+            return { previousBlogs };
         },
         onError: (err, context) => {
             toast.error(err.message);
-            queryClient.setQueryData(["blogs"], context.previousClients);
+            queryClient.setQueryData(["blogs"], context.previousBlogs);
         },
         onSettled: () => {
             toast.success("Blog deleted successfully");
@@ -32,20 +33,22 @@ const BlogCard = ({ blog }) => {
 
     return (
         <div className="card md:flex-row bg-base-100 overflow-hidden">
-            <figure className="w-full md:max-w-52 shrink-0">
+            <Link href={`/dashboard/blogs/${blog.slug}`} className="w-full md:max-w-52 shrink-0">
                 <img className="object-cover aspect-square"
                     src={blog.image}
                     alt={blog.title} />
-            </figure>
+            </Link>
             <div className="card-body">
-                <div className="badge badge-success">{blog.category.category}</div>
-                <div className="flex max-xs:flex-col xs:gap-2 xs:items-end">
-                    <h2 className="card-title text-xl line-clamp-1">{blog.title}</h2>
-                    <p className="whitespace-nowrap">by <span className="link link-hover link-info">{blog.author}</span></p>
-                </div>
-                <p className="line-clamp-2" dangerouslySetInnerHTML={{ __html: clean }} />
+                <Link href={`/dashboard/blogs/${blog.slug}`} className="card-body p-0">
+                    <div className="badge badge-success">{blog.category.category}</div>
+                    <div className="flex max-xs:flex-col xs:gap-2 xs:items-end">
+                        <h2 className="card-title text-xl line-clamp-1">{blog.title}</h2>
+                        <p className="whitespace-nowrap">by <span className="link link-hover link-info">{blog.author}</span></p>
+                    </div>
+                    <p className="line-clamp-2" dangerouslySetInnerHTML={{ __html: clean }} />
+                </Link>
                 <div>
-                    <button className="btn btn-error"><LuTrash2 />Delete</button>
+                    <button className="btn btn-error" onClick={() => mutation.mutate({ id: blog._id, public_id: blog.public_id })} disabled={mutation.isPending}><LuTrash2 />Delete</button>
                     <button className="btn btn-ghost btn-secondary"><LuHeart />Like</button>
                     <button className="btn btn-ghost btn-info"><LuMessageCircle />Comments</button>
                     <button className="btn btn-ghost btn-info" disabled><LuCalendar />10th Jan, 2026</button>

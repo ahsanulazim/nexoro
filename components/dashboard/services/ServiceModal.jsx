@@ -39,7 +39,6 @@ const ServiceModal = ({ ref, service }) => {
 
   const handleService = (data) => {
     mutationEdit.mutate({ id: service._id, formData: data });
-    ref.current.close();
   };
 
   return (

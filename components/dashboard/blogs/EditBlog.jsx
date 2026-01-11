@@ -9,7 +9,7 @@ import { useRef } from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { fetchCategories } from "@/api/fetchCategory"
 import { toast } from "react-toastify"
-import { postBlog } from "@/api/fetchBlogs"
+import { updateBlog } from "@/api/fetchBlogs"
 
 const EditBlog = ({ blog }) => {
 
@@ -23,7 +23,7 @@ const EditBlog = ({ blog }) => {
     const queryClient = useQueryClient();
 
     const mutation = useMutation({
-        mutationFn: postBlog,
+        mutationFn: ({ id, blogData }) => updateBlog(id, blogData),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["blogs"] });
             toast.success("Blog Updated successfully");
@@ -46,12 +46,10 @@ const EditBlog = ({ blog }) => {
         }
     })
 
-    console.log(blog)
-
     const catRef = useRef();
 
     const onSubmit = (data) => {
-        console.log(data);
+        mutation.mutate({ id: blog._id, blogData: data })
 
     }
 
@@ -107,7 +105,11 @@ const EditBlog = ({ blog }) => {
                     <div className="fieldset bg-base-200 border-base-300 rounded-box border p-5">
                         <label className="label">Blog Thumbnail <span className="text-red-600">*</span></label>
                         <img className="w-full rounded-md" src={blog.image} alt={blog.title} />
-                        <input type="file" className="file-input w-full" accept="image/png, image/jpg, image/webp, image/avif, image/jpeg" {...register("image", { required: "Blog image is required" })} />
+                        <input type="file" className="file-input w-full" accept="image/png, image/jpg, image/webp, image/avif, image/jpeg" {...register("image", {
+                            validate: {
+                                lessThan2MB: (files) => !files || files.length === 0 || files[0].size <= 2 * 1024 * 1024 || "File size must be less than 2MB"
+                            }
+                        })} />
                         {errors.image && <p className="text-red-600">{errors.image.message}</p>}
                         <label className="label">Max size 2MB</label>
                     </div>
