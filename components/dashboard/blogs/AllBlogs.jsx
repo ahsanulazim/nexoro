@@ -7,11 +7,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 const AllBlogs = () => {
 
     const router = useRouter();
-
     const searchParams = useSearchParams();
-
     const page = Number(searchParams.get("page") || 1);
-
     const { data, isLoading, isFetching } = useQuery({
         queryKey: ["blogs", page],
         queryFn: fetchBlogs,

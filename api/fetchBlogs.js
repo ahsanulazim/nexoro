@@ -40,6 +40,24 @@ export const fetchBlogs = async ({ queryKey }) => {
     return res.json();
 }
 
+export const fetchBlogsFrontend = async ({ queryKey }) => {
+
+    const [_key, page] = queryKey
+
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/blogs/allBlogs?page=${page}&limit=8`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+        },
+    });
+
+    if (!res.ok) {
+        throw new Error("Failed to Get Blogs");
+    }
+
+    return res.json();
+}
+
 export const deleteBlog = async ({ id, public_id }) => {
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/blogs/${id}`, {
         method: "DELETE",
