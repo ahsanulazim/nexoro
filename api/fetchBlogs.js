@@ -22,8 +22,11 @@ export const postBlog = async (blogData) => {
     return data;
 };
 
-export const fetchBlogs = async () => {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/blogs/allBlogs`, {
+export const fetchBlogs = async ({ queryKey }) => {
+
+    const [_key, page] = queryKey
+
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/blogs/allBlogs?page=${page}&limit=6`, {
         method: "GET",
         headers: {
             "Content-Type": "application/json",

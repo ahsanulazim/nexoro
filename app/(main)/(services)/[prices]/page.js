@@ -11,11 +11,11 @@ const page = async ({ params }) => {
 
   return (
     <main>
-      <TitleBanner>{serviceData.title}</TitleBanner>
+      <TitleBanner>{serviceData?.title}</TitleBanner>
       <div className="max-w-[1426px] mx-auto px-5 py-10 sm:py-20">
         <div className="mb-10">
           <h2 className="text-3xl lg:text-5xl font-semibold text-center mb-3">
-            {serviceData.title} <GradText>Pricing</GradText>
+            {serviceData?.title} <GradText>Pricing</GradText>
           </h2>
           <ul className="flex justify-center gap-y-2 gap-x-3 max-md:text-sm md:gap-x-8 md:gap-y-5 *:flex *:items-center *:gap-2 flex-wrap">
             <li>
@@ -33,7 +33,7 @@ const page = async ({ params }) => {
           </ul>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {serviceData.plans.map((plan) => (
+          {serviceData?.plans.map((plan) => (
             <PricingCard
               key={plan.title}
               title={plan.title}

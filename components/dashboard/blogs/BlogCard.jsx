@@ -51,7 +51,11 @@ const BlogCard = ({ blog }) => {
                     <button className="btn btn-error" onClick={() => mutation.mutate({ id: blog._id, public_id: blog.public_id })} disabled={mutation.isPending}><LuTrash2 />Delete</button>
                     <button className="btn btn-ghost btn-secondary"><LuHeart />Like</button>
                     <button className="btn btn-ghost btn-info"><LuMessageCircle />Comments</button>
-                    <button className="btn btn-ghost btn-info" disabled><LuCalendar />10th Jan, 2026</button>
+                    <button className="btn btn-ghost btn-info" disabled><LuCalendar />{new Date(blog.added).toLocaleString("en-BD", {
+                        timeZone: "Asia/Dhaka",
+                        dateStyle: "medium",
+                        timeStyle: "short",
+                    })}</button>
                 </div>
             </div>
         </div>
