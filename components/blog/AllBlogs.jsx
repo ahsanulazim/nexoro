@@ -17,7 +17,7 @@ const AllBlogs = () => {
     });
 
     const goToPage = (pageNum) => {
-        router.push(`/blog?page=${pageNum}`);
+        router.push(`/blogs?page=${pageNum}`);
     }
 
     return (
