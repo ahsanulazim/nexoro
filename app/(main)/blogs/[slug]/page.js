@@ -13,7 +13,7 @@ const Slug = async ({ params }) => {
 
     return (
         <main>
-            <TitleBanner subtitle="Blog">{blogData.title}</TitleBanner>
+            <TitleBanner subtitle="Blogs">{blogData.title}</TitleBanner>
             <div className="max-w-[1426px] mx-auto px-5 py-10 sm:py-20">
                 <div className="grid grid-cols-4 mb-10 gap-5">
                     <div className="col-span-3 bg-base-300 rounded-xl overflow-hidden">
