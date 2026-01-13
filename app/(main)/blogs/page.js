@@ -2,7 +2,7 @@ import AllBlogs from "@/components/blog/AllBlogs";
 import GradText from "@/components/ui/GradText";
 import TitleBanner from "@/components/ui/TitleBanner";
 
-const Blogs = () => {
+const BlogsPage = () => {
   return <main>
     <TitleBanner>Blogs</TitleBanner>
     <div className="max-w-[1426px] mx-auto px-5 py-10 sm:py-20">
@@ -19,4 +19,4 @@ const Blogs = () => {
   </main>;
 };
 
-export default Blogs;
+export default BlogsPage;
