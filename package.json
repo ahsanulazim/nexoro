@@ -29,6 +29,7 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@tanstack/react-devtools": "^0.8.2",
+    "baseline-browser-mapping": "^2.9.14",
     "daisyui": "^5.5.0",
     "eslint": "^9",
     "eslint-config-next": "16.0.2",
