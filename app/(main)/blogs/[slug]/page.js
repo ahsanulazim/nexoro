@@ -15,10 +15,10 @@ const Slug = async ({ params }) => {
 
   return (
     <main>
-      <TitleBanner subtitle="Blogs">{blogData.title}</TitleBanner>
+      {/* <TitleBanner subtitle="Blogs">{blogData.title}</TitleBanner> */}
       <div className="max-w-[1426px] mx-auto px-5 py-10 sm:py-20">
         <div className="grid grid-cols-4 mb-10 gap-5">
-          <div className="col-span-3 bg-base-300 rounded-xl overflow-hidden">
+          {/* <div className="col-span-3 bg-base-300 rounded-xl overflow-hidden">
             <img
               src={blogData.image}
               alt={blogData.title}
@@ -47,9 +47,9 @@ const Slug = async ({ params }) => {
                 <span className="font-semibold">Summery:</span>{" "}
                 {blogData.description}
               </p>
-              {/* <p dangerouslySetInnerHTML={{ __html: clean }}></p> */}
+              <p dangerouslySetInnerHTML={{ __html: clean }}></p>
             </div>
-          </div>
+          </div> */}
           <div className="col-span-1 bg-base-300 p-6 rounded-xl">
             <h2 className="text-2xl font-semibold">Latest Blogs</h2>
           </div>
