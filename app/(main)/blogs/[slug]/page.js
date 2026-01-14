@@ -10,9 +10,9 @@ const Slug = async ({ params }) => {
   //     `${process.env.NEXT_PUBLIC_API_BASE}/blogs/${slug}`
   //   ).then((res) => res.json());
 
-  //   const clean = DOMPurify.sanitize(blogData?.content, {
-  //     USE_PROFILES: { html: true },
-  //   });
+  const clean = DOMPurify.sanitize(blogData?.content, {
+    USE_PROFILES: { html: true },
+  });
 
   return (
     <main>
