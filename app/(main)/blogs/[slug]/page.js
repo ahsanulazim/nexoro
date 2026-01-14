@@ -4,14 +4,15 @@ import DOMPurify from "isomorphic-dompurify";
 
 const Slug = async ({ params }) => {
   const { slug } = await params;
+  console.log(slug);
 
-  const blogData = await fetch(
-    `${process.env.NEXT_PUBLIC_API_BASE}/blogs/${slug}`
-  ).then((res) => res.json());
+  //   const blogData = await fetch(
+  //     `${process.env.NEXT_PUBLIC_API_BASE}/blogs/${slug}`
+  //   ).then((res) => res.json());
 
-  const clean = DOMPurify.sanitize(blogData?.content, {
-    USE_PROFILES: { html: true },
-  });
+  //   const clean = DOMPurify.sanitize(blogData?.content, {
+  //     USE_PROFILES: { html: true },
+  //   });
 
   return (
     <main>
