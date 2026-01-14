@@ -1,15 +1,17 @@
 import TitleBanner from "@/components/ui/TitleBanner";
 import { LuCalendar } from "react-icons/lu";
 import DOMPurify from "isomorphic-dompurify";
+import { cache } from "react";
 
 const articles = async ({ params }) => {
   const { article } = await params;
 
   const blogData = await fetch(
-    `${process.env.NEXT_PUBLIC_API_BASE}/blogs/${article}`
+    `${process.env.NEXT_PUBLIC_API_BASE}/blogs/${article}`,
+    { cache: "no-store" }
   ).then((res) => res.json());
 
-  const clean = DOMPurify.sanitize(blogData?.content, {
+  const clean = DOMPurify.sanitize(blogData?.content || "", {
     USE_PROFILES: { html: true },
   });
 
