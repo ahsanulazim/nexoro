@@ -47,7 +47,7 @@ const Slug = async ({ params }) => {
                 <span className="font-semibold">Summery:</span>{" "}
                 {blogData.description}
               </p>
-              <p dangerouslySetInnerHTML={{ __html: clean }}></p>
+              {/* <p dangerouslySetInnerHTML={{ __html: clean }}></p> */}
             </div>
           </div>
           <div className="col-span-1 bg-base-300 p-6 rounded-xl">
