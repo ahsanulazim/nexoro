@@ -15,6 +15,7 @@ const HeroTwo = () => {
     const heroSplit = new SplitText(".heroTitle", { type: "chars, words" });
     const desSplit = new SplitText(".heroDes", { type: "lines" });
     gsap.from(heroSplit.words, {
+      opacity: 0,
       yPercent: 100,
       duration: 1,
       ease: 'expo.out',
