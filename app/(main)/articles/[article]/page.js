@@ -10,10 +10,10 @@ const articles = async ({ params }) => {
 
   return (
     <main>
-      <TitleBanner subtitle="Blogs">{blogData.title}</TitleBanner>
+      <TitleBanner subtitle="Articles">{blogData.title}</TitleBanner>
       <div className="max-w-[1426px] mx-auto px-5 py-10 sm:py-20">
-        <div className="grid grid-cols-4 mb-10 gap-5">
-          <div className="col-span-3 bg-base-300 rounded-xl overflow-hidden">
+        <div className="grid lg:grid-cols-4 mb-10 gap-5 items-start">
+          <div className="lg:col-span-3 bg-base-300 rounded-xl overflow-hidden">
             <img
               src={blogData.image}
               alt={blogData.title}
@@ -42,10 +42,10 @@ const articles = async ({ params }) => {
                 <span className="font-semibold">Summery:</span>{" "}
                 {blogData.description}
               </p>
-              <div>{parse(blogData.content.replace(/\u00A0/g, " "))}</div>
+              <div className="blog-content">{parse(blogData.content.replace(/\u00A0/g, " "))}</div>
             </div>
           </div>
-          <div className="col-span-1 bg-base-300 p-6 rounded-xl">
+          <div className="lg:col-span-1 bg-base-300 p-6 rounded-xl lg:sticky lg:top-28">
             <h2 className="text-2xl font-semibold">Latest Blogs</h2>
           </div>
         </div>

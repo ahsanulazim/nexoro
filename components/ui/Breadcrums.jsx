@@ -4,7 +4,7 @@ import { LuHouse } from "react-icons/lu";
 
 const Breadcrums = ({ children, subtitle }) => {
   return (
-    <div className="breadcrumbs max-md:text-sm">
+    <div className="breadcrumbs max-sm:max-w-[250px] max-md:text-sm line-clamp-1">
       <ul>
         <li>
           <Link href="/">
@@ -12,7 +12,7 @@ const Breadcrums = ({ children, subtitle }) => {
           </Link>
         </li>
         {subtitle && <li><Link href={`/${subtitle.slice(0, 1).toLowerCase() + subtitle.slice(1, subtitle.length)}`}>{subtitle}</Link></li>}
-        <li>{children}</li>
+        <li className="">{children}</li>
       </ul>
     </div>
   );

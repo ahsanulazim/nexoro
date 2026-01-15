@@ -45,7 +45,7 @@ export default function Navbar() {
               <Link href="/pricing">Pricing</Link>
             </li>
             <li className="dots-after">
-              <Link href="/blogs">Blogs</Link>
+              <Link href="/articles">Articles</Link>
             </li>
             <li>
               <Link href="/about-us">About</Link>
