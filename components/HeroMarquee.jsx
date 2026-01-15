@@ -66,8 +66,7 @@ const HeroMarquee = () => {
       slidesToSlide={1}
       swipeable
     >
-      {isLoading && <p>Loading...</p>}
-      {services?.map((service) => (
+      {isLoading ? <p>Loading...</p> : services?.map((service) => (
         <HeroCard key={service.title} service={service} />
       ))}
     </Carousel>
