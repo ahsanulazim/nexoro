@@ -16,7 +16,7 @@ const Teams = () => {
   });
 
   return (
-    <section className="relative">
+    <section className="relative" id="team">
       <img
         src="/assets/s2-bg-shape.webp"
         alt="pattern"

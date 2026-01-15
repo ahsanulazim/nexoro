@@ -2,7 +2,7 @@ import { IoArrowForwardCircle } from "react-icons/io5";
 
 const PortfolioCard = ({ project }) => {
   return (
-    <div className="card bg-base-100 rounded-xl">
+    <div className="projectCard card bg-base-100 rounded-xl">
       <figure className="p-5 pb-0">
         <img
           className="object-contain rounded-lg w-full"

@@ -4,7 +4,7 @@ import ServiceStep from "../ui/ServiceStep";
 
 const Services = () => {
   return (
-    <section className="relative" id="services">
+    <section className="relative">
       <LightRays
         raysOrigin="top-center"
         raysColor="#fffff"
