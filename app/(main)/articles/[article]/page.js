@@ -1,19 +1,12 @@
 import TitleBanner from "@/components/ui/TitleBanner";
 import { LuCalendar } from "react-icons/lu";
-import DOMPurify from "isomorphic-dompurify";
-import { cache } from "react";
+import parse from 'html-react-parser';
 
 const articles = async ({ params }) => {
   const { article } = await params;
 
   const blogData = await fetch(
-    `${process.env.NEXT_PUBLIC_API_BASE}/blogs/${article}`,
-    { cache: "no-store" }
-  ).then((res) => res.json());
-
-  const clean = DOMPurify.sanitize(blogData?.content || "", {
-    USE_PROFILES: { html: true },
-  });
+    `${process.env.NEXT_PUBLIC_API_BASE}/blogs/${article}`).then((res) => res.json());
 
   return (
     <main>
@@ -49,7 +42,7 @@ const articles = async ({ params }) => {
                 <span className="font-semibold">Summery:</span>{" "}
                 {blogData.description}
               </p>
-              <p dangerouslySetInnerHTML={{ __html: clean }}></p>
+              <div>{parse(blogData.content)}</div>
             </div>
           </div>
           <div className="col-span-1 bg-base-300 p-6 rounded-xl">

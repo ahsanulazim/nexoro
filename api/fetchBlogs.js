@@ -2,9 +2,8 @@ export const postBlog = async (blogData) => {
     const blogInfo = new FormData();
     blogInfo.append("author", blogData.author);
     blogInfo.append("title", blogData.blogTitle);
-    blogInfo.append("slug", blogData.slug);
     blogInfo.append("description", blogData.blogDescription);
-    blogInfo.append("content", blogData.content.replace(/&nbsp;/g, " "));
+    blogInfo.append("content", blogData.content);
     blogInfo.append("category", blogData.category);
     blogInfo.append("visibility", blogData.visibility);
     blogInfo.append("folder", "blogs");

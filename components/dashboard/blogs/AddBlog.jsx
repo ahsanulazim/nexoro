@@ -23,7 +23,6 @@ const AddBlog = () => {
     const { register, control, reset, handleSubmit, formState: { errors } } = useForm({
         defaultValues: {
             blogTitle: "",
-            slug: "",
             blogDescription: "",
             content: "",
             category: "",
@@ -59,6 +58,26 @@ const AddBlog = () => {
         mutation.mutate(data);
     }
 
+    //quill formats
+    const formats = [
+        'header', 'bold', 'italic', 'underline', 'strike',
+        'list', 'align',
+        'blockquote', 'code-block',
+        'link', 'image'
+    ];
+
+    const modules = {
+        toolbar: [
+            [{ 'header': [1, 2, 3, false] }],   // Heading options
+            ['bold', 'italic', 'underline', 'strike'], // Text styles
+            [{ 'list': 'ordered' }, { 'list': 'bullet' }], // Lists
+            [{ 'align': [] }], // Alignment
+            ['blockquote', 'code-block'], // Block styles
+            ['link', 'image'], // Links & Images
+            ['clean'] // Remove formatting
+        ],
+    };
+
 
     return (
         <>
@@ -71,9 +90,6 @@ const AddBlog = () => {
                     <label htmlFor="blogTitle" className="label">Title <span className="text-red-600">*</span></label>
                     <input type="text" className="input w-full" placeholder="e.g. This Blog is about the services." {...register("blogTitle", { required: "Blog Title is required" })} />
                     {errors.blogTitle && <p className="text-red-600">{errors.blogTitle.message}</p>}
-                    <label htmlFor="slug" className="label">Slug <span className="text-red-600">*</span></label>
-                    <input type="text" className="input w-full" placeholder="e.g. this-blog-is-about-the-services." {...register("slug", { required: "Slug is required" })} />
-                    {errors.slug && <p className="text-red-600">{errors.slug.message}</p>}
                     <label htmlFor="blogDescription" className="label">Short Description <span className="text-red-600">*</span></label>
                     <textarea className="textarea w-full" placeholder="Write a short description" {...register("blogDescription", { required: "Blog Description is required" })}></textarea>
                     {errors.blogDescription && <p className="text-red-600">{errors.blogDescription.message}</p>}
@@ -82,7 +98,7 @@ const AddBlog = () => {
                         name="content"
                         rules={{ required: "Content is required" }}
                         control={control}
-                        render={({ field }) => <ReactQuill theme="snow" className="border border-gray-600 rounded-md" {...field} />}
+                        render={({ field }) => <ReactQuill className="border border-gray-600 rounded-md" {...field} modules={modules} formats={formats} />}
                     />
                     {errors.content && <p className="text-red-600">{errors.content.message}</p>}
                     <button className="btn btn-success mt-4" type="submit" disabled={mutation.isPending}>{mutation.isPending && <span className="loading loading-spinner"></span>} Post Blog</button>
