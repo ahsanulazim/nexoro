@@ -5,6 +5,7 @@ import HeroCard from "./HeroCard";
 import Carousel from "react-multi-carousel";
 import "react-multi-carousel/lib/styles.css";
 import { fetchServices } from "@/api/fetchServices";
+import HeroCardSkeleton from "./skeleton/HeroCardSkeleton";
 
 const HeroMarquee = () => {
   const { data: services, isLoading } = useQuery({
@@ -66,7 +67,9 @@ const HeroMarquee = () => {
       slidesToSlide={1}
       swipeable
     >
-      {isLoading ? <p>Loading...</p> : services?.map((service) => (
+      {isLoading ? Array.from({ length: 6 }).map((_, i) => (
+        <HeroCardSkeleton key={i} />
+      )) : services?.map((service) => (
         <HeroCard key={service.title} service={service} />
       ))}
     </Carousel>
