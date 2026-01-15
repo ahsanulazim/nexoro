@@ -42,7 +42,7 @@ const articles = async ({ params }) => {
                 <span className="font-semibold">Summery:</span>{" "}
                 {blogData.description}
               </p>
-              <div>{parse(blogData.content)}</div>
+              <div>{parse(blogData.content.replace(/\u00A0/g, " "))}</div>
             </div>
           </div>
           <div className="col-span-1 bg-base-300 p-6 rounded-xl">
