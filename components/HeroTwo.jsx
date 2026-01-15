@@ -1,20 +1,46 @@
+'use client'
+
 import { IoIosArrowForward } from "react-icons/io";
 import Button from "./ui/Button";
 import HeroMarquee from "./HeroMarquee";
 import Badge from "./Badge";
 import Link from "next/link";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
+import { SplitText } from "gsap/all";
 
 const HeroTwo = () => {
+
+  useGSAP(() => {
+    const heroSplit = new SplitText(".heroTitle", { type: "chars, words" });
+    const desSplit = new SplitText(".heroDes", { type: "lines" });
+    gsap.from(heroSplit.words, {
+      yPercent: 100,
+      duration: 1,
+      ease: 'expo.out',
+      stagger: 0.05
+    })
+
+    gsap.from(desSplit.lines, {
+      opacity: 0,
+      yPercent: 100,
+      duration: 1,
+      ease: 'expo.out',
+      stagger: 0.05,
+      delay: 0.5
+    })
+  }, [])
+
   return (
     <section className=" bg-[url('/hero.webp')] bg-cover bg-center bg-no-repeat pt-28 md:pt-40">
       <div className="hero mb-10 md:mb-20">
         <div className="hero-content text-center">
           <div className="">
             <Badge />
-            <h1 className="text-4xl sm:text-6xl lg:text-8xl font-bold text-balance">
+            <h1 className="text-4xl sm:text-6xl lg:text-8xl font-bold text-balance heroTitle">
               Creative Strategy that Drives Real Results
             </h1>
-            <p className="py-6 md:text-xl text-balance max-w-3xl mx-auto">
+            <p className="py-6 md:text-xl text-balance max-w-3xl mx-auto heroDes">
               We&apos;re a team of expert who&apos;ve been delivering digital
               success for more than a decade. Discover why businesses trust us
               to drive their growth.
