@@ -35,6 +35,26 @@ export const fetchServices = async () => {
   return res.json();
 };
 
+//get a service
+export const fetchService = async (slug) => {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/services/${slug}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (res.status === 404) {
+    return null;
+  }
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch services");
+  }
+
+  return res.json();
+};
+
 
 //delete services
 export const deleteService = async (slug, public_id) => {
