@@ -5,12 +5,12 @@ import { useEffect, useRef } from "react";
 import { useAnimation, useInView, motion } from "motion/react";
 
 const contactVariant = {
-  hidden: { opacity: 0, x: -50 },
-  visible: { opacity: 1, x: 0, transition: { duration: 0.5, ease: "easeOut" } },
+  hidden: { opacity: 0, y: 50 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
 };
 
 const formVariant = {
-  hidden: { opacity: 0, x: 50 },
+  hidden: { opacity: 0, y: 50 },
   visible: { opacity: 1, x: 0, transition: { duration: 0.5, ease: "easeOut" } },
 };
 
