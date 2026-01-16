@@ -2,13 +2,12 @@ import Image from "next/image";
 import {
   LuBriefcaseBusiness,
   LuBuilding,
-  LuGithub,
-  LuMail,
 } from "react-icons/lu";
+import { motion } from "motion/react";
 
-const TeamCard = ({ member }) => {
+const TeamCard = ({ member, variants }) => {
   return (
-    <div className="hover-3d">
+    <motion.div variants={variants} className="hover-3d">
       <div className="card bg-base-300 shadow-sm">
         <figure>
           <Image
@@ -34,7 +33,7 @@ const TeamCard = ({ member }) => {
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
