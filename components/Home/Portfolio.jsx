@@ -51,7 +51,7 @@ const Portfolio = () => {
 
 
   return (
-    <section ref={portRef} className="bg-base-300" id="port">
+    <section ref={portRef} className="bg-base-300" id="services">
       <div className="max-w-[1426px] px-5 py-20 mx-auto z-10">
         <div className="max-w-4xl mx-auto mb-10">
           <motion.h1 variants={portVariant} initial="hidden" animate={portControls} className="text-center text-3xl sm:text-4xl md:text-5xl font-semibold text-balance">

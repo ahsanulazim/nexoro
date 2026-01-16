@@ -4,6 +4,7 @@ import { fetchBlogsFrontend } from "@/api/fetchBlogs";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import BlogCard from "./BlogCard";
+import AllBlogSkeleton from "./AllBlogSkeleton";
 
 const AllBlogs = () => {
   const router = useRouter();
@@ -23,7 +24,9 @@ const AllBlogs = () => {
     <>
       <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
         {isLoading ? (
-          <p>Loading...</p>
+          Array.from({ length: 8 }).map((_, i) => (
+            <AllBlogSkeleton key={i} />
+          ))
         ) : !data.blogs || data.blogs.length === 0 ? (
           <p className="text-center">No Blogs has been posted yet</p>
         ) : (
@@ -46,9 +49,8 @@ const AllBlogs = () => {
               return (
                 <button
                   key={pageNum}
-                  className={`join-item btn ${
-                    page === pageNum ? "btn-active btn-success" : ""
-                  }`}
+                  className={`join-item btn ${page === pageNum ? "btn-active btn-success" : ""
+                    }`}
                   onClick={() => goToPage(pageNum)}
                 >
                   {pageNum}
