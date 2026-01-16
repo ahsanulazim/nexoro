@@ -6,6 +6,7 @@ import {
   FaTiktok,
   FaUpwork,
 } from "react-icons/fa6";
+import FooterYear from "./FooterYear";
 
 const Footer = () => {
   return (
@@ -73,14 +74,7 @@ const Footer = () => {
           </nav>
         </div>
       </footer>
-      <footer className="footer sm:footer-horizontal footer-center bg-purple-700 text-base-content p-3">
-        <aside>
-          <p>
-            Copyright © {new Date().getFullYear()} - All right reserved by
-            Nexoro Solutions
-          </p>
-        </aside>
-      </footer>
+      <FooterYear />
     </>
   );
 };
