@@ -1,7 +1,6 @@
 'use client'
 
 import { IoIosArrowForward } from "react-icons/io";
-import Button from "./ui/Button";
 import HeroMarquee from "./HeroMarquee";
 import Link from "next/link";
 import { motion, useAnimation } from "motion/react"

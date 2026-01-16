@@ -1,8 +1,9 @@
 import { IoArrowForwardCircle } from "react-icons/io5";
+import { motion } from "motion/react";
 
-const PortfolioCard = ({ project }) => {
+const PortfolioCard = ({ project, variants }) => {
   return (
-    <div className="projectCard card bg-base-100 rounded-xl">
+    <motion.div className="projectCard card bg-base-100 rounded-xl" variants={variants}>
       <figure className="p-5 pb-0">
         <img
           className="object-contain rounded-lg w-full"
@@ -18,7 +19,7 @@ const PortfolioCard = ({ project }) => {
           </button>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
