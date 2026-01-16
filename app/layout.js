@@ -4,10 +4,6 @@ import 'react-quill-new/dist/quill.snow.css';
 import MyProvider from "@/context/MyProvider";
 import { Bounce, ToastContainer } from "react-toastify";
 import QueryProvider from "@/query/QueryProvider";
-import gsap from "gsap";
-import { ScrollTrigger, SplitText } from "gsap/all";
-
-gsap.registerPlugin(ScrollTrigger, SplitText);
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
