@@ -9,7 +9,7 @@ const page = () => {
 
     return (
         <main className="min-h-dvh flex flex-col justify-between">
-            <div className="py-5 px-10">
+            <div className="p-5 sm:px-10">
                 <Link href="/" className="block max-w-fit"><img className="w-full max-w-36" src="/assets/nexoro_logo.png" alt="Nexoro Logo" /></Link>
             </div>
             <div className="max-w-6xl mx-auto w-full p-5">

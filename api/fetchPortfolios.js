@@ -1,0 +1,97 @@
+export const postPortfolio = async (portfolioData) => {
+    const portfolioInfo = new FormData();
+    portfolioInfo.append("author", portfolioData.author);
+    portfolioInfo.append("title", portfolioData.portfolioTitle);
+    portfolioInfo.append("description", portfolioData.portfolioDescription);
+    portfolioInfo.append("content", portfolioData.content);
+    portfolioInfo.append("service", portfolioData.service);
+    portfolioInfo.append("visibility", portfolioData.visibility);
+    portfolioInfo.append("folder", "portfolio");
+    portfolioInfo.append("image", portfolioData.image[0]);
+
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/portfolio`, {
+        method: "POST",
+        body: portfolioInfo,
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+        throw new Error(data.message || "Failed to Post Portfolio");
+    }
+    return data;
+};
+
+export const fetchPortfolios = async ({ queryKey }) => {
+
+    const [_key, page] = queryKey
+
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/portfolio/allPortfolios?page=${page}&limit=6`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+        },
+    });
+
+    if (!res.ok) {
+        throw new Error("Failed to Get Portfolios");
+    }
+
+    return res.json();
+}
+
+export const fetchBlogsFrontend = async ({ queryKey }) => {
+
+    const [_key, page] = queryKey
+
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/blogs/allBlogs?page=${page}&limit=8`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+        },
+    });
+
+    if (!res.ok) {
+        throw new Error("Failed to Get Blogs");
+    }
+
+    return res.json();
+}
+
+export const deleteBlog = async ({ id, public_id }) => {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/blogs/${id}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ public_id }),
+    })
+    if (!res.ok) {
+        throw new Error("Failed to Delete Blog");
+    }
+    return res.json();
+}
+
+export const updateBlog = async (id, blogData) => {
+    const blogInfo = new FormData();
+    blogInfo.append("author", blogData.author);
+    blogInfo.append("title", blogData.blogTitle);
+    blogInfo.append("slug", blogData.slug);
+    blogInfo.append("description", blogData.blogDescription);
+    blogInfo.append("content", blogData.content.replace(/&nbsp;/g, " "));
+    blogInfo.append("category", blogData.category);
+    blogInfo.append("visibility", blogData.visibility);
+    blogInfo.append("folder", "blogs");
+    if (blogData.image) {
+        blogInfo.append("image", blogData.image[0]);
+    }
+
+
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/blogs/${id}`, {
+        method: "PUT",
+        body: blogInfo,
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+        throw new Error(data.message || "Failed to Update Blog");
+    }
+    return data;
+};
