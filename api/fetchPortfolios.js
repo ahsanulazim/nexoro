@@ -57,41 +57,41 @@ export const fetchBlogsFrontend = async ({ queryKey }) => {
     return res.json();
 }
 
-export const deleteBlog = async ({ id, public_id }) => {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/blogs/${id}`, {
+export const deletePortfolio = async ({ id, public_id }) => {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/portfolio/${id}`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ public_id }),
     })
     if (!res.ok) {
-        throw new Error("Failed to Delete Blog");
+        throw new Error("Failed to Delete Portfolio");
     }
     return res.json();
 }
 
-export const updateBlog = async (id, blogData) => {
-    const blogInfo = new FormData();
-    blogInfo.append("author", blogData.author);
-    blogInfo.append("title", blogData.blogTitle);
-    blogInfo.append("slug", blogData.slug);
-    blogInfo.append("description", blogData.blogDescription);
-    blogInfo.append("content", blogData.content.replace(/&nbsp;/g, " "));
-    blogInfo.append("category", blogData.category);
-    blogInfo.append("visibility", blogData.visibility);
-    blogInfo.append("folder", "blogs");
-    if (blogData.image) {
-        blogInfo.append("image", blogData.image[0]);
+export const updatePortfolio = async (id, portfolioData) => {
+    const portfolioInfo = new FormData();
+    portfolioInfo.append("author", portfolioData.author);
+    portfolioInfo.append("title", portfolioData.portfolioTitle);
+    portfolioInfo.append("slug", portfolioData.slug);
+    portfolioInfo.append("description", portfolioData.portfolioDescription);
+    portfolioInfo.append("content", portfolioData.content.replace(/&nbsp;/g, " "));
+    portfolioInfo.append("service", portfolioData.service);
+    portfolioInfo.append("visibility", portfolioData.visibility);
+    portfolioInfo.append("folder", "portfolio");
+    if (portfolioData.image) {
+        portfolioInfo.append("image", portfolioData.image[0]);
     }
 
 
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/blogs/${id}`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/portfolio/${id}`, {
         method: "PUT",
-        body: blogInfo,
+        body: portfolioInfo,
     });
 
     const data = await res.json();
     if (!res.ok) {
-        throw new Error(data.message || "Failed to Update Blog");
+        throw new Error(data.message || "Failed to Update Portfolio");
     }
     return data;
 };

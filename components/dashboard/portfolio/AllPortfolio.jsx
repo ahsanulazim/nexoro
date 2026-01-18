@@ -9,8 +9,8 @@ const AllPortfolio = () => {
     const router = useRouter();
     const searchParams = useSearchParams();
     const page = Number(searchParams.get("page") || 1);
-    const { data, isLoading, isFetching } = useQuery({
-        queryKey: ["portfolio", page],
+    const { data: portfolios, isLoading } = useQuery({
+        queryKey: ["portfolios", page],
         queryFn: fetchPortfolios,
         keepPreviousData: true,
     });
@@ -19,22 +19,17 @@ const AllPortfolio = () => {
         router.push(`/dashboard/portfolio?page=${pageNum}`);
     }
 
-
-    console.log(data);
-
-
-
     return (
         <>
-            <div className="bg-base-300 p-5 rounded-xl flex flex-col gap-5">
-                {isLoading ? <p>Loading...</p> : !data.portfolio || data.portfolio.length === 0 ? <p className="text-center">No Portfolio has been added yet</p> : data.portfolio.map((port) => <PortfolioCard key={port._id} portfolio={port} />)}
+            <div className="grid grid-cols-5 bg-base-300 p-5 rounded-xl gap-5">
+                {isLoading ? <p>Loading...</p> : !portfolios || portfolios.portfolios.length === 0 ? <p className="text-center">No Portfolio has been added yet</p> : portfolios.portfolios.map((port) => <PortfolioCard key={port._id} portfolio={port} />)}
             </div>
-            {isLoading ? <p>Loading...</p> : !data.portfolio || data.portfolio.length === 0 ? <></> :
+            {isLoading ? <p>Loading...</p> : !portfolios || portfolios.portfolios.length === 0 ? <></> :
                 <>
                     <div className="divider"></div>
                     <div className="join">
-                        <button className="join-item btn" disabled={!data.hasPrev} onClick={() => goToPage(page - 1)} >«</button>
-                        {[...Array(data.totalPages)].map((_, i) => {
+                        <button className="join-item btn" disabled={!portfolios.hasPrev} onClick={() => goToPage(page - 1)} >«</button>
+                        {[...Array(portfolios.totalPages)].map((_, i) => {
                             const pageNum = i + 1;
                             return (
                                 <button
@@ -47,7 +42,7 @@ const AllPortfolio = () => {
                                 </button>
                             );
                         })}
-                        <button className="join-item btn" disabled={!data?.hasNext} onClick={() => goToPage(page + 1)}>»</button>
+                        <button className="join-item btn" disabled={!portfolios?.hasNext} onClick={() => goToPage(page + 1)}>»</button>
                     </div>
                 </>}
         </>
