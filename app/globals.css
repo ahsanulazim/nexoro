@@ -9,6 +9,8 @@
   --color-main: hsl(273, 100%, 50%);
   --color-main-dark: hsl(273, 100%, 40%);
   --color-main-light: hsl(273, 100%, 70%);
+  --color-deep-purple: hsl(261, 35%, 15%);
+  --color-medium-purple: hsl(260, 36%, 22%);
   --breakpoint-xs: 480px;
   --animate-gradient: gradient 5s ease infinite;
 }
