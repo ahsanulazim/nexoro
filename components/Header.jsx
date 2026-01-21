@@ -22,8 +22,8 @@ export default function Header({ children }) {
       link: "/articles",
     },
     {
-      title: "About",
-      link: "/about-us",
+      title: "Portfolio",
+      link: "/portfolio",
     },
   ];
 

@@ -149,7 +149,7 @@ const HeroTwo = () => {
                   Get Started <IoArrowForwardCircle className="size-8 sm:size-11" />
                 </motion.button>
               </Link>
-              <Link href="/#portfolio">
+              <Link href="/portfolio">
                 <motion.button variants={buttonVariant} initial="hidden" animate={badgeControl} className="btn sm:btn-lg btn-link no-underline text-white hover:text-main shadow-none portBtn">
                   Portfolio <IoIosArrowForward className="size-5 text-main" />
                 </motion.button>

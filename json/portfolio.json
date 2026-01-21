@@ -1,26 +1,32 @@
 [
   {
-    "title": "Facebook Ads Campaigns",
-    "image": "/assets/portfolio/01.jpg"
+    "title": "Facebook Ads Management",
+    "image": "/assets/portfolio/01.jpg",
+    "slug": "facebook-ads-management"
   },
   {
     "title": "Google Ads Management",
-    "image": "/assets/portfolio/06.jpg"
+    "image": "/assets/portfolio/06.jpg",
+    "slug": "google-ads-management"
   },
   {
     "title": "SEO Optimization",
-    "image": "/assets/portfolio/07.jpg"
+    "image": "/assets/portfolio/07.jpg",
+    "slug": "seo-optimization"
   },
   {
     "title": "YouTube SEO & Thumbnails",
-    "image": "/assets/portfolio/04.jpg"
+    "image": "/assets/portfolio/04.jpg",
+    "slug": "youtube-seo-thumbnails"
   },
   {
     "title": "Social Media Post Design",
-    "image": "/assets/portfolio/03.jpg"
+    "image": "/assets/portfolio/03.jpg",
+    "slug": "social-media-post-design"
   },
   {
     "title": "Logo & Branding",
-    "image": "/assets/portfolio/05.jpg"
+    "image": "/assets/portfolio/05.jpg",
+    "slug": "logo-branding"
   }
 ]

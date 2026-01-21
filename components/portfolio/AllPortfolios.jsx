@@ -1,28 +1,33 @@
 'use client'
+
+import { fetchPortfolioFrontend, fetchPortfolios } from "@/api/fetchPortfolios";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
-import { fetchPortfolios } from "@/api/fetchPortfolios";
-import PortfolioCard from "./PortfolioCard";
+import PortfolioCard from "../dashboard/portfolio/PortfolioCard";
+import PortfolioSkeleton from "./PortfolioSkeleton";
 
-const AllPortfolio = () => {
+const AllPortfolios = () => {
 
     const router = useRouter();
     const searchParams = useSearchParams();
     const page = Number(searchParams.get("page") || 1);
+    const category = searchParams.get("category") || "";
     const { data: portfolios, isLoading } = useQuery({
-        queryKey: ["portfolios", page],
-        queryFn: fetchPortfolios,
+        queryKey: ["portfolios", page, category],
+        queryFn: fetchPortfolioFrontend,
         keepPreviousData: true,
     });
 
     const goToPage = (pageNum) => {
-        router.push(`/dashboard/portfolio?page=${pageNum}`);
+        router.push(`/portfolio?page=${pageNum}`);
     }
 
     return (
         <>
-            <div className="grid grid-cols-5 bg-base-300 p-5 rounded-xl gap-5">
-                {isLoading ? <p>Loading...</p> : !portfolios || portfolios.portfolios.length === 0 ? <p className="text-center">No Portfolio has been added yet</p> : portfolios.portfolios.map((port) => <PortfolioCard client={false} key={port._id} portfolio={port} />)}
+            <div className="grid sm:grid-cols-2 bg-base-300 p-5 rounded-xl gap-5">
+                {isLoading ? Array.from({ length: 12 }).map((_, index) => (
+                    <PortfolioSkeleton key={index} />
+                )) : !portfolios || portfolios.portfolios.length === 0 ? <p className="text-center">No Portfolio has been added yet</p> : portfolios.portfolios.map((port) => <PortfolioCard client={true} key={port._id} portfolio={port} />)}
             </div>
             {isLoading ? <p>Loading...</p> : !portfolios || portfolios.portfolios.length === 0 ? <></> :
                 <>
@@ -49,4 +54,4 @@ const AllPortfolio = () => {
     )
 }
 
-export default AllPortfolio
+export default AllPortfolios

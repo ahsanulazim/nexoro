@@ -23,9 +23,16 @@ export const postPortfolio = async (portfolioData) => {
 
 export const fetchPortfolios = async ({ queryKey }) => {
 
-    const [_key, page] = queryKey
+    const [_key, page, category] = queryKey
 
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/portfolio/allPortfolios?page=${page}&limit=6`, {
+    const url = new URL(`${process.env.NEXT_PUBLIC_API_BASE}/portfolio/allPortfolios`);
+    url.searchParams.append("page", page);
+    url.searchParams.append("limit", 6);
+    if (category) {
+        url.searchParams.append("category", category);
+    }
+
+    const res = await fetch(url.toString(), {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
@@ -39,11 +46,25 @@ export const fetchPortfolios = async ({ queryKey }) => {
     return res.json();
 }
 
-export const fetchBlogsFrontend = async ({ queryKey }) => {
+export const fetchCategories = async () => {
+
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/portfolio/categories`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+        },
+    });
+    if (!res.ok) {
+        throw new Error("Failed to Get Categories");
+    }
+    return res.json();
+}
+
+export const fetchPortfolioFrontend = async ({ queryKey }) => {
 
     const [_key, page] = queryKey
 
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/blogs/allBlogs?page=${page}&limit=8`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/portfolio/allPortfolios?page=${page}&limit=12`, {
         method: "GET",
         headers: {
             "Content-Type": "application/json",

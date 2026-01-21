@@ -22,6 +22,23 @@ const Footer = () => {
               />
             </Link>
             <p>Creative strategy that drives real results</p>
+            <div className="grid grid-flow-col gap-4 mt-2">
+              <a href="http://facebook.com/nexorosolution">
+                <FaFacebook className="size-6 hover:text-main" />
+              </a>
+              <a href="https://www.instagram.com/nexorosolution">
+                <FaInstagram className="size-6 hover:text-main" />
+              </a>
+              <a href="https://www.upwork.com/agencies/1948679868712020249">
+                <FaUpwork className="size-6 hover:text-main" />
+              </a>
+              <a href="https://www.threads.com/@nexorosolution">
+                <FaThreads className="size-6 hover:text-main" />
+              </a>
+              <a href="https://www.tiktok.com/@nexoro.solution">
+                <FaTiktok className="size-6 hover:text-main" />
+              </a>
+            </div>
           </aside>
           <nav>
             <h6 className="footer-title">Quick Links</h6>
@@ -31,6 +48,15 @@ const Footer = () => {
             <Link href="/pricing" className="link link-hover">
               Pricing
             </Link>
+            <Link href="/articles" className="link link-hover">
+              Articles
+            </Link>
+            <Link href="/portfolio" className="link link-hover">
+              Portfolio
+            </Link>
+          </nav>
+          <nav>
+            <h6 className="footer-title">Company</h6>
             <Link href="/about-us" className="link link-hover">
               About us
             </Link>
@@ -51,26 +77,6 @@ const Footer = () => {
               contact@nexorosolution.com
             </a>
             <p>Khulna, Bagerhat-9300</p>
-          </nav>
-          <nav>
-            <h6 className="footer-title">Social</h6>
-            <div className="grid grid-flow-col gap-4">
-              <a href="http://facebook.com/nexorosolution">
-                <FaFacebook className="size-6 hover:text-main" />
-              </a>
-              <a href="https://www.instagram.com/nexorosolution">
-                <FaInstagram className="size-6 hover:text-main" />
-              </a>
-              <a href="https://www.upwork.com/agencies/1948679868712020249">
-                <FaUpwork className="size-6 hover:text-main" />
-              </a>
-              <a href="https://www.threads.com/@nexorosolution">
-                <FaThreads className="size-6 hover:text-main" />
-              </a>
-              <a href="https://www.tiktok.com/@nexoro.solution">
-                <FaTiktok className="size-6 hover:text-main" />
-              </a>
-            </div>
           </nav>
         </div>
       </footer>

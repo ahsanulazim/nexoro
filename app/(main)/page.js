@@ -14,7 +14,7 @@ export default function page() {
       {/* <Services /> */}
       <Portfolio />
       <Teams />
-      <PreviousWork />
+      {/* <PreviousWork /> */}
       <Contact />
       <Review />
     </main>

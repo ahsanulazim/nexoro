@@ -48,7 +48,7 @@ export default function Navbar() {
               <Link href="/articles">Articles</Link>
             </li>
             <li>
-              <Link href="/about-us">About</Link>
+              <Link href="/portfolio">Portfolio</Link>
             </li>
             <li className="dots-before dots-after">
               <Link href="/login">Account</Link>
