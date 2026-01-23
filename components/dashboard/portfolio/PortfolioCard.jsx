@@ -42,7 +42,7 @@ const PortfolioCard = ({ portfolio, client }) => {
                     src={portfolio.image}
                     alt={portfolio.title} />
             </Link>
-            <div className="card-body">
+            <div className="card-body bg-base-300">
                 <Link href={`/dashboard/portfolio/${portfolio.slug}`} className="card-body p-0 gap-1">
                     <div className="badge badge-success">{portfolio.service.title}</div>
                     <h2 className="card-title text-lg xs:text-xl line-clamp-1">{portfolio.title}</h2>

@@ -21,7 +21,7 @@ const AllPortfolio = () => {
 
     return (
         <>
-            <div className="grid grid-cols-5 bg-base-300 p-5 rounded-xl gap-5">
+            <div className="grid grid-cols-3 rounded-xl gap-5">
                 {isLoading ? <p>Loading...</p> : !portfolios || portfolios.portfolios.length === 0 ? <p className="text-center">No Portfolio has been added yet</p> : portfolios.portfolios.map((port) => <PortfolioCard client={false} key={port._id} portfolio={port} />)}
             </div>
             {isLoading ? <p>Loading...</p> : !portfolios || portfolios.portfolios.length === 0 ? <></> :

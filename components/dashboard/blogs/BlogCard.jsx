@@ -1,13 +1,11 @@
 import { LuCalendar, LuHeart, LuMessageCircle, LuTrash2 } from "react-icons/lu"
-import DOMPurify from "isomorphic-dompurify"
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { deleteBlog } from "@/api/fetchBlogs";
 import Link from "next/link";
+import parse from 'html-react-parser';
 
 const BlogCard = ({ blog }) => {
-
-    const clean = DOMPurify.sanitize(blog?.content, { USE_PROFILES: { html: true } });
 
     const queryClient = useQueryClient();
 
@@ -45,7 +43,9 @@ const BlogCard = ({ blog }) => {
                         <h2 className="card-title text-xl line-clamp-1">{blog.title}</h2>
                         <p className="whitespace-nowrap">by <span className="link link-hover link-info">{blog.author}</span></p>
                     </div>
-                    <p className="line-clamp-2" dangerouslySetInnerHTML={{ __html: clean }} />
+                    <p className="line-clamp-2" >
+                        {blog.description}
+                    </p>
                 </Link>
                 <div>
                     <button className="btn btn-error" onClick={() => mutation.mutate({ id: blog._id, public_id: blog.public_id })} disabled={mutation.isPending}><LuTrash2 />Delete</button>

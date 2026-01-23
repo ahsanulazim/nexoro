@@ -1,6 +1,6 @@
 "use client";
 
-import { fetchUsers } from "@/api/fetchUsers";
+import { fetchUsers, getMembers } from "@/api/fetchUsers";
 import DashBread from "@/components/dashboard/DashBread";
 import ClientTable from "@/components/dashboard/users/ClientTable";
 import Loader from "@/components/ui/Loader";
@@ -19,6 +19,14 @@ const Users = () => {
     queryFn: fetchUsers,
     enabled: !!user,
   });
+
+  const { data: members, isLoading: membersLoading } = useQuery({
+    queryKey: ["members", user?.uid],
+    queryFn: getMembers,
+  });
+
+  console.log(members);
+
 
   useEffect(() => {
     if (!loading && !user) {
@@ -41,7 +49,8 @@ const Users = () => {
         <DashBread title="Users" />
         <h1 className="text-4xl font-semibold">Users</h1>
       </section>
-      <section><ClientTable users={users} /></section>
+      <section><ClientTable users={members} customer={false} /></section>
+      <section><ClientTable users={users} customer={true} /></section>
     </main>
   );
 };
