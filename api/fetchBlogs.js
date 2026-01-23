@@ -39,6 +39,22 @@ export const fetchBlogs = async ({ queryKey }) => {
     return res.json();
 }
 
+export const fetchLatestBlogs = async () => {
+
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/blogs/latestBlogs`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+        },
+    });
+
+    if (!res.ok) {
+        throw new Error("Failed to Get Latest Blogs");
+    }
+
+    return res.json();
+}
+
 export const fetchBlogsFrontend = async ({ queryKey }) => {
 
     const [_key, page] = queryKey
