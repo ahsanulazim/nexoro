@@ -12,7 +12,7 @@ const page = async ({ params }) => {
             <TitleBanner subtitle="Portfolio">{portfolioData.title}</TitleBanner>
             <div className="max-w-[1426px] mx-auto px-5 py-10 sm:py-20">
                 <div className="mb-10 gap-5 items-start">
-                    <div className="bg-base-300 rounded-xl overflow-hidden p-6">
+                    <div className="overflow-hidden">
                         <h1 className="text-3xl xs:text-5xl font-semibold">{portfolioData.title}</h1>
                         <h2 className="text-xl xs:text-3xl font-semibold">{portfolioData.description}</h2>
                         <div className="divider"></div>

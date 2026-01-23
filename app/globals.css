@@ -101,7 +101,7 @@
 /* blog CSS */
 
 .blog-content p {
-  @apply mb-4;
+  @apply mb-4 last:mb-0;
 }
 
 .blog-content h1 {
@@ -114,6 +114,10 @@
 
 .blog-content ul {
   @apply list-disc list-inside mb-4;
+}
+
+.blog-content img {
+  @apply rounded-lg
 }
 
 .blog-content ol {
