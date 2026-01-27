@@ -21,7 +21,7 @@ import { useContext } from "react";
 import { MyContext } from "@/context/MyProvider";
 
 const DashDrawer = ({ children }) => {
-  const { isAdmin } = useContext(MyContext);
+  const { isAdmin, isEmployee, isMember } = useContext(MyContext);
 
   return (
     <div className="drawer lg:drawer-open">
@@ -54,7 +54,7 @@ const DashDrawer = ({ children }) => {
                 <span className="is-drawer-close:hidden">Dashboard</span>
               </Link>
             </li>
-            {isAdmin && (
+            {isAdmin || isMember ? (
               <>
                 <li>
                   <Link
@@ -66,16 +66,7 @@ const DashDrawer = ({ children }) => {
                     <span className="is-drawer-close:hidden">Blog</span>
                   </Link>
                 </li>
-                <li>
-                  <Link
-                    href="/dashboard/sliders"
-                    className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
-                    data-tip="Sliders"
-                  >
-                    <LuGalleryThumbnails className="my-1.5 inline-block size-4" />
-                    <span className="is-drawer-close:hidden">Sliders</span>
-                  </Link>
-                </li>
+
                 <li>
                   <button
                     className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
@@ -129,22 +120,36 @@ const DashDrawer = ({ children }) => {
                 </li>
                 <li>
                   <Link
-                    href="/dashboard/clients"
-                    className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
-                    data-tip="Clients"
-                  >
-                    <LuStore className="my-1.5 inline-block size-4" />
-                    <span className="is-drawer-close:hidden">Clients</span>
-                  </Link>
-                </li>
-                <li>
-                  <Link
                     href="/dashboard/review"
                     className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
                     data-tip="Review"
                   >
                     <LuStar className="my-1.5 inline-block size-4" />
                     <span className="is-drawer-close:hidden">Review</span>
+                  </Link>
+                </li>
+              </>
+            ) : null}
+            {isAdmin &&
+              <>
+                <li>
+                  <Link
+                    href="/dashboard/sliders"
+                    className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                    data-tip="Sliders"
+                  >
+                    <LuGalleryThumbnails className="my-1.5 inline-block size-4" />
+                    <span className="is-drawer-close:hidden">Sliders</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/dashboard/clients"
+                    className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                    data-tip="Clients"
+                  >
+                    <LuStore className="my-1.5 inline-block size-4" />
+                    <span className="is-drawer-close:hidden">Clients</span>
                   </Link>
                 </li>
                 <li>
@@ -168,7 +173,8 @@ const DashDrawer = ({ children }) => {
                   </Link>
                 </li>
               </>
-            )}
+
+            }
             {/* List item */}
             <li>
               <Link

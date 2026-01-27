@@ -8,6 +8,8 @@ export const MyContext = createContext();
 
 const MyProvider = ({ children }) => {
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isEmployee, setIsEmployee] = useState(false);
+  const [isMember, setIsMember] = useState(false);
   const [user] = useAuthState(auth);
 
   useEffect(() => {
@@ -18,14 +20,21 @@ const MyProvider = ({ children }) => {
       .then((data) => {
         if (data?.user?.role === "admin") {
           setIsAdmin(true);
-        } else {
+        } else if (data?.user?.role === "employee") {
+          setIsEmployee(true);
+        } else if (data?.user?.role === "member") {
+          setIsMember(true);
+        }
+        else {
           setIsAdmin(false);
+          setIsEmployee(false);
+          setIsMember(false);
         }
       });
   }, [user]);
 
   const data = {
-    isAdmin,
+    isAdmin, isEmployee, isMember
   };
 
   return <MyContext value={data}>{children}</MyContext>;
