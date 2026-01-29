@@ -4,14 +4,16 @@ import { fetchUsers, getMembers } from "@/api/fetchUsers";
 import DashBread from "@/components/dashboard/DashBread";
 import ClientTable from "@/components/dashboard/users/ClientTable";
 import Loader from "@/components/ui/Loader";
+import { MyContext } from "@/context/MyProvider";
 import auth from "@/firebase/firebase.config";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useContext, useEffect } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 
 const Users = () => {
   const [user, loading] = useAuthState(auth);
+  const { isAdmin } = useContext(MyContext)
   const router = useRouter();
 
   const { data: users, isLoading, isError } = useQuery({
@@ -38,7 +40,7 @@ const Users = () => {
     return <Loader />;
   }
 
-  if (isError) {
+  if (!isAdmin || isError) {
     router.push("/dashboard");
     return null;
   }

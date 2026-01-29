@@ -1,17 +1,17 @@
 [
   {
     "title": "Facebook Ads Management",
-    "image": "/assets/portfolio/01.jpg",
+    "image": "/assets/portfolio/05.jpg",
     "slug": "facebook-ads-management"
   },
   {
     "title": "Google Ads Management",
-    "image": "/assets/portfolio/06.jpg",
+    "image": "/assets/portfolio/01.jpg",
     "slug": "google-ads-management"
   },
   {
     "title": "SEO Optimization",
-    "image": "/assets/portfolio/07.jpg",
+    "image": "/assets/portfolio/03.jpg",
     "slug": "seo-optimization"
   },
   {
@@ -26,7 +26,7 @@
   },
   {
     "title": "Logo & Branding",
-    "image": "/assets/portfolio/05.jpg",
+    "image": "/assets/portfolio/06.jpg",
     "slug": "logo-branding"
   }
 ]
