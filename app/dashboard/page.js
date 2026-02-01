@@ -1,7 +1,7 @@
+import DashboardUi from "@/components/dashboard/DashboardUi";
+
 export default function page() {
     return (
-        <div>
-            dashboard
-        </div>
+        <DashboardUi />
     )
 }

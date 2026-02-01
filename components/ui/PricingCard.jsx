@@ -1,4 +1,7 @@
-const PricingCard = ({ title, price, benefits }) => {
+import Link from "next/link";
+
+const PricingCard = ({ title, price, benefits, id, slug }) => {
+
   return (
     <div className="card bg-base-300 shadow-sm">
       <div className="card-body">
@@ -8,7 +11,7 @@ const PricingCard = ({ title, price, benefits }) => {
           <span className="font-semibold text-3xl lg:text-xl">${price}</span>
         </div>
         <div className="mt-4 xl:mt-6">
-          <button className="btn btn-block btn-primary rounded-full border-none bg-linear-to-r from-main via-main-light to-main bg-[length:200%_200%] animate-gradient">Choose Plan</button>
+          <Link href={`/cart/${slug}/${id}`}><button className="btn btn-block btn-primary rounded-full border-none bg-linear-to-r from-main via-main-light to-main bg-size-[200%_200%] animate-gradient">Choose Plan</button></Link>
         </div>
         <ul className="mt-6 flex flex-col gap-2 text-xs grow">
           {benefits.map((benefit, i) => (

@@ -85,6 +85,8 @@ const Plans = () => {
               key={plan.id}
               title={plan.planName}
               price={plan.price}
+              id={plan.id}
+              slug={selectedSlug}
               benefits={plan.benefits.map((b) => b.value)}
             />
           ))
