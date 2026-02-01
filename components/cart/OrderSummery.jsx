@@ -7,7 +7,7 @@ import { useAuthState } from "react-firebase-hooks/auth";
 
 const OrderSummery = ({ className, price, slug, id }) => {
     const router = useRouter();
-    const [user, loading] = useAuthState(auth);
+    const [user] = useAuthState(auth);
 
     return (
         <div className={`lg:flex-none lg:max-w-sm w-full bg-base-300 p-5 rounded-box border border-base-200 ${className}`}>
