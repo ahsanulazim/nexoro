@@ -27,8 +27,6 @@ const Users = () => {
     queryFn: getMembers,
   });
 
-  console.log(members);
-
 
   useEffect(() => {
     if (!loading && !user) {

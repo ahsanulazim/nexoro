@@ -1,15 +1,9 @@
 import DashBread from "@/components/dashboard/DashBread"
 import MsgFull from "@/components/dashboard/inbox/MsgFull";
+import { notFound } from "next/navigation";
 
 const page = async ({ params }) => {
     const { message } = await params;
-
-    const read = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/messages/${message}`, {
-        method: "PATCH",
-        headers: {
-            "Content-Type": "application/json",
-        },
-    });
 
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/messages/${message}`, {
         method: "GET",
@@ -18,6 +12,10 @@ const page = async ({ params }) => {
         },
     });
     const msg = await res.json();
+
+    if (!msg) {
+        return notFound();
+    }
 
     return (
         <>

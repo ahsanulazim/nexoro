@@ -68,13 +68,14 @@ const DashDrawer = ({ children }) => {
                 </li>
 
                 <li>
-                  <button
+                  <Link
+                    href="/dashboard/order"
                     className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
                     data-tip="Orders"
                   >
                     <LuPackage className="my-1.5 inline-block size-4" />
                     <span className="is-drawer-close:hidden">Orders</span>
-                  </button>
+                  </Link>
                 </li>
 
                 <li>

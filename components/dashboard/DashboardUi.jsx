@@ -31,7 +31,7 @@ const DashboardUi = () => {
         {
             id: 3,
             title: "Earning",
-            count: 200000,
+            count: 2000,
             comparison: 40,
             grow: true,
             icon: <LuDollarSign />
@@ -41,7 +41,7 @@ const DashboardUi = () => {
     return (
         <main>
             <section>
-                <div className="grid grid-cols-4 gap-5">
+                <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-5">
                     {statuses.map((status) =>
                         <StatsCard key={status.id} status={status} />
                     )}
