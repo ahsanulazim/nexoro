@@ -12,9 +12,7 @@ const More = () => {
     const { data: services, isLoading } = useQuery({
         queryKey: ["services"],
         queryFn: fetchServices,
-    });
-
-    console.log(services);
+    })
 
     const handleChange = (e, service) => {
         const selectedPlan = service.plans.find(

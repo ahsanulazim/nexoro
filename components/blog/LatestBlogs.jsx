@@ -13,8 +13,6 @@ const LatestBlogs = () => {
         queryFn: fetchLatestBlogs
     });
 
-    console.log(latestBlogs);
-
 
     return (
         <div className="bg-base-300 p-6 rounded-xl">

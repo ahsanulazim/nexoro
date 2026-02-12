@@ -5,7 +5,7 @@ const Blog = async ({ params }) => {
 
     const { blog } = await params;
 
-    const blogData = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/blogs/${blog}`).then(res => res.json())
+    const blogData = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/blogs/getBlog/${blog}`).then(res => res.json())
 
 
     return (

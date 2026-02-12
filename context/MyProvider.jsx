@@ -15,7 +15,7 @@ const MyProvider = ({ children }) => {
   useEffect(() => {
     if (!user?.email) return;
     const email = user?.email;
-    fetch(`${process.env.NEXT_PUBLIC_API_BASE}/users/${email}`)
+    fetch(`${process.env.NEXT_PUBLIC_API_BASE}/users/getUser/${email}`)
       .then((res) => res.json())
       .then((data) => {
         if (data?.user?.role === "admin") {
