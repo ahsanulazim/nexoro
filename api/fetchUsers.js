@@ -43,7 +43,7 @@ export const getMembers = async () => {
 
 //promote user
 export const promoteUser = async (email) => {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/users/promote/${email}`, { method: "PUT" })
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/users/promote?email=${email}`, { method: "PUT" })
     const user = await res.json();
 
     if (!res.ok) {
@@ -54,7 +54,7 @@ export const promoteUser = async (email) => {
 
 //demote member
 export const demoteMember = async (email) => {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/users/demote/${email}`, { method: "PUT" });
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/users/demote?email=${email}`, { method: "PUT" });
     const member = await res.json();
 
     if (!res.ok) {
@@ -69,7 +69,7 @@ export const deleteUser = async (email) => {
     if (!user) throw new Error("No authenticated user");
 
     const token = await user.getIdToken();
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/users/${email}`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/users/delete?email=${email}`, {
         method: "DELETE",
         headers: {
             "Content-Type": "application/json",
