@@ -7,7 +7,7 @@ import { notFound } from "next/navigation"
 const Checkout = async ({ params }) => {
 
     const { slug, id } = await params;
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/cart/${slug}/plans/${id}`);
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/cart/checkout?slug=${slug}&planId=${id}`);
     const plan = await res.json();
 
     if (!plan) {

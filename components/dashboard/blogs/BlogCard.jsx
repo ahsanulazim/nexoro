@@ -3,7 +3,6 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { deleteBlog } from "@/api/fetchBlogs";
 import Link from "next/link";
-import parse from 'html-react-parser';
 
 const BlogCard = ({ blog }) => {
 
@@ -14,7 +13,7 @@ const BlogCard = ({ blog }) => {
         onMutate: async ({ id }) => {
             await queryClient.cancelQueries({ queryKey: ["blogs"] });
             const previousBlogs = queryClient.getQueryData(["blogs"]);
-            queryClient.setQueryData(["blogs"], (oldBlogs) =>
+            queryClient.setQueryData(["blogs"], (oldBlogs = []) =>
                 oldBlogs.filter((blog) => blog._id !== id)
             );
             return { previousBlogs };
@@ -48,7 +47,7 @@ const BlogCard = ({ blog }) => {
                     </p>
                 </Link>
                 <div>
-                    <button className="btn btn-error" onClick={() => mutation.mutate({ id: blog._id, public_id: blog.public_id })} disabled={mutation.isPending}><LuTrash2 />Delete</button>
+                    <button className="btn btn-error" onClick={() => mutation.mutate({ id: blog._id, public_id: blog.public_id })} disabled={mutation.isPending}>{mutation.isPending ? <><span className="loading loading-spinner"></span> Deleting</> : <><LuTrash2 /> Delete</>}</button>
                     <button className="btn btn-ghost btn-secondary"><LuHeart />Like</button>
                     <button className="btn btn-ghost btn-info"><LuMessageCircle />Comments</button>
                     <button className="btn btn-ghost btn-info" disabled><LuCalendar />{new Date(blog.added).toLocaleString("en-BD", {
