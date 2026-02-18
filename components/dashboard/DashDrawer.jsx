@@ -69,7 +69,7 @@ const DashDrawer = ({ children }) => {
 
                 <li>
                   <Link
-                    href="/dashboard/order"
+                    href="/dashboard/orders"
                     className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
                     data-tip="Orders"
                   >
