@@ -104,7 +104,7 @@ const Works = () => {
                     {isLoading ? Array.from({ length: 6 }).map((_, i) => (
                         <PortSkeleton key={i} />
                     )) : portfolios.portfolios.map((port) =>
-                        <PortCarousel key={port._id} port={port} />
+                        port.carousel && <PortCarousel key={port._id} port={port} />
                     )}
                 </Carousel>
             </div>
