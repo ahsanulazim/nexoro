@@ -1,15 +1,13 @@
 'use client'
 
 import Link from "next/link"
-import CatModal from "./CatModal"
 import { Controller, useForm } from "react-hook-form"
-import { LuArrowLeft, LuCirclePlus } from "react-icons/lu"
+import { LuArrowLeft } from "react-icons/lu"
 import ReactQuill from "react-quill-new"
-import { useRef } from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "react-toastify"
-import { updateBlog } from "@/api/fetchBlogs"
 import { fetchServices } from "@/api/fetchServices"
+import { updatePortfolio } from "@/api/fetchPortfolios"
 
 const EditPortfolio = ({ work }) => {
 
@@ -23,10 +21,10 @@ const EditPortfolio = ({ work }) => {
     const queryClient = useQueryClient();
 
     const mutation = useMutation({
-        mutationFn: ({ id, blogData }) => updateBlog(id, blogData),
+        mutationFn: ({ id, portfolioData }) => updatePortfolio(id, portfolioData),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["blogs"] });
-            toast.success("Blog Updated successfully");
+            queryClient.invalidateQueries({ queryKey: ["portfolios"] });
+            toast.success("Portfolio Updated successfully");
         },
         onError: (error) => {
             toast.error(error.message);
@@ -38,6 +36,7 @@ const EditPortfolio = ({ work }) => {
             portfolioTitle: work.title,
             portfolioDescription: work.description,
             content: work.content,
+            carousel: work.carousel,
             service: work.serviceId,
             visibility: `${work.visibility}`,
             image: null,
@@ -45,11 +44,8 @@ const EditPortfolio = ({ work }) => {
         }
     })
 
-    const catRef = useRef();
-
     const onSubmit = (data) => {
-        mutation.mutate({ id: blog._id, blogData: data })
-
+        mutation.mutate({ id: work._id, portfolioData: data })
     }
 
     return (
@@ -79,6 +75,17 @@ const EditPortfolio = ({ work }) => {
                     <div className="fieldset bg-base-200 border-base-300 rounded-box border p-5">
                         <label className="label">Author</label>
                         <input type="text" className="input w-full" placeholder="Author Name" disabled {...register("author")} />
+                    </div>
+
+                    <div className="fieldset bg-base-200 border-base-300 rounded-box border p-5">
+                        <label className="label" htmlFor="carousel">View on Homepage<span className="text-red-600">*</span>
+                        </label>
+                        <select className="select w-full" defaultValue="" {...register("carousel", { required: "View on Homepage is required" })}>
+                            <option value="" disabled={true}>Select Option</option>
+                            <option value={true}>Yes</option>
+                            <option value={false}>No</option>
+                        </select>
+                        {errors.carousel && <p className="text-red-600">{errors.carousel.message}</p>}
                     </div>
 
                     <div className="fieldset bg-base-200 border-base-300 rounded-box border p-5">

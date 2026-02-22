@@ -4,6 +4,7 @@ export const postPortfolio = async (portfolioData) => {
     portfolioInfo.append("title", portfolioData.portfolioTitle);
     portfolioInfo.append("description", portfolioData.portfolioDescription);
     portfolioInfo.append("content", portfolioData.content);
+    portfolioInfo.append("carousel", portfolioData.carousel);
     portfolioInfo.append("service", portfolioData.service);
     portfolioInfo.append("visibility", portfolioData.visibility);
     portfolioInfo.append("folder", "portfolio");
@@ -97,6 +98,7 @@ export const updatePortfolio = async (id, portfolioData) => {
     portfolioInfo.append("slug", portfolioData.slug);
     portfolioInfo.append("description", portfolioData.portfolioDescription);
     portfolioInfo.append("content", portfolioData.content.replace(/&nbsp;/g, " "));
+    portfolioInfo.append("carousel", portfolioData.carousel);
     portfolioInfo.append("service", portfolioData.service);
     portfolioInfo.append("visibility", portfolioData.visibility);
     portfolioInfo.append("folder", "portfolio");

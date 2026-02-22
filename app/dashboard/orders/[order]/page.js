@@ -6,9 +6,6 @@ const Order = async ({ params }) => {
     const { order } = await params;
     const orderData = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/orders/getOrder/${order}`).then(res => res.json());
 
-    console.log(orderData);
-
-
     return (
         <main>
             <section className="">

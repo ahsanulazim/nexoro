@@ -25,6 +25,7 @@ const AddPortfolio = () => {
             portfolioTitle: "",
             portfolioDescription: "",
             content: "",
+            carousel: "",
             service: "",
             visibility: "",
             image: null,
@@ -115,6 +116,16 @@ const AddPortfolio = () => {
                         <input type="text" className="input w-full" placeholder="Author Name" disabled {...register("author")} />
                     </div>
 
+                    <div className="fieldset bg-base-200 border-base-300 rounded-box border p-5">
+                        <label className="label" htmlFor="carousel">View on Homepage<span className="text-red-600">*</span>
+                        </label>
+                        <select className="select w-full" defaultValue="" {...register("carousel", { required: "View on Homepage is required" })}>
+                            <option value="" disabled={true}>Select Option</option>
+                            <option value={true}>Yes</option>
+                            <option value={false}>No</option>
+                        </select>
+                        {errors.carousel && <p className="text-red-600">{errors.carousel.message}</p>}
+                    </div>
                     <div className="fieldset bg-base-200 border-base-300 rounded-box border p-5">
                         <label className="label" htmlFor="service">Select a Service<span className="text-red-600">*</span>
                         </label>
