@@ -4,6 +4,10 @@ import "react-multi-carousel/lib/styles.css";
 import { useAnimation, useInView, motion } from "motion/react";
 import GradText from "../ui/GradText";
 import { useEffect, useRef } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { fetchPortfolios } from "@/api/fetchPortfolios";
+import PortCarousel from "../PortCarousel";
+import PortSkeleton from "../skeleton/PortSkeleton";
 
 const portVariant = {
     hidden: { opacity: 0, y: 50 },
@@ -29,6 +33,15 @@ const Works = () => {
         sequence();
     }, [inView, portControls]);
 
+    //fetch portfolio data and map through it to show in carousel
+    const page = 1;
+    const { data: portfolios, isLoading } = useQuery({
+        queryKey: ["portfolios", page],
+        queryFn: fetchPortfolios,
+        keepPreviousData: true,
+    });
+
+
     return (
         <section ref={workRef}>
             <div className="max-w-[1426px] max-lg:py-10 px-5 py-20 mx-auto">
@@ -41,6 +54,7 @@ const Works = () => {
                     additionalTransfrom={0}
                     arrows={false}
                     autoPlaySpeed={3000}
+                    autoPlay={true}
                     centerMode={false}
                     className=""
                     containerClass="container"
@@ -87,27 +101,11 @@ const Works = () => {
                     slidesToSlide={1}
                     swipeable
                 >
-                    <div className="relative">
-                        <img
-                            src="https://images.unsplash.com/photo-1549989476-69a92fa57c36?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=60"
-                            className="w-full m-auto rounded-xl"
-                        />
-                        <div className=" sm:absolute w-full sm:bottom-0 sm:p-6 text-gray-900 mt-5">
-                            <div className="bg-white rounded-lg p-5 gap-5 lg:p-10 flex flex-col lg:flex-row lg:items-center justify-between sm:shadow-lg">
-                                <h2 className="text-3xl font-bold">Branding Development Kit</h2>
-                                <div className="flex max-xs:flex-col xs:items-center gap-3 xs:gap-10">
-                                    <div>
-                                        <h3 className="opacity-50">Published Date</h3>
-                                        <p className="font-semibold">February 2026</p>
-                                    </div>
-                                    <div>
-                                        <h3 className="opacity-50">Services</h3>
-                                        <p className="font-semibold">Web Design and Development</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    {isLoading ? Array.from({ length: 6 }).map((_, i) => (
+                        <PortSkeleton key={i} />
+                    )) : portfolios.portfolios.map((port) =>
+                        <PortCarousel key={port._id} port={port} />
+                    )}
                 </Carousel>
             </div>
         </section>
