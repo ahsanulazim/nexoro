@@ -1,7 +1,4 @@
-import More from "@/components/cart/More"
 import OrderSummery from "@/components/cart/OrderSummery"
-import FooterYear from "@/components/FooterYear"
-import Link from "next/link"
 import { notFound } from "next/navigation"
 
 const Checkout = async ({ params }) => {
@@ -15,10 +12,7 @@ const Checkout = async ({ params }) => {
     }
 
     return (
-        <main className="min-h-dvh flex flex-col justify-between">
-            <div className="p-5 sm:px-10">
-                <Link href="/" className="block max-w-fit"><img className="w-full max-w-36" src="/assets/nexoro_logo.png" alt="Nexoro Logo" /></Link>
-            </div>
+        <>
             <div className="max-w-6xl mx-auto w-full p-5">
                 <h1 className="text-5xl mb-10">Your Cart</h1>
                 <div className="flex gap-5 items-start">
@@ -35,16 +29,12 @@ const Checkout = async ({ params }) => {
                                 <span>Get up to 20% discount using coupon code <span className="font-bold">&quot;WINTER2026&quot;</span></span>
                             </div>
                         </div>
-                        {/* <div className="bg-base-300 p-5 rounded-box border border-base-200">
-                            <More />
-                        </div> */}
                     </div>
-                    <OrderSummery slug={slug} id={plan.plan.id} price={plan.plan.price} className={"hidden lg:block"} />
+                    <OrderSummery btn={true} slug={slug} id={plan.plan.id} price={plan.plan.price} className={"hidden lg:block"} />
                 </div>
             </div>
-            <FooterYear />
-            <OrderSummery slug={slug} id={plan.plan.id} price={plan.plan.price} className={"sticky bottom-0 left-0 lg:hidden rounded-b-none"} />
-        </main>
+            <OrderSummery btn={true} slug={slug} id={plan.plan.id} price={plan.plan.price} className={"sticky bottom-0 left-0 lg:hidden rounded-b-none"} />
+        </>
     )
 }
 
