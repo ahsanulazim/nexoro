@@ -1,16 +1,43 @@
 "use client";
+import { fetchPaymentRequest } from "@/api/fetchEps";
+import auth from "@/firebase/firebase.config.js";
+import { useMutation } from "@tanstack/react-query";
+import { useAuthState } from "react-firebase-hooks/auth";
 import { useForm } from "react-hook-form";
 import { LuArrowRight } from "react-icons/lu";
+import { toast } from "react-toastify";
 
-const BillingForm = () => {
+const BillingForm = ({ slug, plan }) => {
+  const [user] = useAuthState(auth);
+
+  const mutation = useMutation({
+    mutationFn: fetchPaymentRequest,
+    onSuccess: (data) => {
+      // window.location.href = data.RedirectURL;
+      toast.success("Payment initialized successfully.");
+    },
+    onError: (error) => {
+      toast.error("Failed to initialize payment. Please try again.");
+    },
+  });
+
   const {
     register,
     handleSubmit,
     formState: { errors, isDirty },
-  } = useForm();
+  } = useForm({
+    defaultValues: {
+      fullname: "",
+      email: user?.email || "",
+      phone: "",
+      address: "",
+      city: "",
+      zip: "",
+    },
+  });
 
   const onSubmit = (data) => {
-    console.log(data);
+    mutation.mutate({ slug, plan, ...data });
   };
 
   return (
@@ -29,6 +56,19 @@ const BillingForm = () => {
       {errors.fullname && (
         <p className="text-red-600">{errors.fullname.message}</p>
       )}
+
+      <label htmlFor="email" className="label">
+        Email
+      </label>
+      <input
+        name="email"
+        type="email"
+        className="input w-full"
+        placeholder="ex: john.doe@example.com"
+        {...register("email", { required: "Please add an Email Address" })}
+      />
+
+      {errors.email && <p className="text-red-600">{errors.email.message}</p>}
 
       <label htmlFor="phone" className="label">
         Phone

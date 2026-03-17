@@ -23,7 +23,7 @@ const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/cart/checkout?slug=
                         <div className="bg-base-300 p-5 rounded-box border border-base-200">
                             <h2 className="text-2xl font-semibold flex items-center gap-2"><LuWallet/> Billing Details</h2>
                             <div className="divider"></div>
-                            <BillingForm/>
+                            <BillingForm slug={slug} plan={plan.plan.id} />
                         </div>
                     </div>
                     <OrderSummery btn={false} slug={slug} id={plan.plan.id} price={plan.plan.price} className={"hidden lg:block"} />
