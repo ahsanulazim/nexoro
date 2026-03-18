@@ -1,11 +1,13 @@
 "use client";
+import { fetchCountries } from "@/api/fetchCart";
 import { fetchPaymentRequest } from "@/api/fetchEps";
 import auth from "@/firebase/firebase.config.js";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { LuArrowRight } from "react-icons/lu";
 import { toast } from "react-toastify";
+import Select from "react-select";
 
 const BillingForm = ({ slug, plan }) => {
   const [user] = useAuthState(auth);
@@ -13,7 +15,9 @@ const BillingForm = ({ slug, plan }) => {
   const mutation = useMutation({
     mutationFn: fetchPaymentRequest,
     onSuccess: (data) => {
-      // window.location.href = data.RedirectURL;
+      window.location.href = data.RedirectURL;
+      console.log(data);
+
       toast.success("Payment initialized successfully.");
     },
     onError: (error) => {
@@ -22,8 +26,20 @@ const BillingForm = ({ slug, plan }) => {
   });
 
   const {
+    data: countries,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["countries"],
+    queryFn: fetchCountries,
+    staleTime: 1000 * 60 * 60 * 24,
+    refetchOnWindowFocus: false,
+  });
+
+  const {
     register,
     handleSubmit,
+    control,
     formState: { errors, isDirty },
   } = useForm({
     defaultValues: {
@@ -33,6 +49,7 @@ const BillingForm = ({ slug, plan }) => {
       address: "",
       city: "",
       zip: "",
+      country: "",
     },
   });
 
@@ -97,7 +114,7 @@ const BillingForm = ({ slug, plan }) => {
         <p className="text-red-600">{errors.address.message}</p>
       )}
 
-      <div className="flex gap-5 items-center">
+      <div className="flex max-xs:flex-col xs:gap-5">
         <div className="fieldset flex-1">
           <label htmlFor="city" className="label">
             City
@@ -112,17 +129,79 @@ const BillingForm = ({ slug, plan }) => {
           {errors.city && <p className="text-red-600">{errors.city.message}</p>}
         </div>
         <div className="fieldset flex-1">
+          <label htmlFor="state" className="label">
+            State
+          </label>
+          <input
+            name="state"
+            type="text"
+            className="input w-full"
+            placeholder="ex: Dhaka"
+            {...register("state", { required: "State is required" })}
+          />
+          {errors.state && (
+            <p className="text-red-600">{errors.state.message}</p>
+          )}
+        </div>
+      </div>
+      <div className="flex max-xs:flex-col xs:gap-5">
+        <div className="fieldset flex-1">
           <label htmlFor="zip" className="label">
             Zip code
           </label>
           <input
             name="zip"
             type="text"
-            className="input w-full"
+            className={`input ${errors.zip ? "input-error" : ""} w-full`}
             placeholder="ex: 0000"
             {...register("zip", { required: "Zip Code is required" })}
           />
           {errors.zip && <p className="text-red-600">{errors.zip.message}</p>}
+        </div>
+        <div className="fieldset flex-1">
+          <label htmlFor="country" className="label">
+            Country
+          </label>
+          <Controller
+            name="country"
+            control={control}
+            rules={{ required: "Country is required" }}
+            render={({ field }) => (
+              <Select
+                {...field}
+                options={countries || []}
+                isLoading={isLoading}
+                isSearchable
+                isClearable={true}
+                captureMenuScroll={true}
+                placeholder="Select a Country"
+                classNames={{
+                  control: (state) =>
+                    `!bg-base-100 !border !border-white/25 !rounded-md !p-0.5 ${
+                      errors.country ? "!border-error" : "!border-base-300"
+                    }`,
+                  menu: () =>
+                    "!bg-base-100 !rounded-lg !border !border-base-300",
+                  option: ({ isFocused, isSelected }) =>
+                    `!cursor-pointer ${
+                      isSelected
+                        ? "!bg-primary !text-primary-content"
+                        : isFocused
+                          ? "!bg-base-200"
+                          : ""
+                    }`,
+                  singleValue: () => "!text-base-content",
+                  input: () => "!text-base-content",
+                }}
+                styles={{
+                  control: (base) => ({ ...base, boxShadow: "none" }), // Remove default blue outline
+                }}
+              />
+            )}
+          />
+          {errors.country && (
+            <p className="text-red-600">{errors.country.message}</p>
+          )}
         </div>
       </div>
 
