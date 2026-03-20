@@ -11,6 +11,7 @@ const MyProvider = ({ children }) => {
   const [isEmployee, setIsEmployee] = useState(false);
   const [isMember, setIsMember] = useState(false);
   const [user] = useAuthState(auth);
+  const [cart, setCart] = useState(null);
 
   useEffect(() => {
     if (!user?.email) return;
@@ -24,8 +25,7 @@ const MyProvider = ({ children }) => {
           setIsEmployee(true);
         } else if (data?.user?.role === "member") {
           setIsMember(true);
-        }
-        else {
+        } else {
           setIsAdmin(false);
           setIsEmployee(false);
           setIsMember(false);
@@ -34,7 +34,12 @@ const MyProvider = ({ children }) => {
   }, [user]);
 
   const data = {
-    isAdmin, isEmployee, isMember
+    isAdmin,
+    isEmployee,
+    isMember,
+    cart,
+    setCart,
+    user,
   };
 
   return <MyContext value={data}>{children}</MyContext>;

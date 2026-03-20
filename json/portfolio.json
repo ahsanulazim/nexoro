@@ -1,32 +1,32 @@
 [
   {
-    "title": "Facebook Ads Management",
-    "image": "/assets/portfolio/01.jpg",
-    "slug": "facebook-ads-management"
+    "title": "Ai & Automation",
+    "image": "/assets/services/1.jpeg",
+    "slug": "ai-and-Automation"
   },
   {
-    "title": "Google Ads Management",
-    "image": "/assets/portfolio/02.jpeg",
+    "title": "Cyber Security and Maintenance",
+    "image": "/assets/services/2.jpeg",
     "slug": "google-ads-management"
   },
   {
-    "title": "SEO Optimization",
-    "image": "/assets/portfolio/03.jpg",
-    "slug": "seo-optimization"
+    "title": "Digital Marketing and Growth",
+    "image": "/assets/services/3.jpeg",
+    "slug": "digital-marketing-and-growth"
   },
   {
-    "title": "YouTube SEO & Thumbnails",
-    "image": "/assets/portfolio/04.jpg",
-    "slug": "youtube-seo-thumbnails"
+    "title": "Video Editing and Motion",
+    "image": "/assets/services/4.jpeg",
+    "slug": "video-editing-and-motion"
   },
   {
-    "title": "Social Media Post Design",
-    "image": "/assets/portfolio/05.jpg",
-    "slug": "social-media-post-design"
+    "title": "Brand Identity and Visual Design",
+    "image": "/assets/services/5.jpeg",
+    "slug": "brand-identity-and-visual-design"
   },
   {
-    "title": "Logo & Branding",
-    "image": "/assets/portfolio/06.jpg",
-    "slug": "logo-branding"
+    "title": "Web & App Development",
+    "image": "/assets/services/6.jpeg",
+    "slug": "web-and-app-development"
   }
 ]

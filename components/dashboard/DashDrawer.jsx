@@ -58,34 +58,12 @@ const DashDrawer = ({ children }) => {
               <>
                 <li>
                   <Link
-                    href="/dashboard/blogs"
-                    className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
-                    data-tip="Blog"
-                  >
-                    <LuNotebookPen className="my-1.5 inline-block size-4" />
-                    <span className="is-drawer-close:hidden">Blog</span>
-                  </Link>
-                </li>
-
-                <li>
-                  <Link
                     href="/dashboard/orders"
                     className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
                     data-tip="Orders"
                   >
                     <LuPackage className="my-1.5 inline-block size-4" />
                     <span className="is-drawer-close:hidden">Orders</span>
-                  </Link>
-                </li>
-
-                <li>
-                  <Link
-                    href="/dashboard/portfolio"
-                    className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
-                    data-tip="Portfolio"
-                  >
-                    <LuBookUser className="my-1.5 inline-block size-4" />
-                    <span className="is-drawer-close:hidden">Portfolio</span>
                   </Link>
                 </li>
 
@@ -109,6 +87,41 @@ const DashDrawer = ({ children }) => {
                     <span className="is-drawer-close:hidden">Pricing</span>
                   </Link>
                 </li>
+              </>
+            ) : null}
+            {isAdmin && (
+              <>
+                <li>
+                  <Link
+                    href="/dashboard/blogs"
+                    className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                    data-tip="Blog"
+                  >
+                    <LuNotebookPen className="my-1.5 inline-block size-4" />
+                    <span className="is-drawer-close:hidden">Blog</span>
+                  </Link>
+                </li>
+
+                <li>
+                  <Link
+                    href="/dashboard/portfolio"
+                    className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                    data-tip="Portfolio"
+                  >
+                    <LuBookUser className="my-1.5 inline-block size-4" />
+                    <span className="is-drawer-close:hidden">Portfolio</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/dashboard/sliders"
+                    className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                    data-tip="Sliders"
+                  >
+                    <LuGalleryThumbnails className="my-1.5 inline-block size-4" />
+                    <span className="is-drawer-close:hidden">Sliders</span>
+                  </Link>
+                </li>
                 <li>
                   <Link
                     href="/dashboard/inbox"
@@ -127,20 +140,6 @@ const DashDrawer = ({ children }) => {
                   >
                     <LuStar className="my-1.5 inline-block size-4" />
                     <span className="is-drawer-close:hidden">Review</span>
-                  </Link>
-                </li>
-              </>
-            ) : null}
-            {isAdmin &&
-              <>
-                <li>
-                  <Link
-                    href="/dashboard/sliders"
-                    className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
-                    data-tip="Sliders"
-                  >
-                    <LuGalleryThumbnails className="my-1.5 inline-block size-4" />
-                    <span className="is-drawer-close:hidden">Sliders</span>
                   </Link>
                 </li>
                 <li>
@@ -174,8 +173,7 @@ const DashDrawer = ({ children }) => {
                   </Link>
                 </li>
               </>
-
-            }
+            )}
             {/* List item */}
             <li>
               <Link

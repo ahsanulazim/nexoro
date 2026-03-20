@@ -10,10 +10,10 @@ import { LuArrowRight } from "react-icons/lu";
 import { toast } from "react-toastify";
 
 const OrderSummery = ({ className, price, slug, id, btn }) => {
-  // const router = useRouter();
-  // const [user] = useAuthState(auth);
+  const router = useRouter();
+  const [user] = useAuthState(auth);
 
-  // const queryClient = useQueryClient();
+  const queryClient = useQueryClient();
 
   // const { mutate, isPending } = useMutation({
   //     mutationFn: (data) => createOrder(data.slug, data.id),
@@ -41,7 +41,7 @@ const OrderSummery = ({ className, price, slug, id, btn }) => {
           <div className="divider"></div>
           <p className="text-main-light font-bold mb-5">Have a coupon code?</p>
           {/* <button className="btn btn-primary btn-nexoro-primary w-full" onClick={() => user ? mutate({ slug, id }) : router.push("/register")}>{isPending ? "Processing..." : "Checkout"}</button> */}
-          <Link href={`/cart/${slug}/${id}/checkout`}>
+          <Link href={user ? `/cart/${slug}/${id}/checkout` : "/register"}>
             <button className="btn btn-primary btn-nexoro-primary w-full">
               Continue <LuArrowRight />
             </button>

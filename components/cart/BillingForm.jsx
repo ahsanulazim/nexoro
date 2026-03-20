@@ -17,7 +17,6 @@ const BillingForm = ({ slug, plan }) => {
     onSuccess: (data) => {
       window.location.href = data.RedirectURL;
       console.log(data);
-
       toast.success("Payment initialized successfully.");
     },
     onError: (error) => {
@@ -55,6 +54,7 @@ const BillingForm = ({ slug, plan }) => {
 
   const onSubmit = (data) => {
     mutation.mutate({ slug, plan, ...data });
+    localStorage.setItem("orderData", JSON.stringify({ slug, plan }));
   };
 
   return (

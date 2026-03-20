@@ -1,3 +1,5 @@
+import auth from "@/firebase/firebase.config.js";
+
 //Initialize Payment Request API
 export const fetchPaymentRequest = async ({ slug, plan, ...customer }) => {
   try {
@@ -7,6 +9,8 @@ export const fetchPaymentRequest = async ({ slug, plan, ...customer }) => {
     );
     const data = await res.json();
     const token = data.token;
+
+    localStorage.setItem("epsToken", token);
 
     const epsRes = await fetch(
       `${process.env.NEXT_PUBLIC_API_BASE}/payment/eps/initialize-payment`,
@@ -27,4 +31,22 @@ export const fetchPaymentRequest = async ({ slug, plan, ...customer }) => {
     console.error("Error fetching payment request:", error);
     throw error;
   }
+};
+
+//verify payment status
+export const confirmOrder = async ({ merchantTransactionId, token, uid }) => {
+  const slug = JSON.parse(localStorage.getItem("orderData"))?.slug;
+  const planId = JSON.parse(localStorage.getItem("orderData"))?.plan;
+
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_BASE}/payment/eps/confirm-order?uid=${uid}&slug=${slug}&planId=${planId}&merchantTransactionId=${merchantTransactionId}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`, // token stored earlier
+      },
+    },
+  );
+  const data = await res.json();
+
+  return data;
 };
