@@ -42,7 +42,7 @@ const Footer = () => {
           </aside>
           <nav>
             <h6 className="footer-title">Quick Links</h6>
-            <Link href="/#services" className="link link-hover">
+            <Link href="/services" className="link link-hover">
               Services
             </Link>
             <Link href="/pricing" className="link link-hover">
@@ -77,6 +77,8 @@ const Footer = () => {
               contact@nexorosolution.com
             </a>
             <p>Khulna, Bagerhat-9300</p>
+            <a href="tel:+18707448416">+18707448416</a>
+            <p>Dhaka, Bangladesh</p>
           </nav>
         </div>
       </footer>
