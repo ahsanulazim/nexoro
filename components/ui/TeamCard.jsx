@@ -1,13 +1,9 @@
 import Image from "next/image";
-import {
-  LuBriefcaseBusiness,
-  LuBuilding,
-} from "react-icons/lu";
-import { motion } from "motion/react";
+import { LuBriefcaseBusiness, LuBuilding } from "react-icons/lu";
 
-const TeamCard = ({ member, variants }) => {
+const TeamCard = ({ member }) => {
   return (
-    <motion.div variants={variants} className="hover-3d">
+    <div className="hover-3d">
       <div className="card bg-base-300 shadow-sm">
         <figure>
           <Image
@@ -19,9 +15,7 @@ const TeamCard = ({ member, variants }) => {
           />
         </figure>
         <div className="card-body">
-          <h2 className="card-title text-lg">
-            {member.memberName}
-          </h2>
+          <h2 className="card-title text-lg">{member.memberName}</h2>
           <div>
             <p className="flex items-center gap-2">
               <LuBriefcaseBusiness /> {member.role}
@@ -33,7 +27,7 @@ const TeamCard = ({ member, variants }) => {
           </div>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 };
 

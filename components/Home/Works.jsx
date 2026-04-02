@@ -104,12 +104,20 @@ const Works = () => {
           slidesToSlide={1}
           swipeable
         >
-          {isLoading
-            ? Array.from({ length: 6 }).map((_, i) => <PortSkeleton key={i} />)
-            : portfolios.portfolios.map(
-                (port) =>
-                  port.carousel && <PortCarousel key={port._id} port={port} />,
-              )}
+          {isLoading ? (
+            Array.from({ length: 6 }).map((_, i) => <PortSkeleton key={i} />)
+          ) : portfolios.portfolios.length > 0 ? (
+            portfolios.portfolios.map(
+              (port) =>
+                port.carousel && <PortCarousel key={port._id} port={port} />,
+            )
+          ) : (
+            <div className="min-h-96 bg-base-300 p-5 rounded-2xl flex items-center justify-center">
+              <h2 className="text-lg text-center">
+                Our Best Works will be showcased here
+              </h2>
+            </div>
+          )}
         </Carousel>
       </div>
     </section>
