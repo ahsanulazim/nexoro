@@ -6,7 +6,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { LuArrowRight } from "react-icons/lu";
+import { LuArrowRight, LuTriangleAlert } from "react-icons/lu";
 import { toast } from "react-toastify";
 
 const OrderSummery = ({ className, price, slug, id, btn }) => {
@@ -32,15 +32,21 @@ const OrderSummery = ({ className, price, slug, id, btn }) => {
       className={`lg:flex-none lg:max-w-sm w-full bg-base-300 p-5 rounded-box border border-base-200 ${className}`}
     >
       <h2 className="text-2xl mb-5 font-semibold">Order Summery</h2>
-      <div className="flex justify-between">
+      <div className="flex justify-between mb-5">
         <h3>Subtotal</h3>
         <h3>${price}</h3>
+      </div>
+      <div role="alert" className="alert alert-warning">
+        <LuTriangleAlert className="h-6 w-6 shrink-0 stroke-current" />
+        <span>
+          Prices shown in <span className="font-bold">USD</span>. Payment will
+          be processed in <span className="font-bold">BDT</span>
+        </span>
       </div>
       {btn ? (
         <>
           <div className="divider"></div>
           <p className="text-main-light font-bold mb-5">Have a coupon code?</p>
-          {/* <button className="btn btn-primary btn-nexoro-primary w-full" onClick={() => user ? mutate({ slug, id }) : router.push("/register")}>{isPending ? "Processing..." : "Checkout"}</button> */}
           <Link href={user ? `/cart/${slug}/${id}/checkout` : "/register"}>
             <button className="btn btn-primary btn-nexoro-primary w-full">
               Continue <LuArrowRight />
