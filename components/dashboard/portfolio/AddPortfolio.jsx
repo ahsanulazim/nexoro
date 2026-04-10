@@ -4,7 +4,7 @@ import { Controller, useForm } from "react-hook-form";
 import { LuArrowLeft, LuPlus } from "react-icons/lu";
 import ReactQuill from "react-quill-new";
 import { useAuthState } from "react-firebase-hooks/auth";
-import auth from "@/firebase/firebase.config.js";
+import { auth } from "@/firebase/firebase.config.js";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { useRef } from "react";

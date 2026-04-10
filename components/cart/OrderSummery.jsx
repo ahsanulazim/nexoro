@@ -1,7 +1,7 @@
 "use client";
 
 import { createOrder } from "@/api/fetchCart";
-import auth from "@/firebase/firebase.config";
+import { auth } from "@/firebase/firebase.config";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";

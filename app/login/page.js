@@ -2,7 +2,7 @@
 
 import AuthPage from "@/components/auth/AuthPage";
 import Loader from "@/components/ui/Loader";
-import auth from "@/firebase/firebase.config";
+import { auth } from "@/firebase/firebase.config";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";

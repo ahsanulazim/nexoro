@@ -1,7 +1,7 @@
 "use client";
 
 import { demoteMember, promoteUser } from "@/api/fetchUsers";
-import auth from "@/firebase/firebase.config";
+import { auth } from "@/firebase/firebase.config";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { LuArrowBigDownDash, LuArrowBigUpDash, LuTrash2 } from "react-icons/lu";
@@ -20,9 +20,9 @@ const ClientRow = ({ client, btn, customer }) => {
       queryClient.setQueryData(["users"], (oldUsers) =>
         Array.isArray(oldUsers)
           ? oldUsers.map((user) =>
-            user.email === client.email ? { ...user, role: "member" } : user
-          )
-          : []
+              user.email === client.email ? { ...user, role: "member" } : user,
+            )
+          : [],
       );
       return { previousUsers };
     },
@@ -30,12 +30,11 @@ const ClientRow = ({ client, btn, customer }) => {
       toast.success(`${client.userName} has been promoted to member.`);
       queryClient.invalidateQueries({ queryKey: ["users"] });
       queryClient.invalidateQueries({ queryKey: ["members"] });
-
     },
     onError: (error, variables, context) => {
       toast.error(error.message);
       queryClient.setQueryData(["users"], context.previousUsers);
-    }
+    },
   });
 
   const { mutate: demoteMutation, isPending: isDemoting } = useMutation({
@@ -51,27 +50,25 @@ const ClientRow = ({ client, btn, customer }) => {
       queryClient.setQueryData(["members"], (oldMembers) =>
         Array.isArray(oldMembers)
           ? oldMembers.map((user) =>
-            user.email === email ? { ...user, role: "user" } : user
-          )
-          : []
+              user.email === email ? { ...user, role: "user" } : user,
+            )
+          : [],
       );
       return { previousMembers };
     },
     onError: (error, variables, context) => {
       toast.error(error.message);
       queryClient.setQueryData(["members"], context.previousMembers);
-    }
-
+    },
   });
-
 
   const handlePromote = () => {
     promoteMutation(client.email);
-  }
+  };
 
   const handleDemote = () => {
     demoteMutation(client.email);
-  }
+  };
 
   return (
     <>
@@ -82,10 +79,26 @@ const ClientRow = ({ client, btn, customer }) => {
         </td>
         <td className="w-auto whitespace-nowrap">
           <div className="flex gap-5">
-            <button className={`btn ${customer ? "btn-success" : "btn-warning"} btn-sm md:btn-md rounded-md`} onClick={customer ? handlePromote : handleDemote} disabled={isPending || isDemoting}>
-              {customer ? <><LuArrowBigUpDash /> Make Member </> : <><LuArrowBigDownDash /> Demote Member</>}
+            <button
+              className={`btn ${customer ? "btn-success" : "btn-warning"} btn-sm md:btn-md rounded-md`}
+              onClick={customer ? handlePromote : handleDemote}
+              disabled={isPending || isDemoting}
+            >
+              {customer ? (
+                <>
+                  <LuArrowBigUpDash /> Make Member{" "}
+                </>
+              ) : (
+                <>
+                  <LuArrowBigDownDash /> Demote Member
+                </>
+              )}
             </button>
-            <button className="btn btn-error btn-sm md:btn-md rounded-md" disabled={client.email === user.email ? true : false} onClick={btn}>
+            <button
+              className="btn btn-error btn-sm md:btn-md rounded-md"
+              disabled={client.email === user.email ? true : false}
+              onClick={btn}
+            >
               <LuTrash2 /> Remove
             </button>
           </div>

@@ -1,7 +1,7 @@
 "use client";
 import { fetchCountries } from "@/api/fetchCart";
 import { fetchPaymentRequest } from "@/api/fetchEps";
-import auth from "@/firebase/firebase.config.js";
+import { auth } from "@/firebase/firebase.config.js";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { Controller, useForm } from "react-hook-form";

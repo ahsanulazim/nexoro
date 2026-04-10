@@ -1,7 +1,7 @@
 "use client";
 
 import { deleteUser } from "@/api/fetchUsers";
-import auth from "@/firebase/firebase.config";
+import { auth } from "@/firebase/firebase.config";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { FaTriangleExclamation } from "react-icons/fa6";
@@ -26,7 +26,7 @@ export default function Modal({ ref, remove }) {
       toast.error("Something went wrong while deleting");
       ref.current.close();
     },
-  })
+  });
 
   return (
     <>

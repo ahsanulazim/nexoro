@@ -1,5 +1,5 @@
 "use client";
-import auth from "@/firebase/firebase.config";
+import { auth } from "@/firebase/firebase.config";
 import Link from "next/link";
 import { useAuthState, useSignOut } from "react-firebase-hooks/auth";
 import { LuLogOut, LuSettings, LuUser } from "react-icons/lu";

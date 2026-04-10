@@ -1,6 +1,6 @@
 "use client";
 
-import auth from "@/firebase/firebase.config";
+import { auth } from "@/firebase/firebase.config";
 import Link from "next/link";
 import { LuMail, LuUser } from "react-icons/lu";
 import {
@@ -44,7 +44,7 @@ const UserForm = ({ login }) => {
               google,
               email,
             }),
-          }
+          },
         );
         const data = await userRes.json();
         router.push("/dashboard");

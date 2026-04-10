@@ -1,6 +1,6 @@
 //Order Created
 
-import auth from "@/firebase/firebase.config";
+import { auth } from "@/firebase/firebase.config";
 
 export const createOrder = async (slug, id) => {
   const user = auth.currentUser;
