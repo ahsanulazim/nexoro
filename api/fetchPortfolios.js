@@ -6,10 +6,14 @@ export const postPortfolio = async (portfolioData) => {
   portfolioInfo.append("content", portfolioData.content);
   portfolioInfo.append("carousel", portfolioData.carousel);
   portfolioInfo.append("service", portfolioData.service);
-  portfolioInfo.append("subService", portfolioData.subService);
+  if (portfolioData.subService !== "") {
+    portfolioInfo.append("subService", portfolioData.subService);
+  }
   portfolioInfo.append("visibility", portfolioData.visibility);
   portfolioInfo.append("folder", "portfolio");
   portfolioInfo.append("image", portfolioData.image[0]);
+
+  console.log(portfolioInfo);
 
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/portfolio`, {
     method: "POST",
@@ -112,7 +116,9 @@ export const updatePortfolio = async (id, portfolioData) => {
   );
   portfolioInfo.append("carousel", portfolioData.carousel);
   portfolioInfo.append("service", portfolioData.service);
-  portfolioInfo.append("subService", portfolioData.subService);
+  if (portfolioData.subService !== "") {
+    portfolioInfo.append("subService", portfolioData.subService);
+  }
   portfolioInfo.append("visibility", portfolioData.visibility);
   portfolioInfo.append("folder", "portfolio");
   if (portfolioData.image) {

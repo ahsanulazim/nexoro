@@ -69,6 +69,28 @@ const DashDrawer = ({ children }) => {
 
                 <li>
                   <Link
+                    href="/dashboard/blogs"
+                    className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                    data-tip="Blog"
+                  >
+                    <LuNotebookPen className="my-1.5 inline-block size-4" />
+                    <span className="is-drawer-close:hidden">Blog</span>
+                  </Link>
+                </li>
+
+                <li>
+                  <Link
+                    href="/dashboard/portfolio"
+                    className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                    data-tip="Portfolio"
+                  >
+                    <LuBookUser className="my-1.5 inline-block size-4" />
+                    <span className="is-drawer-close:hidden">Portfolio</span>
+                  </Link>
+                </li>
+
+                <li>
+                  <Link
                     href="/dashboard/services"
                     className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
                     data-tip="Services"
@@ -91,27 +113,6 @@ const DashDrawer = ({ children }) => {
             ) : null}
             {isAdmin && (
               <>
-                <li>
-                  <Link
-                    href="/dashboard/blogs"
-                    className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
-                    data-tip="Blog"
-                  >
-                    <LuNotebookPen className="my-1.5 inline-block size-4" />
-                    <span className="is-drawer-close:hidden">Blog</span>
-                  </Link>
-                </li>
-
-                <li>
-                  <Link
-                    href="/dashboard/portfolio"
-                    className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
-                    data-tip="Portfolio"
-                  >
-                    <LuBookUser className="my-1.5 inline-block size-4" />
-                    <span className="is-drawer-close:hidden">Portfolio</span>
-                  </Link>
-                </li>
                 <li>
                   <Link
                     href="/dashboard/sliders"

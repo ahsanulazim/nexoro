@@ -36,6 +36,8 @@ const OrderTable = () => {
     orderRef.current?.showModal();
   };
 
+  console.log(orders);
+
   return (
     <div>
       <OrderModal ref={orderRef} orderId={orderId} />

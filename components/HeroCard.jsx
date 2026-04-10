@@ -13,7 +13,7 @@ const HeroCard = ({ service }) => {
         <div className="card-actions">
           <Link href={service.slug}>
             <button className="flex items-center gap-2 cursor-pointer font-semibold">
-              Learn More <FaCircleArrowRight className="size-5" />
+              Get Now <FaCircleArrowRight className="size-5" />
             </button>
           </Link>
         </div>
