@@ -18,7 +18,7 @@ const page = async ({ params }) => {
 
   return (
     <main>
-      <TitleBanner>{service?.title}</TitleBanner>
+      <TitleBanner subtitle="Services">{service?.title}</TitleBanner>
       <div className="max-w-[1426px] mx-auto px-5 py-10 sm:py-20">
         <div className="mb-10">
           <h2 className="text-3xl lg:text-5xl font-semibold text-center mb-3">
@@ -47,7 +47,7 @@ const page = async ({ params }) => {
               price={plan.price}
               id={plan.id}
               slug={prices}
-              benefits={plan.benefits.map(b => b.value)}
+              benefits={plan.benefits.map((b) => b.value)}
             />
           ))}
         </div>

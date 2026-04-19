@@ -1,34 +1,40 @@
 import { LuFolder, LuShoppingBasket } from "react-icons/lu";
-import { motion } from "motion/react";
 import Link from "next/link";
+import Image from "next/image";
 
-const PortfolioCard = ({ project, variants }) => {
+const PortfolioCard = ({ service }) => {
   return (
-    <motion.div
-      className="projectCard card bg-base-100 rounded-xl"
-      variants={variants}
-    >
-      <Link href={`/${project.slug}`} className="p-5 pb-0">
-        <img
+    <div className="serviceCard card bg-base-100 rounded-xl">
+      <Link href={`/${service.slug}`} className="p-5 pb-0">
+        <Image
+          width={500}
+          height={500}
           className="object-contain rounded-lg w-full"
-          src={project.image}
-          alt={project.title}
+          src={service.image ? service.image : "/assets/No_Image_Available.jpg"}
+          alt={service.title}
         />
       </Link>
       <div className="card-body">
-        <Link href={`/${project.slug}`}>
-          <h2 className="card-title max-xs:text-sm">{project.title}</h2>
+        <Link href={`/${service.slug}`}>
+          <h2 className="card-title max-xs:text-sm">{service.title}</h2>
         </Link>
         <div className="card-actions">
-          <button className="btn max-xs:btn-sm rounded-full btn-primary btn-nexoro-primary">
-            <LuShoppingBasket /> Get Now
-          </button>
-          <button className="btn max-xs:btn-sm rounded-full" data-theme="light">
-            <LuFolder /> Portfolio
-          </button>
+          <Link href={service.slug}>
+            <button className="btn max-xs:btn-sm rounded-full btn-primary btn-nexoro-primary">
+              <LuShoppingBasket /> Get Now
+            </button>
+          </Link>
+          <Link href={`/portfolio?category=${service._id}`}>
+            <button
+              className="btn max-xs:btn-sm rounded-full"
+              data-theme="light"
+            >
+              <LuFolder /> Portfolio
+            </button>
+          </Link>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 };
 
