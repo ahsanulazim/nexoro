@@ -1,10 +1,11 @@
 import { Space_Grotesk } from "next/font/google";
 import "./globals.css";
-import 'react-quill-new/dist/quill.snow.css';
+import "react-quill-new/dist/quill.snow.css";
 import MyProvider from "@/context/MyProvider";
 import { Bounce, ToastContainer } from "react-toastify";
 import QueryProvider from "@/query/QueryProvider";
 import Anime from "@/animation/Anime";
+// import FacebookPixel from "@/components/FacebookPixel";
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
@@ -42,6 +43,7 @@ export default function RootLayout({ children }) {
             </Anime>
           </MyProvider>
         </QueryProvider>
+        {/* <FacebookPixel /> */}
       </body>
     </html>
   );

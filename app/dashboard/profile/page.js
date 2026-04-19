@@ -2,7 +2,7 @@
 
 import DashBread from "@/components/dashboard/DashBread";
 import AccountInfo from "@/components/dashboard/profile/AccountInfo";
-import auth from "@/firebase/firebase.config";
+import { auth } from "@/firebase/firebase.config";
 import profiledata from "@/json/profiledata.json";
 import { userInfo } from "@/utils/userInfo";
 import { useAuthState } from "react-firebase-hooks/auth";

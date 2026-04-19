@@ -2,11 +2,12 @@
 export const addService = async (formData) => {
   const fd = new FormData();
   fd.append("title", formData.serviceTitle);
-  fd.append("slug", formData.slug);
   fd.append("shortDes", formData.shortDes);
   fd.append("longDes", formData.longDes);
   fd.append("folder", "icons");
+  fd.append("folder", "coverImages");
   fd.append("icon", formData.icon[0]);
+  fd.append("coverImage", formData.coverImage[0]);
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/services`, {
     method: "POST",
     body: fd,
@@ -37,12 +38,15 @@ export const fetchServices = async () => {
 
 //get a service
 export const fetchService = async (slug) => {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/services/${slug}`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_BASE}/services/${slug}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
     },
-  });
+  );
 
   if (res.status === 404) {
     return null;
@@ -55,7 +59,6 @@ export const fetchService = async (slug) => {
   return res.json();
 };
 
-
 //delete services
 export const deleteService = async (slug, public_id) => {
   const res = await fetch(
@@ -64,7 +67,7 @@ export const deleteService = async (slug, public_id) => {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ public_id }),
-    }
+    },
   );
   if (!res.ok) {
     throw new Error("Failed to delete service");
@@ -84,10 +87,13 @@ export const updateService = async (id, formData) => {
     fd.append("icon", formData.icon[0]);
   }
 
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/services/${id}`, {
-    method: "PUT",
-    body: fd,
-  });
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_BASE}/services/${id}`,
+    {
+      method: "PUT",
+      body: fd,
+    },
+  );
 
   const data = await res.json();
   if (!res.ok) {

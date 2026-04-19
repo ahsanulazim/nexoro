@@ -1,7 +1,7 @@
 "use client";
 
 import PasswordInput from "@/components/dashboard/settings/PasswordInput";
-import auth from "@/firebase/firebase.config";
+import { auth } from "@/firebase/firebase.config";
 import {
   EmailAuthProvider,
   reauthenticateWithCredential,
@@ -14,38 +14,37 @@ import { toast } from "react-toastify";
 
 const Page = () => {
   const [user] = useAuthState(auth);
-  const [currentPassword, setCurrentPassword] = useState("")
-  const [newPassword, setNewPassword] = useState("")
-  const [confirmPassword, setConfirmPassword] = useState("")
-  const [matchError, setMatchError] = useState(false)
-  const [loading, setLoading] = useState(false)
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [matchError, setMatchError] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const changePassword = async (e) => {
     e.preventDefault();
-    setMatchError(false)
-    setLoading(true)
+    setMatchError(false);
+    setLoading(true);
     if (newPassword === confirmPassword) {
       try {
         // Step 1: re-authenticate
         const credential = EmailAuthProvider.credential(
           user.email,
-          currentPassword
+          currentPassword,
         );
         await reauthenticateWithCredential(user, credential);
 
         // Step 2: update password
         await updatePassword(user, newPassword);
-        setLoading(false)
+        setLoading(false);
         toast.success("Password updated successfully!");
       } catch (error) {
-        setLoading(false)
+        setLoading(false);
         toast.error("Wrong Current Password");
       }
     } else {
-      setMatchError(true)
-      setLoading(false)
+      setMatchError(true);
+      setLoading(false);
     }
-
   };
 
   return (
@@ -69,9 +68,11 @@ const Page = () => {
           value={newPassword}
           onChange={(e) => setNewPassword(e.target.value)}
         />
-        {matchError && <p role="alert" className="alert alert-error mb-2">
-          Passwords Do not Match!
-        </p>}
+        {matchError && (
+          <p role="alert" className="alert alert-error mb-2">
+            Passwords Do not Match!
+          </p>
+        )}
         <PasswordInput
           label="Confirm Password"
           name="confirmPass"
@@ -79,9 +80,11 @@ const Page = () => {
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
         />
-        {matchError && <p role="alert" className="alert alert-error mb-2">
-          Passwords Do not Match!
-        </p>}
+        {matchError && (
+          <p role="alert" className="alert alert-error mb-2">
+            Passwords Do not Match!
+          </p>
+        )}
         <button
           type="submit"
           className="btn btn-primary shadow-none bg-main hover:bg-main-dark border-main hover:border-main-dark"

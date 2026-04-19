@@ -70,10 +70,10 @@ export const fetchCategories = async () => {
 };
 
 export const fetchPortfolioFrontend = async ({ queryKey }) => {
-  const [_key, page] = queryKey;
+  const [_key, page, category] = queryKey;
 
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_BASE}/portfolio/allPortfolios?page=${page}&limit=12`,
+    `${process.env.NEXT_PUBLIC_API_BASE}/portfolio/allPortfolios?category=${category}&page=${page}&limit=12`,
     {
       method: "GET",
       headers: {
@@ -83,7 +83,7 @@ export const fetchPortfolioFrontend = async ({ queryKey }) => {
   );
 
   if (!res.ok) {
-    throw new Error("Failed to Get Blogs");
+    throw new Error("Failed to Get Portfolios");
   }
 
   return res.json();

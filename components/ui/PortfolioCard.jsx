@@ -20,10 +20,10 @@ const PortfolioCard = ({ project, variants }) => {
           <h2 className="card-title max-xs:text-sm">{project.title}</h2>
         </Link>
         <div className="card-actions">
-          <button className="btn max-xs:btn-sm rounded-full btn-success">
+          <button className="btn max-xs:btn-sm rounded-full btn-primary btn-nexoro-primary">
             <LuShoppingBasket /> Get Now
           </button>
-          <button className="btn max-xs:btn-sm rounded-full btn-info">
+          <button className="btn max-xs:btn-sm rounded-full" data-theme="light">
             <LuFolder /> Portfolio
           </button>
         </div>

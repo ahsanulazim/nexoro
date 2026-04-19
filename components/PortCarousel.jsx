@@ -7,8 +7,8 @@ const PortCarousel = ({ port }) => {
       <Image
         src={port.image}
         alt={port.title}
-        width={450}
-        height={450}
+        width={700}
+        height={700}
         className="w-full m-auto rounded-xl"
       />
       <div className=" sm:absolute w-full sm:bottom-0 sm:p-6 text-gray-900 mt-5">

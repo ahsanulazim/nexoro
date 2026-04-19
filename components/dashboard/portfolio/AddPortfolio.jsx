@@ -71,6 +71,11 @@ const AddPortfolio = () => {
     queryFn: fetchSubServices,
   });
 
+  const validateContent = (value) => {
+    const text = value?.replace(/<(.|\n)*?>/g, "").replace(/\s+/g, "").trim();
+    return text ? true : "Content is required";
+  };
+
   const onSubmit = (data) => {
     mutation.mutate(data);
   };
@@ -159,15 +164,13 @@ const AddPortfolio = () => {
           </label>
           <Controller
             name="content"
-            rules={{ required: "Content is required" }}
             control={control}
+            rules={{ validate: validateContent }}
             render={({ field }) => (
               <ReactQuill
-                ref={quillRef}
-                className="border border-gray-600 rounded-md"
-                {...field}
-                modules={modules}
-                formats={formats}
+                value={field.value}
+                onChange={field.onChange}
+                className="border border-gray-400 rounded-md"
               />
             )}
           />
