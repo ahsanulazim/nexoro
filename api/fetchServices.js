@@ -4,10 +4,9 @@ export const addService = async (formData) => {
   fd.append("title", formData.serviceTitle);
   fd.append("shortDes", formData.shortDes);
   fd.append("longDes", formData.longDes);
-  fd.append("folder", "icons");
-  fd.append("folder", "coverImages");
   fd.append("icon", formData.icon[0]);
   fd.append("coverImage", formData.coverImage[0]);
+
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/services`, {
     method: "POST",
     body: fd,
@@ -82,9 +81,13 @@ export const updateService = async (id, formData) => {
   fd.append("slug", formData.slug);
   fd.append("shortDes", formData.shortDes);
   fd.append("longDes", formData.longDes);
-  fd.append("folder", "icons");
-  if (formData.icon) {
+
+  if (formData.icon && formData.icon.length > 0) {
     fd.append("icon", formData.icon[0]);
+  }
+
+  if (formData.coverImage && formData.coverImage.length > 0) {
+    fd.append("coverImage", formData.coverImage[0]);
   }
 
   const res = await fetch(

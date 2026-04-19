@@ -43,6 +43,7 @@ const ServiceForm = ({ ref }) => {
   const handleService = (data) => {
     setLoading(true);
     mutation.mutate(data);
+    reset();
   };
 
   const handleClose = () => {

@@ -4,8 +4,12 @@ import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 
 const ServiceModal = ({ ref, service }) => {
-
-  const { register, handleSubmit, reset, formState: { errors, isDirty } } = useForm({
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isDirty },
+  } = useForm({
     defaultValues: {
       serviceTitle: service?.title,
       slug: service?.slug,
@@ -19,7 +23,7 @@ const ServiceModal = ({ ref, service }) => {
       shortDes: service?.shortDes,
       longDes: service?.longDes,
       icon: null,
-    }
+    },
   });
 
   const queryClient = useQueryClient();
@@ -34,7 +38,7 @@ const ServiceModal = ({ ref, service }) => {
     },
     onError: (error) => {
       toast.error(error.message);
-    }
+    },
   });
 
   const handleService = (data) => {
@@ -59,24 +63,27 @@ const ServiceModal = ({ ref, service }) => {
                 value: /^[A-Za-z\s]+$/,
                 message: "Only letters and spaces are allowed",
               },
-
             })}
           />
-          {errors.serviceTitle && <p className="text-red-600">{errors.serviceTitle.message}</p>}
+          {errors.serviceTitle && (
+            <p className="text-red-600">{errors.serviceTitle.message}</p>
+          )}
           <label className="label" htmlFor="slug">
             Slug
           </label>
-          <input
-            type="text"
-            className="input w-full"
-            placeholder="Set a Slug for The Service"
-            {...register("slug", {
-              pattern: {
-                value: /^(?![0-9-]+$)(?:[a-z]{2,}-?|[0-9]-?)+(?<!-)$/,
-                message: "Wrong Slug Pattern",
-              },
-            })}
-          />
+          <label className="input w-full">
+            <span className="label">nexorosolution.com</span>
+            <input
+              type="text"
+              placeholder="Set a Slug for The Service"
+              {...register("slug", {
+                pattern: {
+                  value: /^(?![0-9-]+$)(?:[a-z]{2,}-?|[0-9]-?)+(?<!-)$/,
+                  message: "Wrong Slug Pattern",
+                },
+              })}
+            />
+          </label>
           <p className="italic">Only letters and hyphens are allowed</p>
           {errors.slug && <p className="text-red-600">{errors.slug.message}</p>}
           <label className="label">Set Icon </label>
@@ -86,12 +93,35 @@ const ServiceModal = ({ ref, service }) => {
             accept=".svg,image/svg+xml"
             {...register("icon", {
               validate: {
-                lessThan5MB: (files) => !files || files.length === 0 || files[0].size <= 5 * 1024 * 1024 || "File size must be less than 5MB"
-              }
+                lessThan5MB: (files) =>
+                  !files ||
+                  files.length === 0 ||
+                  files[0].size <= 5 * 1024 * 1024 ||
+                  "File size must be less than 5MB",
+              },
             })}
           />
           <p className="italic">SVG Only. Max size 5MB</p>
           {errors.icon && <p className="text-red-600">{errors.icon.message}</p>}
+          <label htmlFor="coverImage" className="label">
+            Set Cover Image
+          </label>
+          <input
+            type="file"
+            className="file-input"
+            accept="image/png, image/jpeg, image/jpg, image/webp, image/avif"
+            {...register("coverImage", {
+              validate: {
+                lessThan5MB: (files) =>
+                  files[0].size <= 5 * 1024 * 1024 ||
+                  "File size must be less than 5MB",
+              },
+            })}
+          />
+          <label className="label italic">JPG/PNG Only. Max size 5MB</label>
+          {errors.coverImage && (
+            <p className="text-red-600">{errors.coverImage.message}</p>
+          )}
           <label className="label" htmlFor="shortDes">
             Short Description
           </label>
@@ -101,11 +131,13 @@ const ServiceModal = ({ ref, service }) => {
             {...register("shortDes", {
               minLength: {
                 value: 50,
-                message: "Write at least 50 Characters"
-              }
+                message: "Write at least 50 Characters",
+              },
             })}
           ></textarea>
-          {errors.shortDes && <p className="text-red-600">{errors.shortDes.message}</p>}
+          {errors.shortDes && (
+            <p className="text-red-600">{errors.shortDes.message}</p>
+          )}
           <label className="label" htmlFor="longDes">
             Long Description
           </label>
@@ -116,17 +148,34 @@ const ServiceModal = ({ ref, service }) => {
             {...register("longDes", {
               minLength: {
                 value: 250,
-                message: "Write at least 250 Characters"
-              }
+                message: "Write at least 250 Characters",
+              },
             })}
           ></textarea>
-          {errors.longDes && <p className="text-red-600">{errors.longDes.message}</p>}
-
+          {errors.longDes && (
+            <p className="text-red-600">{errors.longDes.message}</p>
+          )}
 
           <div className="modal-action">
-            <button type="button" className="btn btn-error" onClick={() => ref.current.close()}>Close</button>
-            <button type="submit" className={`btn btn-primary ${mutationEdit.isPending || !isDirty ? "" : "btn-nexoro-primary"
-              }`} disabled={mutationEdit.isPending || !isDirty ? true : false}>{mutationEdit.isPending && <span className="loading loading-spinner"></span>} Update Service</button>
+            <button
+              type="button"
+              className="btn btn-error"
+              onClick={() => ref.current.close()}
+            >
+              Close
+            </button>
+            <button
+              type="submit"
+              className={`btn btn-primary ${
+                mutationEdit.isPending || !isDirty ? "" : "btn-nexoro-primary"
+              }`}
+              disabled={mutationEdit.isPending || !isDirty ? true : false}
+            >
+              {mutationEdit.isPending && (
+                <span className="loading loading-spinner"></span>
+              )}{" "}
+              Update Service
+            </button>
           </div>
         </form>
       </div>

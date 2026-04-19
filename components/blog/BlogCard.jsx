@@ -33,16 +33,6 @@ const BlogCard = ({ blog }) => {
             <p className="line-clamp-2">{blog.description}</p>
           </Link>
         </div>
-        <div className="card-actions gap-2">
-          <button className="btn btn-soft btn-secondary">
-            <LuHeart />
-            Like
-          </button>
-          <button className="btn btn-soft btn-info">
-            <LuMessageCircle />
-            Comments
-          </button>
-        </div>
       </div>
     </div>
   );
