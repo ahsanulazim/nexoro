@@ -91,7 +91,7 @@ export const updateService = async (id, formData) => {
   }
 
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_BASE}/services/${id}`,
+    `${process.env.NEXT_PUBLIC_API_BASE}/services/updateService/${id}`,
     {
       method: "PUT",
       body: fd,
@@ -103,4 +103,15 @@ export const updateService = async (id, formData) => {
     throw new Error(data.message || "Failed to update service");
   }
   return data;
+};
+
+export const toggleFavourite = async (slug) => {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_BASE}/services/favourite?slug=${slug}`,
+    { method: "PUT" },
+  );
+  if (!res.ok) {
+    throw new Error("Failed to update favourite status");
+  }
+  return res.json();
 };

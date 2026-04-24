@@ -10,7 +10,11 @@ const PortfolioCard = ({ service }) => {
           width={500}
           height={500}
           className="object-contain rounded-lg w-full"
-          src={service.image ? service.image : "/assets/No_Image_Available.jpg"}
+          src={
+            service.coverImage
+              ? service.coverImage
+              : "/assets/No_Image_Available.jpg"
+          }
           alt={service.title}
         />
       </Link>

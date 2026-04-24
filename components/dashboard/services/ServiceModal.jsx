@@ -113,6 +113,8 @@ const ServiceModal = ({ ref, service }) => {
             {...register("coverImage", {
               validate: {
                 lessThan5MB: (files) =>
+                  !files ||
+                  files.length === 0 ||
                   files[0].size <= 5 * 1024 * 1024 ||
                   "File size must be less than 5MB",
               },
