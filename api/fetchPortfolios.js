@@ -108,7 +108,6 @@ export const updatePortfolio = async (id, portfolioData) => {
   const portfolioInfo = new FormData();
   portfolioInfo.append("author", portfolioData.author);
   portfolioInfo.append("title", portfolioData.portfolioTitle);
-  portfolioInfo.append("slug", portfolioData.slug);
   portfolioInfo.append("description", portfolioData.portfolioDescription);
   portfolioInfo.append(
     "content",
@@ -126,7 +125,7 @@ export const updatePortfolio = async (id, portfolioData) => {
   }
 
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_BASE}/portfolio/${id}`,
+    `${process.env.NEXT_PUBLIC_API_BASE}/portfolio/updatePortfolio/${id}`,
     {
       method: "PUT",
       body: portfolioInfo,

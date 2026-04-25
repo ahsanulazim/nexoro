@@ -72,7 +72,10 @@ const AddPortfolio = () => {
   });
 
   const validateContent = (value) => {
-    const text = value?.replace(/<(.|\n)*?>/g, "").replace(/\s+/g, "").trim();
+    const text = value
+      ?.replace(/<(.|\n)*?>/g, "")
+      .replace(/\s+/g, "")
+      .trim();
     return text ? true : "Content is required";
   };
 
@@ -170,6 +173,8 @@ const AddPortfolio = () => {
               <ReactQuill
                 value={field.value}
                 onChange={field.onChange}
+                formats={formats}
+                modules={modules}
                 className="border border-gray-400 rounded-md"
               />
             )}

@@ -19,6 +19,7 @@ import DashNav from "./DashNav";
 import Link from "next/link";
 import { useContext } from "react";
 import { MyContext } from "@/context/MyProvider";
+import ActiveLink from "./ActiveLink";
 
 const DashDrawer = ({ children }) => {
   const { isAdmin, isEmployee, isMember } = useContext(MyContext);
@@ -44,148 +45,96 @@ const DashDrawer = ({ children }) => {
           <ul className="menu w-full grow">
             {/* List item */}
             <li>
-              <Link
-                href="/dashboard"
-                className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
-                data-tip="Dashboard"
-              >
+              <ActiveLink href="/dashboard" dataTip="Dashboard">
                 {/* Home icon */}
                 <LuLayoutDashboard className="my-1.5 inline-block size-4" />
                 <span className="is-drawer-close:hidden">Dashboard</span>
-              </Link>
+              </ActiveLink>
             </li>
             {isAdmin || isMember ? (
               <>
                 <li>
-                  <Link
-                    href="/dashboard/orders"
-                    className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
-                    data-tip="Orders"
-                  >
+                  <ActiveLink href="/dashboard/orders" dataTip="Orders">
                     <LuPackage className="my-1.5 inline-block size-4" />
                     <span className="is-drawer-close:hidden">Orders</span>
-                  </Link>
+                  </ActiveLink>
                 </li>
 
                 <li>
-                  <Link
-                    href="/dashboard/blogs"
-                    className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
-                    data-tip="Blog"
-                  >
+                  <ActiveLink href="/dashboard/blogs" dataTip="Blog">
                     <LuNotebookPen className="my-1.5 inline-block size-4" />
                     <span className="is-drawer-close:hidden">Blog</span>
-                  </Link>
+                  </ActiveLink>
                 </li>
 
                 <li>
-                  <Link
-                    href="/dashboard/portfolio"
-                    className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
-                    data-tip="Portfolio"
-                  >
+                  <ActiveLink href="/dashboard/portfolio" dataTip="Portfolio">
                     <LuBookUser className="my-1.5 inline-block size-4" />
                     <span className="is-drawer-close:hidden">Portfolio</span>
-                  </Link>
+                  </ActiveLink>
                 </li>
 
                 <li>
-                  <Link
-                    href="/dashboard/services"
-                    className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
-                    data-tip="Services"
-                  >
+                  <ActiveLink href="/dashboard/services" dataTip="Services">
                     <LuFlag className="my-1.5 inline-block size-4" />
                     <span className="is-drawer-close:hidden">Services</span>
-                  </Link>
+                  </ActiveLink>
                 </li>
                 <li>
-                  <Link
-                    href="/dashboard/pricing"
-                    className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
-                    data-tip="Pricing"
-                  >
+                  <ActiveLink href="/dashboard/pricing" dataTip="Pricing">
                     <HiOutlineCurrencyBangladeshi className="my-1.5 inline-block size-4" />
                     <span className="is-drawer-close:hidden">Pricing</span>
-                  </Link>
+                  </ActiveLink>
                 </li>
               </>
             ) : null}
             {isAdmin && (
               <>
                 <li>
-                  <Link
-                    href="/dashboard/sliders"
-                    className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
-                    data-tip="Sliders"
-                  >
+                  <ActiveLink href="/dashboard/sliders" dataTip="Sliders">
                     <LuGalleryThumbnails className="my-1.5 inline-block size-4" />
                     <span className="is-drawer-close:hidden">Sliders</span>
-                  </Link>
+                  </ActiveLink>
                 </li>
                 <li>
-                  <Link
-                    href="/dashboard/inbox"
-                    className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
-                    data-tip="Inbox"
-                  >
+                  <ActiveLink href="/dashboard/inbox" dataTip="Inbox">
                     <LuMessageCircle className="my-1.5 inline-block size-4" />
                     <span className="is-drawer-close:hidden">Inbox</span>
-                  </Link>
+                  </ActiveLink>
                 </li>
                 <li>
-                  <Link
-                    href="/dashboard/review"
-                    className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
-                    data-tip="Review"
-                  >
+                  <ActiveLink href="/dashboard/review" dataTip="Review">
                     <LuStar className="my-1.5 inline-block size-4" />
                     <span className="is-drawer-close:hidden">Review</span>
-                  </Link>
+                  </ActiveLink>
                 </li>
                 <li>
-                  <Link
-                    href="/dashboard/clients"
-                    className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
-                    data-tip="Clients"
-                  >
+                  <ActiveLink href="/dashboard/clients" dataTip="Clients">
                     <LuStore className="my-1.5 inline-block size-4" />
                     <span className="is-drawer-close:hidden">Clients</span>
-                  </Link>
+                  </ActiveLink>
                 </li>
                 <li>
-                  <Link
-                    href="/dashboard/users"
-                    className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
-                    data-tip="Users"
-                  >
+                  <ActiveLink href="/dashboard/users" dataTip="Users">
                     <LuUsersRound className="my-1.5 inline-block size-4" />
                     <span className="is-drawer-close:hidden">Users</span>
-                  </Link>
+                  </ActiveLink>
                 </li>
                 <li>
-                  <Link
-                    href="/dashboard/team"
-                    className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
-                    data-tip="Team"
-                  >
+                  <ActiveLink href="/dashboard/team" dataTip="Team">
                     <LuUsers className="my-1.5 inline-block size-4" />
                     <span className="is-drawer-close:hidden">Team</span>
-                  </Link>
+                  </ActiveLink>
                 </li>
               </>
             )}
             {/* List item */}
             <li>
-              <Link
-                href="/dashboard/settings"
-                className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
-                data-tip="Settings"
-              >
+              <ActiveLink href="/dashboard/settings" dataTip="Settings">
                 {/* Settings icon */}
                 <LuSettings className="my-1.5 inline-block size-4" />
                 <span className="is-drawer-close:hidden">Settings</span>
-              </Link>
+              </ActiveLink>
             </li>
           </ul>
         </div>

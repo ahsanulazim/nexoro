@@ -63,6 +63,33 @@ const EditPortfolio = ({ work }) => {
     mutation.mutate({ id: work._id, portfolioData: data });
   };
 
+  //quill formats
+  const formats = [
+    "header",
+    "bold",
+    "italic",
+    "underline",
+    "strike",
+    "list",
+    "align",
+    "blockquote",
+    "code-block",
+    "link",
+    "image",
+  ];
+
+  const modules = {
+    toolbar: [
+      [{ header: [1, 2, 3, false] }], // Heading options
+      ["bold", "italic", "underline", "strike"], // Text styles
+      [{ list: "ordered" }, { list: "bullet" }], // Lists
+      [{ align: [] }], // Alignment
+      ["blockquote", "code-block"], // Block styles
+      ["link", "image"], // Links & Images
+      ["clean"], // Remove formatting
+    ],
+  };
+
   return (
     <>
       <div className="mb-5 w-fit">
@@ -118,6 +145,8 @@ const EditPortfolio = ({ work }) => {
             render={({ field }) => (
               <ReactQuill
                 theme="snow"
+                formats={formats}
+                modules={modules}
                 className="border border-gray-600 rounded-md"
                 {...field}
               />
