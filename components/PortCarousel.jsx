@@ -23,12 +23,12 @@ const PortCarousel = ({ port }) => {
             </div>
             <div>
               <h3 className="opacity-50">Services</h3>
-              <p className="font-semibold">{port.service.title}</p>
+              <p className="font-semibold">{port.serviceTitle}</p>
             </div>
-            {port.subService && (
+            {port.subServiceTitle && (
               <div>
                 <h3 className="opacity-50">Category</h3>
-                <p className="font-semibold">{port.subService.subService}</p>
+                <p className="font-semibold">{port.subServiceTitle}</p>
               </div>
             )}
           </div>

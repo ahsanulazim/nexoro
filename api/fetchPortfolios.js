@@ -138,3 +138,17 @@ export const updatePortfolio = async (id, portfolioData) => {
   }
   return data;
 };
+
+export const portfolioCarousel = async () => {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_BASE}/portfolio/getportfolio/carousel`,
+    {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    },
+  );
+  if (!res.ok) {
+    throw new Error("Failed to Get Portfolio Carousel");
+  }
+  return res.json();
+};

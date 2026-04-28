@@ -8,8 +8,6 @@ const Work = async ({ params }) => {
     `${process.env.NEXT_PUBLIC_API_BASE}/portfolio/${work}`,
   ).then((res) => res.json());
 
-  console.log(work);
-
   return (
     <main className="flex flex-col gap-4">
       <section className="">

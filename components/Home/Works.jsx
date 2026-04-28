@@ -5,7 +5,7 @@ import { useAnimation, useInView, motion } from "motion/react";
 import GradText from "../ui/GradText";
 import { useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { fetchPortfolios } from "@/api/fetchPortfolios";
+import { portfolioCarousel } from "@/api/fetchPortfolios";
 import PortCarousel from "../PortCarousel";
 import PortSkeleton from "../skeleton/PortSkeleton";
 
@@ -33,10 +33,9 @@ const Works = () => {
   }, [inView, portControls]);
 
   //fetch portfolio data and map through it to show in carousel
-  const page = 1;
   const { data: portfolios, isLoading } = useQuery({
-    queryKey: ["portfolios", page],
-    queryFn: fetchPortfolios,
+    queryKey: ["portfolios"],
+    queryFn: portfolioCarousel,
     keepPreviousData: true,
   });
 
@@ -106,11 +105,10 @@ const Works = () => {
         >
           {isLoading ? (
             Array.from({ length: 6 }).map((_, i) => <PortSkeleton key={i} />)
-          ) : portfolios.portfolios.length > 0 ? (
-            portfolios.portfolios.map(
-              (port) =>
-                port.carousel && <PortCarousel key={port._id} port={port} />,
-            )
+          ) : portfolios.carouselPortfolios.length > 0 ? (
+            portfolios.carouselPortfolios.map((port) => (
+              <PortCarousel key={port._id} port={port} />
+            ))
           ) : (
             <div className="min-h-96 bg-base-300 p-5 rounded-2xl flex items-center justify-center">
               <h2 className="text-lg text-center">
