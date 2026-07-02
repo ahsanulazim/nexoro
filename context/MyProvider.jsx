@@ -1,5 +1,6 @@
 "use client";
 
+import { getChart } from "@/api/fetchAnalytics";
 import { fetchClients } from "@/api/fetchClients";
 import { fetchServices } from "@/api/fetchServices";
 import { auth } from "@/firebase/firebase.config";
@@ -56,6 +57,16 @@ const MyProvider = ({ children }) => {
     queryFn: fetchServices,
   });
 
+  //chart Data
+  const {
+    data: chartData,
+    isLoading: chartDataLoading,
+    isError: chartDataError,
+  } = useQuery({
+    queryKey: ["chart"],
+    queryFn: getChart,
+  });
+
   const data = {
     isAdmin,
     isEmployee,
@@ -69,6 +80,9 @@ const MyProvider = ({ children }) => {
     services,
     servicesLoading,
     servicesError,
+    chartData,
+    chartDataLoading,
+    chartDataError,
   };
 
   return <MyContext value={data}>{children}</MyContext>;

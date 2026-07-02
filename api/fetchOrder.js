@@ -15,3 +15,12 @@ export const getOrder = async ({ queryKey }) => {
   });
   return res.data;
 };
+
+export const updateOrder = async ({ orderId, ...data }) => {
+  const res = await api.put("/orders/updateOrder", data, {
+    params: {
+      orderId,
+    },
+  });
+  return res.data;
+};

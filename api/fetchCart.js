@@ -61,7 +61,7 @@ export const fetchCountries = async () => {
 
 export const updateOrderStatus = async ({ orderId, status }) => {
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_BASE}/orders/updateOrder/${orderId}`,
+    `${process.env.NEXT_PUBLIC_API_BASE}/orders/updateOrderStatus/${orderId}`,
     {
       method: "PUT",
       headers: {

@@ -6,6 +6,8 @@ import { MyContext } from "@/context/MyProvider";
 import Analytics, { transformAnalytics } from "./Analytics";
 import { useQuery } from "@tanstack/react-query";
 import { getAnalytics } from "@/api/fetchAnalytics";
+import RevenueChart from "./RevenueChart";
+import OrderChart from "./OrderChart";
 
 const DashboardUi = () => {
   const { isAdmin, isEmployee, isMember } = useContext(MyContext);
@@ -42,6 +44,22 @@ const DashboardUi = () => {
         ) : isEmployee ? (
           <p>Employee Dashboard</p>
         ) : null}
+      </section>
+      <section className="mt-5">
+        <div className="grid grid-cols-5 gap-5">
+          <div className="bg-base-200 rounded-box p-5 col-span-3">
+            <h2 className="uppercase text-sm font-semibold tracking-wider">
+              Revenue
+            </h2>
+            <RevenueChart />
+          </div>
+          <div className="bg-base-200 rounded-box p-5 col-span-2">
+            <h2 className="uppercase text-sm font-semibold tracking-wider">
+              Orders
+            </h2>
+            <OrderChart />
+          </div>
+        </div>
       </section>
     </main>
   );

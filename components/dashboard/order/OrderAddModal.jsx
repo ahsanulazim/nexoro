@@ -1,6 +1,7 @@
-import { createOrder, getOrder } from "@/api/fetchOrder";
+import { createOrder, getOrder, updateOrder } from "@/api/fetchOrder";
 import { useAppForm } from "@/components/ui/forms/CustomHookForm";
 import { MyContext } from "@/context/MyProvider";
+import { orderSchema } from "@/validator/orderValidator";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useContext } from "react";
 import { toast } from "react-toastify";
@@ -21,31 +22,33 @@ const OrderAddModal = ({ ref, isEditing, orderId }) => {
     servicesError,
   } = useContext(MyContext);
 
-  console.log(orderData);
-
   const { AppField, AppForm, Subscribe, SubmitButton, handleSubmit, reset } =
     useAppForm({
       defaultValues: {
         clientId: isEditing ? orderData?.order?.clientId : "",
         slug: isEditing ? orderData?.order?.service?.slug : "",
         planId: isEditing ? orderData?.order?.planId : "",
+        status: isEditing ? orderData?.order?.status : "",
         payment: isEditing ? orderData?.order?.payment : "",
         paymentMethod: isEditing ? orderData?.order?.paymentMethod : "",
         discount: isEditing ? orderData?.order?.discount : 0,
         amount: isEditing ? orderData?.order?.amount : 0,
       },
       onSubmit: ({ value }) => {
-        console.log(value);
-        mutate(value);
+        isEditing ? mutate({ ...value, orderId }) : mutate(value);
+      },
+      validators: {
+        onSubmit: orderSchema,
       },
     });
 
   const queryClient = useQueryClient();
 
   const { mutate, isPending } = useMutation({
-    mutationFn: createOrder,
+    mutationFn: isEditing ? updateOrder : createOrder,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["orders"] });
+      toast.success(isEditing ? "Order Updated" : "Order Added");
       reset();
       ref.current.close();
     },
@@ -124,6 +127,21 @@ const OrderAddModal = ({ ref, isEditing, orderId }) => {
                         />
                       );
                     }}
+                  />
+                )}
+              />
+
+              <AppField
+                name="status"
+                children={(field) => (
+                  <field.SelectField
+                    label="Select Status"
+                    data={[
+                      { value: "Pending", label: "Pending" },
+                      { value: "Processing", label: "Processing" },
+                      { value: "Completed", label: "Completed" },
+                      { value: "Cancelled", label: "Cancelled" },
+                    ]}
                   />
                 )}
               />

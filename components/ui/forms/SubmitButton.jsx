@@ -7,7 +7,7 @@ const SubmitButton = ({ label, isPending }) => {
     <form.Subscribe selector={(state) => state.isSubmitting}>
       {(isSubmitting) => (
         <button
-          className="btn btn-nexoro-primary"
+          className={`btn ${isSubmitting || isPending ? "" : "btn-nexoro-primary"}`}
           type="submit"
           disabled={isSubmitting || isPending}
         >
