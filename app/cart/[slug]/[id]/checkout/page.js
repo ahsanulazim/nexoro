@@ -1,18 +1,23 @@
 import BillingForm from "@/components/cart/BillingForm";
 import OrderSummery from "@/components/cart/OrderSummery";
-import Link from "next/link"
+import Link from "next/link";
 import { LuArrowLeft, LuWallet } from "react-icons/lu";
+import { notFound } from "next/navigation";
 
 const page = async ({params}) => {
 
 const {slug, id}= await params;
 const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/cart/checkout?slug=${slug}&planId=${id}`);
-    const plan = await res.json();
-
-    if (!plan) {
+    
+    if (!res.ok) {
         return notFound();
     }
 
+    const plan = await res.json();
+
+    if (!plan || !plan.plan) {
+        return notFound();
+    }
 
   return (
     <>

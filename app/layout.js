@@ -6,7 +6,7 @@ import { Bounce, ToastContainer } from "react-toastify";
 import QueryProvider from "@/query/QueryProvider";
 import Anime from "@/animation/Anime";
 import { GoogleTagManager } from "@next/third-parties/google";
-// import FacebookPixel from "@/components/FacebookPixel";
+import FacebookPixel from "@/components/FacebookPixel";
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
@@ -45,7 +45,7 @@ export default function RootLayout({ children }) {
             </Anime>
           </MyProvider>
         </QueryProvider>
-        {/* <FacebookPixel /> */}
+        <FacebookPixel />
       </body>
     </html>
   );

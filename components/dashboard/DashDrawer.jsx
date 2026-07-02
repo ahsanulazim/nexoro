@@ -25,7 +25,7 @@ const DashDrawer = ({ children }) => {
   const { isAdmin, isEmployee, isMember } = useContext(MyContext);
 
   return (
-    <div className="drawer lg:drawer-open">
+    <div className="drawer lg:drawer-open" data-lenis-ignore>
       <input id="my-drawer-4" type="checkbox" className="drawer-toggle" />
       <div className="drawer-content">
         {/* Navbar */}

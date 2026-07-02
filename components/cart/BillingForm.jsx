@@ -24,15 +24,9 @@ const BillingForm = ({ slug, plan }) => {
     },
   });
 
-  const {
-    data: countries,
-    isLoading,
-    error,
-  } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ["countries"],
     queryFn: fetchCountries,
-    staleTime: 1000 * 60 * 60 * 24,
-    refetchOnWindowFocus: false,
   });
 
   const {
@@ -47,6 +41,7 @@ const BillingForm = ({ slug, plan }) => {
       phone: "",
       address: "",
       city: "",
+      state: "",
       zip: "",
       country: "",
     },
@@ -169,7 +164,7 @@ const BillingForm = ({ slug, plan }) => {
             render={({ field }) => (
               <Select
                 {...field}
-                options={countries || []}
+                options={data?.countries || []}
                 isLoading={isLoading}
                 isSearchable
                 isClearable={true}

@@ -10,14 +10,13 @@ import { fetchServices } from "@/api/fetchServices";
 import PlansSkeleton from "./PlansSkeleton";
 
 const Plans = () => {
-
   const { data: services, isLoading: loadingServices } = useQuery({
     queryKey: ["services"],
     queryFn: fetchServices,
   });
 
   const [selectedSlug, setSelectedSlug] = useState("");
-
+  const [serviceTitle, setServiceTitle] = useState("");
 
   const { data: plans, isLoading: loadingPlans } = useQuery({
     queryKey: ["plans", selectedSlug],
@@ -63,35 +62,36 @@ const Plans = () => {
             value={selectedSlug}
             className="select bg-main border-main outline-none rounded-full"
             onChange={(e) => setSelectedSlug(e.target.value)}
+            data-lenis-ignore
           >
             {services?.map((service) => (
-              <option key={service.slug} value={service.slug} className="hover:bg-base-100">
+              <option
+                key={service.slug}
+                value={service.slug}
+                onClick={() => setServiceTitle(service.title)}
+                className="hover:bg-base-100"
+              >
                 {service.title}
               </option>
             ))}
           </select>
-
         </fieldset>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        {loadingPlans ? (
-          Array.from({ length: 3 }).map((_, i) => (
-            <PlansSkeleton key={i} />
-          ))
-        ) : (
-          Array.isArray(plans) &&
-          plans.map((plan) => (
-            <PricingCard
-              key={plan.id}
-              title={plan.planName}
-              price={plan.price}
-              id={plan.id}
-              slug={selectedSlug}
-              benefits={plan.benefits.map((b) => b.value)}
-            />
-          ))
-        )}
-
+        {loadingPlans
+          ? Array.from({ length: 3 }).map((_, i) => <PlansSkeleton key={i} />)
+          : Array.isArray(plans) &&
+            plans.map((plan) => (
+              <PricingCard
+                key={plan.id}
+                title={plan.planName}
+                price={plan.price}
+                id={plan.id}
+                serviceTitle={serviceTitle}
+                slug={selectedSlug}
+                benefits={plan.benefits.map((b) => b.value)}
+              />
+            ))}
       </div>
     </div>
   );

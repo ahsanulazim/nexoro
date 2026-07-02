@@ -1,4 +1,4 @@
-import auth from "@/firebase/firebase.config.js";
+import api from "@/axios/axiosInstance";
 
 //Initialize Payment Request API
 export const fetchPaymentRequest = async ({ slug, plan, ...customer }) => {
@@ -38,15 +38,17 @@ export const confirmOrder = async ({ merchantTransactionId, token, uid }) => {
   const slug = JSON.parse(localStorage.getItem("orderData"))?.slug;
   const planId = JSON.parse(localStorage.getItem("orderData"))?.plan;
 
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_BASE}/payment/eps/confirm-order?uid=${uid}&slug=${slug}&planId=${planId}&merchantTransactionId=${merchantTransactionId}`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`, // token stored earlier
-      },
+  const res = await api.get("/payment/eps/confirm-order", {
+    params: {
+      uid,
+      slug,
+      planId,
+      merchantTransactionId,
     },
-  );
-  const data = await res.json();
+    headers: {
+      Authorization: `Bearer ${token}`, // token stored earlier
+    },
+  });
 
-  return data;
+  return res.data;
 };

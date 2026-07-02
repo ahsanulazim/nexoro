@@ -5,12 +5,14 @@ import { useQuery } from "@tanstack/react-query";
 import moment from "moment";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { LuEye, LuTrash2 } from "react-icons/lu";
+import { LuEye, LuSquarePen, LuTrash2 } from "react-icons/lu";
 import OrderModal from "./OrderModal";
 import { useRef, useState } from "react";
+import OrderAddModal from "./OrderAddModal";
 
 const OrderTable = () => {
   const orderRef = useRef();
+  const orderEditRef = useRef();
   const router = useRouter();
   const searchParams = useSearchParams();
   const page = Number(searchParams.get("page") || 1);
@@ -36,10 +38,9 @@ const OrderTable = () => {
     orderRef.current?.showModal();
   };
 
-  console.log(orders);
-
   return (
     <div>
+      <OrderAddModal ref={orderEditRef} isEditing={true} orderId={orderId} />
       <OrderModal ref={orderRef} orderId={orderId} />
       <div className="overflow-x-auto bg-base-200 rounded-box">
         <table className="table">
@@ -48,7 +49,9 @@ const OrderTable = () => {
               <th>Order ID</th>
               <th>Name</th>
               <th>Service</th>
+              <th>Payment Status</th>
               <th>Delivery Status</th>
+              <th>Created By</th>
               <th>Date</th>
               <th>Actions</th>
             </tr>
@@ -83,13 +86,13 @@ const OrderTable = () => {
               ))
             ) : isError ? (
               <tr>
-                <td colSpan={7} className="text-center">
+                <td colSpan={8} className="text-center">
                   Error fetching orders
                 </td>
               </tr>
             ) : !orders.orders || orders.orders.length === 0 ? (
               <tr>
-                <td colSpan={7} className="text-center">
+                <td colSpan={8} className="text-center">
                   No orders found
                 </td>
               </tr>
@@ -108,8 +111,33 @@ const OrderTable = () => {
                   <td>
                     <h2>{order.serviceTitle}</h2>
                     <p className="font-semibold">
-                      {order.planName} - ${order.planPrice}
+                      {order.planName} - ${order.price}
                     </p>
+                  </td>
+                  <td>
+                    <span
+                      className={`badge ${order.payment === "Success" ? "badge-success" : order.payment === "Pending" ? "badge-warning" : order.payment === "Failed" ? "badge-error" : "badge-info"}`}
+                    >
+                      {order.payment}
+                    </span>
+                    {order.payment === "Success" ? (
+                      <>
+                        <br />
+                        <small className="opacity-75">
+                          Paid by {order.paymentMethod}
+                        </small>
+                      </>
+                    ) : order.payment === "Partial" ? (
+                      <>
+                        <br />
+                        <small className="flex items-center gap-1">
+                          Due Amount -
+                          <span className="badge badge-warning badge-sm font-bold">
+                            ${order.dueAmount}
+                          </span>
+                        </small>
+                      </>
+                    ) : null}
                   </td>
                   <td>
                     <p
@@ -118,6 +146,9 @@ const OrderTable = () => {
                       {order.status}
                     </p>
                   </td>
+                  <td>
+                    {order.createdBy === null ? "Customer" : order.createdBy}
+                  </td>
                   <td>{moment(order.createdAt).format("Do MMM, YYYY")}</td>
                   <td>
                     <Link href={`/dashboard/orders/${order.orderId}`}>
@@ -125,6 +156,15 @@ const OrderTable = () => {
                         <LuEye />
                       </button>
                     </Link>
+                    <button
+                      className="btn btn-primary btn-soft btn-circle ml-2"
+                      onClick={() => {
+                        setOrderId(order.orderId);
+                        orderEditRef.current?.showModal();
+                      }}
+                    >
+                      <LuSquarePen />
+                    </button>
                     <button
                       onClick={() => handleDeleteOrder(order.orderId)}
                       className="btn btn-error btn-soft btn-circle ml-2"
@@ -141,7 +181,9 @@ const OrderTable = () => {
               <th>Order ID</th>
               <th>Name</th>
               <th>Service</th>
+              <th>Payment Status</th>
               <th>Delivery Status</th>
+              <th>Created By</th>
               <th>Date</th>
               <th>Actions</th>
             </tr>

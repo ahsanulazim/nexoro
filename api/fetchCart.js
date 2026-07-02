@@ -44,20 +44,17 @@ export const fetchAllOrders = async ({ queryKey }) => {
 
 //fetch all country names for billing form
 export const fetchCountries = async () => {
-  const res = await fetch("https://restcountries.com/v3.1/all?fields=name");
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_API_BASE}/orders/countries`,
+  );
 
-  if (!res.ok) {
+  if (!response.ok) {
     throw new Error("Network response was not ok");
   }
 
-  const countries = await res.json();
+  const data = await response.json();
 
-  return countries
-    .map((country) => ({
-      value: country.name.common,
-      label: country.name.common,
-    }))
-    .sort((a, b) => a.label.localeCompare(b.label));
+  return data;
 };
 
 //update order status by admin

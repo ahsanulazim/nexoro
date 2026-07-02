@@ -1,6 +1,9 @@
 "use client";
 
+import { fetchClients } from "@/api/fetchClients";
+import { fetchServices } from "@/api/fetchServices";
 import { auth } from "@/firebase/firebase.config";
+import { useQuery } from "@tanstack/react-query";
 import { createContext, useEffect, useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 
@@ -33,6 +36,26 @@ const MyProvider = ({ children }) => {
       });
   }, [user]);
 
+  //client Data
+  const {
+    data: clientData,
+    isLoading: clientDataLoading,
+    isError: clientDataError,
+  } = useQuery({
+    queryKey: ["clientData"],
+    queryFn: fetchClients,
+  });
+
+  //services data
+  const {
+    data: services,
+    isLoading: servicesLoading,
+    isError: servicesError,
+  } = useQuery({
+    queryKey: ["services"],
+    queryFn: fetchServices,
+  });
+
   const data = {
     isAdmin,
     isEmployee,
@@ -40,6 +63,12 @@ const MyProvider = ({ children }) => {
     cart,
     setCart,
     user,
+    clientData,
+    clientDataLoading,
+    clientDataError,
+    services,
+    servicesLoading,
+    servicesError,
   };
 
   return <MyContext value={data}>{children}</MyContext>;

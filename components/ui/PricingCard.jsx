@@ -1,17 +1,38 @@
+"use client";
+
+import addToCart from "@/lib/addToCart";
 import Link from "next/link";
 
-const PricingCard = ({ title, price, benefits, id, slug }) => {
+const PricingCard = ({ title, price, benefits, id, slug, serviceTitle }) => {
+  const handleCartTracking = () => {
+    addToCart({
+      id,
+      name: title,
+      category: serviceTitle,
+      price,
+      quantity: 1,
+    });
+  };
 
   return (
     <div className="card bg-base-300 shadow-sm">
       <div className="card-body">
-        <span className="badge badge-xs badge-warning hidden">Most Popular</span>
+        <span className="badge badge-xs badge-warning hidden">
+          Most Popular
+        </span>
         <div className="flex justify-between flex-col lg:flex-row">
           <h2 className="text-xl lg:text-2xl xl:text-3xl">{title}</h2>
           <span className="font-semibold text-3xl lg:text-xl">${price}</span>
         </div>
         <div className="mt-4 xl:mt-6">
-          <Link href={`/cart/${slug}/${id}`}><button className="btn btn-block btn-primary rounded-full border-none bg-linear-to-r from-main via-main-light to-main bg-size-[200%_200%] animate-gradient">Choose Plan</button></Link>
+          <Link href={`/cart/${slug}/${id}`}>
+            <button
+              onClick={handleCartTracking}
+              className="btn btn-block btn-primary rounded-full border-none bg-linear-to-r from-main via-main-light to-main bg-size-[200%_200%] animate-gradient"
+            >
+              Choose Plan
+            </button>
+          </Link>
         </div>
         <ul className="mt-6 flex flex-col gap-2 text-xs grow">
           {benefits.map((benefit, i) => (

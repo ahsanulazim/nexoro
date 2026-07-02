@@ -32,7 +32,7 @@ const page = () => {
         toast.error("Payment verification failed.");
       }
     },
-    onError: () => {
+    onError: (error) => {
       toast.error("Something went wrong while confirming order.");
     },
   });
