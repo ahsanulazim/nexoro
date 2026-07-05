@@ -3,6 +3,7 @@
 import { getChart } from "@/api/fetchAnalytics";
 import { fetchClients } from "@/api/fetchClients";
 import { fetchServices } from "@/api/fetchServices";
+import { fetchMembers } from "@/api/fetchTeam";
 import { auth } from "@/firebase/firebase.config";
 import { useQuery } from "@tanstack/react-query";
 import { createContext, useEffect, useState } from "react";
@@ -67,6 +68,16 @@ const MyProvider = ({ children }) => {
     queryFn: getChart,
   });
 
+  //team members data
+  const {
+    data: team,
+    isLoading: teamLoading,
+    isError: teamError,
+  } = useQuery({
+    queryKey: ["team"],
+    queryFn: fetchMembers,
+  });
+
   const data = {
     isAdmin,
     isEmployee,
@@ -83,6 +94,9 @@ const MyProvider = ({ children }) => {
     chartData,
     chartDataLoading,
     chartDataError,
+    team,
+    teamLoading,
+    teamError,
   };
 
   return <MyContext value={data}>{children}</MyContext>;

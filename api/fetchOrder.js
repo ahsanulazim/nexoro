@@ -24,3 +24,14 @@ export const updateOrder = async ({ orderId, ...data }) => {
   });
   return res.data;
 };
+
+export const assignOrder = async ({ orderId, ...data }) => {
+  const { value } = data;
+
+  const res = await api.put("/orders/assignOrderToMember", value, {
+    params: {
+      id: orderId,
+    },
+  });
+  return res.data;
+};

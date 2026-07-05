@@ -14,6 +14,7 @@ const OrderTable = () => {
   const orderRef = useRef();
   const orderEditRef = useRef();
   const router = useRouter();
+  const contentRef = useRef();
   const searchParams = useSearchParams();
   const page = Number(searchParams.get("page") || 1);
 
@@ -40,8 +41,13 @@ const OrderTable = () => {
 
   return (
     <div>
-      <OrderAddModal ref={orderEditRef} isEditing={true} orderId={orderId} />
-      <OrderModal ref={orderRef} orderId={orderId} />
+      <OrderAddModal
+        ref={orderEditRef}
+        isEditing={true}
+        orderId={orderId}
+        setOrderId={setOrderId}
+      />
+      <OrderModal ref={orderRef} orderId={orderId} setOrderId={setOrderId} />
       <div className="overflow-x-auto bg-base-200 rounded-box">
         <table className="table">
           <thead>
@@ -51,6 +57,7 @@ const OrderTable = () => {
               <th>Service</th>
               <th>Payment Status</th>
               <th>Delivery Status</th>
+              <th>Assigned</th>
               <th>Created By</th>
               <th>Date</th>
               <th>Actions</th>
@@ -77,6 +84,9 @@ const OrderTable = () => {
                     <div className="skeleton h-5 w-24"></div>
                   </td>
                   <td>
+                    <div className="skeleton h-5 w-20"></div>
+                  </td>
+                  <td>
                     <div className="flex gap-2">
                       <div className="skeleton rounded-full size-10"></div>
                       <div className="skeleton rounded-full size-10"></div>
@@ -86,13 +96,13 @@ const OrderTable = () => {
               ))
             ) : isError ? (
               <tr>
-                <td colSpan={8} className="text-center">
+                <td colSpan={9} className="text-center">
                   Error fetching orders
                 </td>
               </tr>
             ) : !orders.orders || orders.orders.length === 0 ? (
               <tr>
-                <td colSpan={8} className="text-center">
+                <td colSpan={9} className="text-center">
                   No orders found
                 </td>
               </tr>
@@ -147,6 +157,15 @@ const OrderTable = () => {
                     </p>
                   </td>
                   <td>
+                    {order.assignedTo ? (
+                      <span className="badge badge-success">
+                        {order.assignedMember}
+                      </span>
+                    ) : (
+                      <span className="badge badge-error">Not Assigned</span>
+                    )}
+                  </td>
+                  <td>
                     {order.createdBy === null ? "Customer" : order.createdBy}
                   </td>
                   <td>{moment(order.createdAt).format("Do MMM, YYYY")}</td>
@@ -183,6 +202,7 @@ const OrderTable = () => {
               <th>Service</th>
               <th>Payment Status</th>
               <th>Delivery Status</th>
+              <th>Assigned</th>
               <th>Created By</th>
               <th>Date</th>
               <th>Actions</th>

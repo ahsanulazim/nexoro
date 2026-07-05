@@ -1,5 +1,6 @@
 import DashBread from "@/components/dashboard/DashBread";
 import OrderAction from "@/components/dashboard/order/OrderAction";
+import OrderAssign from "@/components/dashboard/order/OrderAssign";
 import moment from "moment";
 import { LuBox } from "react-icons/lu";
 
@@ -21,7 +22,7 @@ const Order = async ({ params }) => {
               <LuBox /> Order Details
             </h1>
             <p className="opacity-50 text-sm">
-              Created on: {moment(orderData.order.createdAt).format("LLL")}
+              Created on: {moment(orderData.order?.createdAt).format("LLL")}
             </p>
           </div>
           <div className="divider"></div>
@@ -95,9 +96,26 @@ const Order = async ({ params }) => {
             </div>
           </div>
         </div>
-        <div className="p-5 bg-base-300 rounded-box lg:col-span-4">
-          <h1 className="font-semibold">Order Actions</h1>
-          <OrderAction order={orderData.order} />
+        <div className="lg:col-span-4">
+          <div className="p-5 bg-base-300 rounded-box">
+            <h1 className="font-semibold">Order Actions</h1>
+            <OrderAction order={orderData.order} />
+          </div>
+          <div className="p-5 bg-base-300 rounded-box mt-5">
+            {orderData.order.assignedTo ? (
+              <h1 className="font-semibold">
+                Order Assigned to{" "}
+                <span className="badge badge-success badge-lg">
+                  {orderData.order.assignedMember}
+                </span>
+              </h1>
+            ) : (
+              <>
+                <h1 className="font-semibold">Order Assign</h1>
+                <OrderAssign order={orderData.order} />
+              </>
+            )}
+          </div>
         </div>
       </section>
     </main>

@@ -1,0 +1,25 @@
+{
+    "DEPLOYPATH": "/home/nexoroso/public_html",
+    "task": {
+        "0": "animation",
+        "1": "api",
+        "2": "app",
+        "3": "axios",
+        "4": "components",
+        "5": "context",
+        "6": "date",
+        "7": "firebase",
+        "8": "json",
+        "9": "lib",
+        "10": "public",
+        "11": "query",
+        "12": "utils",
+        "13": "validator",
+        "14": "package.json",
+        "15": "package-lock.json",
+        "16": "next.config.mjs",
+        "17": "postcss.config.mjs",
+        "18": "eslint.config.mjs",
+        "19": "jsconfig.json"
+    }
+}

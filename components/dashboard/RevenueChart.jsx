@@ -1,6 +1,4 @@
-import { getChart } from "@/api/fetchAnalytics";
 import { MyContext } from "@/context/MyProvider";
-import { useQuery } from "@tanstack/react-query";
 import { useContext } from "react";
 import {
   Area,
