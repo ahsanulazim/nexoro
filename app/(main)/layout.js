@@ -1,7 +1,10 @@
+import Anime from "@/animation/Anime";
 import Header from "@/components/Header";
 
 export default function layout({ children }) {
-    return (
-        <Header>{children}</Header>
-    )
+  return (
+    <Anime>
+      <Header>{children}</Header>
+    </Anime>
+  );
 }

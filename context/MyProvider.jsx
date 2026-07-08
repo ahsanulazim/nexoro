@@ -17,6 +17,8 @@ const MyProvider = ({ children }) => {
   const [isMember, setIsMember] = useState(false);
   const [user] = useAuthState(auth);
   const [cart, setCart] = useState(null);
+  const [socket, setSocket] = useState(null);
+  const [onlineUsers, setOnlineUsers] = useState([]);
 
   useEffect(() => {
     if (!user?.email) return;
@@ -77,6 +79,10 @@ const MyProvider = ({ children }) => {
     queryKey: ["team"],
     queryFn: fetchMembers,
   });
+
+  //connect socket function to handle socket function and online users updates
+
+  const connectSocket = (userData) => {};
 
   const data = {
     isAdmin,

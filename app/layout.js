@@ -4,7 +4,6 @@ import "react-quill-new/dist/quill.snow.css";
 import MyProvider from "@/context/MyProvider";
 import { Bounce, ToastContainer } from "react-toastify";
 import QueryProvider from "@/query/QueryProvider";
-import Anime from "@/animation/Anime";
 import { GoogleTagManager } from "@next/third-parties/google";
 import FacebookPixel from "@/components/FacebookPixel";
 
@@ -27,22 +26,20 @@ export default function RootLayout({ children }) {
       >
         <QueryProvider>
           <MyProvider>
-            <Anime>
-              <ToastContainer
-                position="top-right"
-                autoClose={3000}
-                hideProgressBar={false}
-                newestOnTop={false}
-                closeOnClick={false}
-                rtl={false}
-                pauseOnFocusLoss
-                draggable
-                pauseOnHover
-                theme="colored"
-                transition={Bounce}
-              />
-              {children}
-            </Anime>
+            <ToastContainer
+              position="top-right"
+              autoClose={3000}
+              hideProgressBar={false}
+              newestOnTop={false}
+              closeOnClick={false}
+              rtl={false}
+              pauseOnFocusLoss
+              draggable
+              pauseOnHover
+              theme="colored"
+              transition={Bounce}
+            />
+            {children}
           </MyProvider>
         </QueryProvider>
         <FacebookPixel />
