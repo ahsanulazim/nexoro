@@ -82,7 +82,35 @@ const MyProvider = ({ children }) => {
 
   //connect socket function to handle socket function and online users updates
 
-  const connectSocket = (userData) => {};
+  const connectSocket = (userData) => {
+    if (!userData || socket?.connected) return;
+    const newSocket = io(process.env.NEXT_PUBLIC_API_BASE, {
+      auth: {
+        token: user?.accessToken,
+      },
+    });
+
+    newSocket.on("connect", () => {
+      console.log("Connected to server", newSocket.id);
+    });
+
+    newSocket.on("connect_error", (err) => {
+      console.log(`Connection Error: ${err.message}`);
+    });
+
+    newSocket.on("onlineUsers", (users) => {
+      setOnlineUsers(users);
+    });
+
+    newSocket.on("disconnect", () => {
+      console.log("Disconnected from server");
+    });
+
+    setSocket(newSocket);
+    return () => {
+      newSocket.disconnect();
+    };
+  };
 
   const data = {
     isAdmin,
