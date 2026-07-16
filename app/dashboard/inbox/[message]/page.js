@@ -1,33 +1,18 @@
-import DashBread from "@/components/dashboard/DashBread"
-import MsgFull from "@/components/dashboard/inbox/MsgFull";
-import { notFound } from "next/navigation";
+import ChatNav from "@/components/dashboard/inbox/ChatNav";
+import Conversation from "@/components/dashboard/inbox/Conversation";
 
 const page = async ({ params }) => {
-    const { message } = await params;
+  const { message } = await params;
 
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/messages/${message}`, {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-        },
-    });
-    const msg = await res.json();
+  console.log("response", message);
 
-    if (!msg) {
-        return notFound();
-    }
+  return (
+    <div className="drawer-content flex flex-col">
+      <ChatNav />
+      {/* Page content here */}
+      <Conversation currentRoom={message} />
+    </div>
+  );
+};
 
-    return (
-        <>
-            <main className="flex flex-col gap-4">
-                <section className="">
-                    <DashBread title="Inbox" subtitle="Messages" />
-                    <h1 className="text-4xl font-semibold">Messages</h1>
-                </section >
-                <MsgFull msg={msg.message} />
-            </main >
-        </>
-    )
-}
-
-export default page
+export default page;

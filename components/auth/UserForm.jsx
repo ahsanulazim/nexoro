@@ -7,6 +7,7 @@ import {
   useSendEmailVerification,
   useSignInWithGoogle,
   useUpdateProfile,
+  useSendPasswordResetEmail,
 } from "react-firebase-hooks/auth";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -15,8 +16,9 @@ import {
   signInWithEmailAndPassword,
 } from "firebase/auth";
 import PasswordField from "./PassField";
+import { toast } from "react-toastify";
 
-const UserForm = ({ login }) => {
+const UserForm = ({ login, reset }) => {
   const [loading, setLoading] = useState(false);
   const [loginError, setLoginError] = useState(false);
   const [regError, setRegError] = useState(false);
@@ -24,6 +26,7 @@ const UserForm = ({ login }) => {
   const [signInWithGoogle] = useSignInWithGoogle(auth);
   const [sendEmailVerification] = useSendEmailVerification(auth);
   const [updateProfile] = useUpdateProfile(auth);
+  const [sendPasswordResetEmail] = useSendPasswordResetEmail(auth);
 
   //Google Sign in Logic
   const handleGoogle = async () => {
@@ -105,50 +108,75 @@ const UserForm = ({ login }) => {
     }
   };
 
+  //Reset Password Logic
+  const handleReset = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    const email = e.target.email.value;
+    try {
+      await sendPasswordResetEmail(auth, email);
+      setLoading(false);
+      toast.success("Password reset email sent");
+      //router.push("/login");
+    } catch (err) {
+      console.log(err);
+
+      setLoading(false);
+      toast.error("Failed to send password reset email");
+    }
+  };
+
   return (
     <div className="bg-base-200 border-base-300 rounded-box w-full sm:max-w-lg border p-5 sm:p-10 mx-auto">
       <h1 className=" text-center font-semibold text-2xl sm:text-4xl mb-5">
-        {login ? "Login" : "Register"}
+        {login ? "Login" : reset ? "Reset Password" : "Register"}
       </h1>
-      {/* Social Login */}
-      <button
-        className="btn bg-white text-black border-[#e5e5e5] grow py-6 rounded-lg w-full"
-        onClick={handleGoogle}
-      >
-        <svg
-          aria-label="Google logo"
-          width="20"
-          height="20"
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 512 512"
-        >
-          <g>
-            <path d="m0 0H512V512H0" fill="#fff"></path>
-            <path
-              fill="#34a853"
-              d="M153 292c30 82 118 95 171 60h62v48A192 192 0 0190 341"
-            ></path>
-            <path
-              fill="#4285f4"
-              d="m386 400a140 175 0 0053-179H260v74h102q-7 37-38 57"
-            ></path>
-            <path
-              fill="#fbbc02"
-              d="m90 341a208 200 0 010-171l63 49q-12 37 0 73"
-            ></path>
-            <path
-              fill="#ea4335"
-              d="m153 219c22-69 116-109 179-50l55-54c-78-75-230-72-297 55"
-            ></path>
-          </g>
-        </svg>
-        <span>Continue with Google</span>
-      </button>
-      <div className="divider">OR</div>
+
+      {!reset && (
+        <>
+          {/* Social Login */}
+          <button
+            className="btn bg-white text-black border-[#e5e5e5] grow py-6 rounded-lg w-full"
+            onClick={handleGoogle}
+          >
+            <svg
+              aria-label="Google logo"
+              width="20"
+              height="20"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 512 512"
+            >
+              <g>
+                <path d="m0 0H512V512H0" fill="#fff"></path>
+                <path
+                  fill="#34a853"
+                  d="M153 292c30 82 118 95 171 60h62v48A192 192 0 0190 341"
+                ></path>
+                <path
+                  fill="#4285f4"
+                  d="m386 400a140 175 0 0053-179H260v74h102q-7 37-38 57"
+                ></path>
+                <path
+                  fill="#fbbc02"
+                  d="m90 341a208 200 0 010-171l63 49q-12 37 0 73"
+                ></path>
+                <path
+                  fill="#ea4335"
+                  d="m153 219c22-69 116-109 179-50l55-54c-78-75-230-72-297 55"
+                ></path>
+              </g>
+            </svg>
+            <span>Continue with Google</span>
+          </button>
+          <div className="divider">OR</div>
+        </>
+      )}
 
       <form
         className="fieldset"
-        onSubmit={(e) => (login ? handleLogin(e) : handleRegister(e))}
+        onSubmit={(e) =>
+          login ? handleLogin(e) : reset ? handleReset(e) : handleRegister(e)
+        }
       >
         {loginError && (
           <p role="alert" className="alert alert-error mb-2">
@@ -161,7 +189,7 @@ const UserForm = ({ login }) => {
           </p>
         )}
         {/* email & pass login */}
-        {!login && (
+        {!login && !reset && (
           <>
             <label className="label text-sm" htmlFor="name">
               Full Name
@@ -200,10 +228,10 @@ const UserForm = ({ login }) => {
         </label>
         <div className="validator-hint hidden">Enter valid email address</div>
 
-        <PasswordField login={login} />
+        {!reset && <PasswordField login={login} />}
 
         {login && (
-          <Link href="#" className="text-sm text-purple-500">
+          <Link href="/forget-password" className="text-sm text-purple-500">
             Forgot Password?
           </Link>
         )}
@@ -215,24 +243,22 @@ const UserForm = ({ login }) => {
           } mt-4 shadow-none`}
           disabled={loading ? true : false}
         >
-          {login ? (
-            loading ? (
-              <>
-                <span className="loading loading-spinner"></span>Login
-              </>
-            ) : (
-              "Login"
-            )
-          ) : loading ? (
-            <>
-              <span className="loading loading-spinner"></span>Register
-            </>
+          {loading ? (
+            <span className="loading loading-spinner"></span>
+          ) : login ? (
+            "Login"
+          ) : reset ? (
+            "Send Reset Link"
           ) : (
             "Register"
           )}
         </button>
         <p className="text-sm text-center text-balance">
-          {login ? "Don't Have an Account?" : "Already Have an Account?"}{" "}
+          {login
+            ? "Don't Have an Account?"
+            : reset
+              ? "Remember Your Password?"
+              : "Already Have an Account?"}{" "}
           <Link
             href={login ? "/register" : "/login"}
             className="link text-purple-500"

@@ -4,41 +4,60 @@ import { getChart } from "@/api/fetchAnalytics";
 import { fetchClients } from "@/api/fetchClients";
 import { fetchServices } from "@/api/fetchServices";
 import { fetchMembers } from "@/api/fetchTeam";
+import api from "@/axios/axiosInstance";
 import { auth } from "@/firebase/firebase.config";
 import { useQuery } from "@tanstack/react-query";
+import { onAuthStateChanged } from "firebase/auth";
 import { createContext, useEffect, useState } from "react";
-import { useAuthState } from "react-firebase-hooks/auth";
 
 export const MyContext = createContext();
 
 const MyProvider = ({ children }) => {
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [isEmployee, setIsEmployee] = useState(false);
-  const [isMember, setIsMember] = useState(false);
-  const [user] = useAuthState(auth);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [cart, setCart] = useState(null);
-  const [socket, setSocket] = useState(null);
-  const [onlineUsers, setOnlineUsers] = useState([]);
 
   useEffect(() => {
-    if (!user?.email) return;
-    const email = user?.email;
-    fetch(`${process.env.NEXT_PUBLIC_API_BASE}/users/getUser?email=${email}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (data?.user?.role === "admin") {
-          setIsAdmin(true);
-        } else if (data?.user?.role === "employee") {
-          setIsEmployee(true);
-        } else if (data?.user?.role === "member") {
-          setIsMember(true);
-        } else {
-          setIsAdmin(false);
-          setIsEmployee(false);
-          setIsMember(false);
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setCurrentUser(JSON.parse(storedUser));
+    }
+
+    // Firebase observer একবারই attach হবে
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      setLoading(true);
+
+      if (user) {
+        const email = user.email;
+        try {
+          const res = await api.get("/users/getUser", {
+            params: {
+              email,
+            },
+          });
+          setCurrentUser(res.data);
+          localStorage.setItem("user", JSON.stringify(res.data));
+          setLoading(false);
+        } catch (error) {
+          if (error.response && error.response.status === 404) {
+            // It's a new registration, the user is not in the database yet.
+            // UserForm will handle setting the user after calling createUser API.
+            console.log("New user registered, waiting for DB sync...");
+            setLoading(false);
+          } else {
+            console.error("Error fetching user data:", error);
+            setLoading(false);
+          }
         }
-      });
-  }, [user]);
+      } else {
+        setCurrentUser(null);
+        localStorage.removeItem("user");
+        setLoading(false);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   //client Data
   const {
@@ -80,45 +99,11 @@ const MyProvider = ({ children }) => {
     queryFn: fetchMembers,
   });
 
-  //connect socket function to handle socket function and online users updates
-
-  const connectSocket = (userData) => {
-    if (!userData || socket?.connected) return;
-    const newSocket = io(process.env.NEXT_PUBLIC_API_BASE, {
-      auth: {
-        token: user?.accessToken,
-      },
-    });
-
-    newSocket.on("connect", () => {
-      console.log("Connected to server", newSocket.id);
-    });
-
-    newSocket.on("connect_error", (err) => {
-      console.log(`Connection Error: ${err.message}`);
-    });
-
-    newSocket.on("onlineUsers", (users) => {
-      setOnlineUsers(users);
-    });
-
-    newSocket.on("disconnect", () => {
-      console.log("Disconnected from server");
-    });
-
-    setSocket(newSocket);
-    return () => {
-      newSocket.disconnect();
-    };
-  };
-
   const data = {
-    isAdmin,
-    isEmployee,
-    isMember,
     cart,
     setCart,
-    user,
+    currentUser,
+    loading,
     clientData,
     clientDataLoading,
     clientDataError,

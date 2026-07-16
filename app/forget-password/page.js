@@ -1,13 +1,13 @@
 "use client";
 
-import AuthPage from "@/components/auth/AuthPage";
-import Loader from "@/components/ui/Loader";
 import { auth } from "@/firebase/firebase.config";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
+import { useEffect } from "react";
+import Loader from "@/components/ui/Loader";
+import AuthPage from "@/components/auth/AuthPage";
 
-const Register = () => {
+const page = () => {
   const router = useRouter();
   const [user, loading] = useAuthState(auth);
 
@@ -25,7 +25,7 @@ const Register = () => {
     return <Loader />;
   }
 
-  return <AuthPage login={false} reset={false} />;
+  return <AuthPage login={false} reset={true} />;
 };
 
-export default Register;
+export default page;

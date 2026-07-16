@@ -1,7 +1,55 @@
+"use client";
+
 import { LuEllipsisVertical, LuMessageCircle } from "react-icons/lu";
 import SearchChat from "../inbox/SearchChat";
+import { useSocket } from "@/context/SocketProvider";
+import { useContext, useEffect, useState } from "react";
+import { MyContext } from "@/context/MyProvider";
+import { auth } from "@/firebase/firebase.config";
+import Link from "next/link";
 
-const ChatSidebar = () => {
+const ChatSidebar = ({ currentRoom, onSelectRoom }) => {
+  const { socket, onlineStatuses, unreadCounts } = useSocket();
+  const { currentUser } = useContext(MyContext);
+  const [conversations, setConversations] = useState([]);
+
+  // ১. সাইডবার কনভার্সেশন লিস্ট লোড করা
+  const fetchSidebar = async () => {
+    if (!currentUser) return;
+    try {
+      const token = await auth.currentUser?.getIdToken();
+
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE}/conversations/getSidebarConversations`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+      const result = await res.json();
+      if (result.success) {
+        setConversations(result.data);
+      }
+    } catch (err) {
+      console.log("Error fetching sidebar:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchSidebar();
+
+    if (!socket) return;
+    // রিয়েলটাইমে নতুন কোনো কাস্টমার মেসেজ দিলে সাইডবার আপডেট হবে
+    socket.on("newConversationUpdate", () => {
+      console.log("conversations", conversations);
+      fetchSidebar();
+    });
+
+    return () => {
+      socket.off("newConversationUpdate");
+    };
+  }, [socket, currentUser]);
+  console.log("conversations", conversations);
+
   return (
     <div className="drawer-side h-[calc(100dvh-96px)] bg-base-200">
       <div className="flex flex-col">
@@ -19,20 +67,40 @@ const ChatSidebar = () => {
         </div>
         <ul className="list w-80 px-4 overflow-y-auto h-[calc(100dvh-232px)]">
           {/* Sidebar content here */}
-          <li className="list-row cursor-pointer hover:bg-main-dark">
-            <div>
-              <img
-                className="size-10 rounded-full"
-                src="https://img.daisyui.com/images/profile/demo/1@94.webp"
-              />
-            </div>
-            <div>
-              <div>Dio Lupa</div>
-              <div className="text-xs uppercase font-semibold opacity-60">
-                Remaining Reason
-              </div>
-            </div>
-          </li>
+          {conversations?.map((conversation) => (
+            <li
+              key={conversation?._id}
+              onClick={() => onSelectRoom(conversation)}
+            >
+              <Link
+                href={`/dashboard/inbox/${conversation?.roomId}`}
+                className={`list-row cursor-pointer hover:bg-main-dark items-center ${
+                  currentRoom === conversation?.roomId ? "bg-main-dark" : ""
+                }`}
+              >
+                <div
+                  className={`avatar ${onlineStatuses[conversation?.customer._id] ? "avatar-online" : "avatar-offline"}`}
+                >
+                  <div className="size-10 rounded-full bg-primary text-neutral-content">
+                    <span className="text-xs uppercase font-bold grid place-items-center h-full">
+                      {conversation?.customer?.userName?.slice(0, 2) || "C"}
+                    </span>
+                  </div>
+                </div>
+                <div>
+                  <div>{conversation?.customer?.userName}</div>
+                  <div className="text-xs line-clamp-1 font-semibold opacity-60">
+                    {conversation?.lastMessage}
+                  </div>
+                </div>
+                {unreadCounts[conversation?.roomId] > 0 && (
+                  <span className="badge badge-sm badge-info">
+                    {unreadCounts[conversation?.roomId]}
+                  </span>
+                )}
+              </Link>
+            </li>
+          ))}
         </ul>
       </div>
     </div>

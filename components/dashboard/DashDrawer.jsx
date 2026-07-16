@@ -4,6 +4,7 @@ import {
   LuBookUser,
   LuFlag,
   LuGalleryThumbnails,
+  LuHeadset,
   LuLayoutDashboard,
   LuMessageCircle,
   LuNotebookPen,
@@ -16,13 +17,12 @@ import {
 } from "react-icons/lu";
 import { HiOutlineCurrencyBangladeshi } from "react-icons/hi";
 import DashNav from "./DashNav";
-import Link from "next/link";
 import { useContext } from "react";
 import { MyContext } from "@/context/MyProvider";
 import ActiveLink from "./ActiveLink";
 
 const DashDrawer = ({ children }) => {
-  const { isAdmin, isEmployee, isMember } = useContext(MyContext);
+  const { currentUser } = useContext(MyContext);
 
   return (
     <div className="drawer lg:drawer-open" data-lenis-ignore>
@@ -51,7 +51,8 @@ const DashDrawer = ({ children }) => {
                 <span className="is-drawer-close:hidden">Dashboard</span>
               </ActiveLink>
             </li>
-            {isAdmin || isMember ? (
+            {currentUser?.user?.role === "admin" ||
+            currentUser?.user?.role === "member" ? (
               <>
                 <li>
                   <ActiveLink href="/dashboard/orders" dataTip="Orders">
@@ -88,7 +89,7 @@ const DashDrawer = ({ children }) => {
                 </li>
               </>
             ) : null}
-            {isAdmin && (
+            {currentUser?.user?.role === "admin" ? (
               <>
                 <li>
                   <ActiveLink href="/dashboard/sliders" dataTip="Sliders">
@@ -127,8 +128,16 @@ const DashDrawer = ({ children }) => {
                   </ActiveLink>
                 </li>
               </>
+            ) : (
+              <li>
+                <ActiveLink href="/dashboard/support" dataTip="Support">
+                  <LuHeadset className="my-1.5 inline-block size-4" />
+                  <span className="is-drawer-close:hidden">Support</span>
+                </ActiveLink>
+              </li>
             )}
             {/* List item */}
+
             <li>
               <ActiveLink href="/dashboard/settings" dataTip="Settings">
                 {/* Settings icon */}

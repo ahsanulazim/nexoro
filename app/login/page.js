@@ -25,7 +25,7 @@ const Login = () => {
     return <Loader />;
   }
 
-  return <AuthPage login={true} />;
+  return <AuthPage login={true} reset={false} />;
 };
 
 export default Login;

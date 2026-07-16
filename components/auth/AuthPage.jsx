@@ -1,7 +1,7 @@
 import Link from "next/link";
 import UserForm from "./UserForm";
 
-const AuthPage = ({ login }) => {
+const AuthPage = ({ login, reset }) => {
   return (
     <main>
       <div className="p-5 sm:p-10">
@@ -14,7 +14,7 @@ const AuthPage = ({ login }) => {
         </Link>
       </div>
       <div className="p-5 pt-0 md:pb-5">
-        <UserForm login={login} />
+        <UserForm login={login} reset={reset} />
       </div>
     </main>
   );
