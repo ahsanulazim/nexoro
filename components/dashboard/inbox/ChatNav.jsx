@@ -1,22 +1,26 @@
 "use client";
 import Status from "@/components/ui/Status";
 import { useSocket } from "@/context/SocketProvider";
+import { useParams } from "next/navigation";
 
 const ChatNav = () => {
-  const { activeUser, onlineStatuses } = useSocket();
-
-  console.log("onlineStatuses", onlineStatuses);
-
-  const isOnline = activeUser ? onlineStatuses[activeUser._id] : false;
+  const { message: currentRoom } = useParams();
+  const { onlineStatuses, conversations } = useSocket();
+  const currentConversation = conversations?.find(
+    (c) => c?.roomId === currentRoom,
+  );
+  const isOnline = currentConversation
+    ? onlineStatuses[currentConversation.customer._id]
+    : false;
 
   return (
     <div className="navbar bg-base-300 shadow-sm px-4 justify-between border-b border-base-100">
       <div className="flex items-center gap-2">
         <div>
           <h3 className="font-bold text-lg">
-            {activeUser ? activeUser.userName : "Customer Support"}
+            {currentConversation?.customer?.userName || "Customer Support"}
           </h3>
-          {activeUser && (
+          {currentConversation?.customer && (
             <span className="text-xs block">
               {isOnline ? (
                 <>

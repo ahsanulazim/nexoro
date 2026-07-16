@@ -21,6 +21,7 @@ const SocketProvider = ({ children }) => {
   const [onlineStatuses, setOnlineStatuses] = useState({});
   const [activeUser, setActiveUser] = useState(null);
   const [unreadCounts, setUnreadCounts] = useState({});
+  const [conversations, setConversations] = useState([]);
 
   useEffect(() => {
     let newSocket = null;
@@ -114,6 +115,8 @@ const SocketProvider = ({ children }) => {
     activeUser,
     setActiveUser,
     unreadCounts,
+    conversations,
+    setConversations,
   };
 
   return <SocketContext value={data}>{children}</SocketContext>;

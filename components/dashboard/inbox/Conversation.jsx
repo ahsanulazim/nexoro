@@ -6,30 +6,78 @@ import { auth } from "@/firebase/firebase.config";
 import moment from "moment";
 import { useContext, useEffect, useRef, useState } from "react";
 import { IoCheckmarkDoneSharp } from "react-icons/io5";
-import { LuImage, LuPaperclip, LuSend, LuX } from "react-icons/lu";
+import {
+  LuArrowUp,
+  LuFile,
+  LuImage,
+  LuPaperclip,
+  LuSend,
+  LuX,
+} from "react-icons/lu";
+import { toast } from "react-toastify";
 
 const Conversation = ({ currentRoom }) => {
-  const { socket, activeUser } = useSocket();
+  const { socket, conversations } = useSocket();
   const { currentUser } = useContext(MyContext);
-
   const [messages, setMessages] = useState([]);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const chatEndRef = useRef(null);
+  const chatBottomRef = useRef(null);
   const [text, setText] = useState("");
   const [file, setFile] = useState(null);
   const [replyTo, setReplyTo] = useState(null);
-
-  const chatBottomRef = useRef(null);
   const role = currentUser?.user?.role;
 
-  console.log("currentRoom", currentRoom);
+  const handleLoadMore = async () => {
+    if (loading || !hasMore || !currentRoom) return;
+
+    setLoading(true);
+    try {
+      const token = await auth.currentUser.getIdToken();
+
+      const res = await api.get("/conversations/getMessages", {
+        params: {
+          roomId: currentRoom,
+          page: page + 1,
+          limit: 20,
+        },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const result = res.data;
+      if (result.success && result.data?.length > 0) {
+        // নতুন লোড হওয়া মেসেজগুলো পুরোনো মেসেজের আগে যোগ হবে (reverse করে)
+        setMessages((prev) => [...result.data.reverse(), ...prev]);
+        setPage((prev) => prev + 1);
+        setHasMore(result.pagination?.hasMore ?? false);
+      } else {
+        setHasMore(false);
+      }
+    } catch (err) {
+      console.log("Error loading more messages:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // ১. রুম চেঞ্জ হলে মেসেজ হিস্ট্রি ফেচ করা
   useEffect(() => {
-    if (!currentRoom || !currentUser) return;
+    if (!currentRoom || !currentUser || !socket) return;
 
-    if (socket) {
+    const joinRoom = () => {
       socket.emit("joinRoom", { roomId: currentRoom });
       socket.emit("markAsRead", { roomId: currentRoom });
+    };
+
+    if (socket.connected) {
+      joinRoom();
     }
+
+    socket.on("connect", joinRoom);
 
     const fetchMessages = async () => {
       try {
@@ -38,15 +86,18 @@ const Conversation = ({ currentRoom }) => {
         const res = await api.get("/conversations/getMessages", {
           params: {
             roomId: currentRoom,
+            page: 1,
+            limit: 20,
           },
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
         const result = res.data;
-        console.log("Message", result);
         if (result.success) {
           setMessages(result.data);
+          setPage(1);
+          setHasMore(result.pagination?.hasMore ?? false);
           // মেসেজ লোড হওয়ার সাথে সাথে স্ক্রোল ডাউন
           setTimeout(
             () =>
@@ -62,9 +113,8 @@ const Conversation = ({ currentRoom }) => {
     fetchMessages();
 
     return () => {
-      if (socket) {
-        socket.emit("leaveRoom", { roomId: currentRoom });
-      }
+      socket.off("connect", joinRoom);
+      socket.emit("leaveRoom", { roomId: currentRoom });
     };
   }, [currentRoom, currentUser, socket]);
 
@@ -72,8 +122,7 @@ const Conversation = ({ currentRoom }) => {
   useEffect(() => {
     if (!socket || !currentRoom) return;
 
-    socket.on("receiveMessage", (newMsg) => {
-      console.log("new message", newMsg);
+    const handleReceiveMessage = (newMsg) => {
       if (newMsg.roomId === currentRoom) {
         setMessages((prev) => [...prev, newMsg]);
         setTimeout(
@@ -86,17 +135,20 @@ const Conversation = ({ currentRoom }) => {
           socket.emit("markAsRead", { roomId: currentRoom });
         }
       }
-    });
+    };
 
-    socket.on("messagesRead", ({ roomId }) => {
+    const handleMessagesRead = ({ roomId }) => {
       if (roomId === currentRoom) {
         setMessages((prev) => prev.map((m) => ({ ...m, isRead: true })));
       }
-    });
+    };
+
+    socket.on("receiveMessage", handleReceiveMessage);
+    socket.on("messagesRead", handleMessagesRead);
 
     return () => {
-      socket.off("receiveMessage");
-      socket.off("messagesRead");
+      socket.off("receiveMessage", handleReceiveMessage);
+      socket.off("messagesRead", handleMessagesRead);
     };
   }, [socket, currentRoom, role]);
 
@@ -105,16 +157,31 @@ const Conversation = ({ currentRoom }) => {
     e.preventDefault();
     if (!text.trim() && !file) return;
 
-    const receiverId = role === "admin" ? activeUser?._id : "admin";
+    let receiverId = "admin";
+    if (role === "admin") {
+      const currentConversation = conversations?.find(
+        (c) => c.roomId === currentRoom,
+      );
+      if (currentConversation?.customer?._id) {
+        receiverId = currentConversation.customer._id;
+      } else {
+        const customerMsg = messages.find((m) => m.senderRole !== "admin");
+        if (customerMsg) receiverId = customerMsg.senderId;
+      }
+    }
 
     if (file) {
       // ফাইল থাকলে HTTP POST (Multipart FormData) রিকোয়েস্ট যাবে
+      if (file.size > 1024 * 1024 * 5) {
+        return toast.error("File size must be less than 5MB");
+      }
       try {
         const token = await auth.currentUser.getIdToken();
         const formData = new FormData();
         formData.append("file", file);
         formData.append("text", text);
         formData.append("receiverId", receiverId);
+        formData.append("folder", "chat_attachments");
         if (replyTo) {
           formData.append("replyTo", JSON.stringify(replyTo));
         }
@@ -167,9 +234,28 @@ const Conversation = ({ currentRoom }) => {
   return (
     <div className="bg-base-100">
       <div
+        ref={chatEndRef}
         className="p-5 overflow-y-auto space-y-3"
         style={{ height: `calc(100dvh - ${replyTo ? 309 : 241}px)` }}
       >
+        {hasMore && (
+          <div className="flex justify-center py-4">
+            <button
+              onClick={handleLoadMore}
+              disabled={loading}
+              className="btn btn-sm rounded-full"
+            >
+              {loading ? (
+                <span className="loading loading-spinner loading-sm"></span>
+              ) : (
+                <>
+                  <LuArrowUp />
+                  Load more
+                </>
+              )}
+            </button>
+          </div>
+        )}
         {messages.map((msg) => {
           const isMe = msg.senderRole === role;
 
@@ -195,11 +281,13 @@ const Conversation = ({ currentRoom }) => {
                     className="mb-1 max-w-xs rounded-lg overflow-hidden"
                   >
                     {att.type === "image" ? (
-                      <img
-                        src={att.url}
-                        alt="attachment"
-                        className="w-full object-cover max-h-48"
-                      />
+                      <a href={att.url} target="_blank" rel="noreferrer">
+                        <img
+                          src={att.thumbnailUrl}
+                          alt="attachment"
+                          className="w-full object-cover max-h-48"
+                        />
+                      </a>
                     ) : (
                       <a
                         href={att.url}
@@ -207,7 +295,7 @@ const Conversation = ({ currentRoom }) => {
                         rel="noreferrer"
                         className="flex items-center gap-2 p-2 bg-black/20 text-xs rounded hover:underline"
                       >
-                        📄 {att.originalName || "View Document"}
+                        <LuFile /> {att.originalName || "View Document"}
                       </a>
                     )}
                   </div>
@@ -275,7 +363,7 @@ const Conversation = ({ currentRoom }) => {
         {/* ফাইল সিলেক্টেড ব্যাজ */}
         {file && (
           <div className="badge badge-info gap-2 p-3 text-xs">
-            📎 {file.name}
+            <LuPaperclip /> {file.name}
             <button onClick={() => setFile(null)} className="hover:text-error">
               <LuX />
             </button>

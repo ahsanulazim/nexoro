@@ -1,17 +1,6 @@
-"use client";
 import ChatSidebar from "@/components/dashboard/order/ChatSidebar";
-import { useSocket } from "@/context/SocketProvider";
-import { useState } from "react";
 
 const layout = ({ children }) => {
-  const { setActiveUser } = useSocket();
-  const [currentRoom, setCurrentRoom] = useState(null);
-
-  const handleSelectRoom = (conv) => {
-    setCurrentRoom(conv.roomId);
-    setActiveUser(conv.customer);
-  };
-
   return (
     <main className="flex flex-col gap-4">
       {/* <Msgs /> */}
@@ -21,10 +10,7 @@ const layout = ({ children }) => {
             <input id="my-drawer-3" type="checkbox" className="drawer-toggle" />
             <div className="drawer-content flex flex-col">{children}</div>
 
-            <ChatSidebar
-              currentRoom={currentRoom}
-              onSelectRoom={handleSelectRoom}
-            />
+            <ChatSidebar />
           </div>
         </div>
       </section>

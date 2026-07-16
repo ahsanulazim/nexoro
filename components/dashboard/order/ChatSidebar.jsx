@@ -3,15 +3,22 @@
 import { LuEllipsisVertical, LuMessageCircle } from "react-icons/lu";
 import SearchChat from "../inbox/SearchChat";
 import { useSocket } from "@/context/SocketProvider";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect } from "react";
 import { MyContext } from "@/context/MyProvider";
 import { auth } from "@/firebase/firebase.config";
 import Link from "next/link";
+import { useParams } from "next/navigation";
 
-const ChatSidebar = ({ currentRoom, onSelectRoom }) => {
-  const { socket, onlineStatuses, unreadCounts } = useSocket();
+const ChatSidebar = () => {
+  const { message: currentRoom } = useParams();
+  const {
+    socket,
+    onlineStatuses,
+    unreadCounts,
+    conversations,
+    setConversations,
+  } = useSocket();
   const { currentUser } = useContext(MyContext);
-  const [conversations, setConversations] = useState([]);
 
   // ১. সাইডবার কনভার্সেশন লিস্ট লোড করা
   const fetchSidebar = async () => {
@@ -40,7 +47,6 @@ const ChatSidebar = ({ currentRoom, onSelectRoom }) => {
     if (!socket) return;
     // রিয়েলটাইমে নতুন কোনো কাস্টমার মেসেজ দিলে সাইডবার আপডেট হবে
     socket.on("newConversationUpdate", () => {
-      console.log("conversations", conversations);
       fetchSidebar();
     });
 
@@ -48,7 +54,6 @@ const ChatSidebar = ({ currentRoom, onSelectRoom }) => {
       socket.off("newConversationUpdate");
     };
   }, [socket, currentUser]);
-  console.log("conversations", conversations);
 
   return (
     <div className="drawer-side h-[calc(100dvh-96px)] bg-base-200">
@@ -68,10 +73,7 @@ const ChatSidebar = ({ currentRoom, onSelectRoom }) => {
         <ul className="list w-80 px-4 overflow-y-auto h-[calc(100dvh-232px)]">
           {/* Sidebar content here */}
           {conversations?.map((conversation) => (
-            <li
-              key={conversation?._id}
-              onClick={() => onSelectRoom(conversation)}
-            >
+            <li key={conversation?._id}>
               <Link
                 href={`/dashboard/inbox/${conversation?.roomId}`}
                 className={`list-row cursor-pointer hover:bg-main-dark items-center ${
