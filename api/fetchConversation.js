@@ -10,6 +10,17 @@ export const getMessages = async (roomId) => {
       Authorization: `Bearer ${token}`,
     },
   });
-  const result = await res.json();
-  return result;
+  return res.data;
+};
+
+export const deleteConversation = async (roomId) => {
+  const token = await auth.currentUser?.getIdToken();
+
+  const res = await api.delete("/conversations/deleteConversation", {
+    params: { roomId },
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return res.data;
 };

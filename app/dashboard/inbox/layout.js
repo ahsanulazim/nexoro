@@ -1,4 +1,4 @@
-import ChatSidebar from "@/components/dashboard/order/ChatSidebar";
+import ChatSidebar from "@/components/dashboard/inbox/ChatSidebar";
 
 const layout = ({ children }) => {
   return (

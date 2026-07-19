@@ -13,7 +13,7 @@ import { useAuthState } from "react-firebase-hooks/auth";
 
 const Users = () => {
   const [user, loading] = useAuthState(auth);
-  const { isAdmin } = useContext(MyContext);
+  const { currentUser } = useContext(MyContext);
   const router = useRouter();
 
   const {
@@ -41,7 +41,7 @@ const Users = () => {
     return <Loader />;
   }
 
-  if (!isAdmin || isError) {
+  if (currentUser?.user?.role !== "admin" || isError) {
     router.push("/dashboard");
     return null;
   }

@@ -1,21 +1,7 @@
-"use client";
-import ChatNav from "@/components/dashboard/inbox/ChatNav";
-import Conversation from "@/components/dashboard/inbox/Conversation";
-import { useContext } from "react";
-import { MyContext } from "@/context/MyProvider";
+import StartChat from "@/components/dashboard/support/StartChat";
 
 const page = () => {
-  const { currentUser } = useContext(MyContext);
-
-  return (
-    <>
-      <ChatNav />
-      <Conversation
-        currentRoom={`room_${currentUser?.user?._id}`}
-        activeUser={null}
-      />
-    </>
-  );
+  return <StartChat />;
 };
 
 export default page;

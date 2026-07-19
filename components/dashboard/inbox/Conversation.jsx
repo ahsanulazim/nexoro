@@ -4,16 +4,11 @@ import { MyContext } from "@/context/MyProvider";
 import { useSocket } from "@/context/SocketProvider";
 import { auth } from "@/firebase/firebase.config";
 import moment from "moment";
+import Image from "next/image";
 import { useContext, useEffect, useRef, useState } from "react";
+import { BsFileEarmarkPdfFill } from "react-icons/bs";
 import { IoCheckmarkDoneSharp } from "react-icons/io5";
-import {
-  LuArrowUp,
-  LuFile,
-  LuImage,
-  LuPaperclip,
-  LuSend,
-  LuX,
-} from "react-icons/lu";
+import { LuArrowUp, LuFile, LuPaperclip, LuSend, LuX } from "react-icons/lu";
 import { toast } from "react-toastify";
 
 const Conversation = ({ currentRoom }) => {
@@ -28,6 +23,8 @@ const Conversation = ({ currentRoom }) => {
   const [text, setText] = useState("");
   const [file, setFile] = useState(null);
   const [replyTo, setReplyTo] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const role = currentUser?.user?.role;
 
   const handleLoadMore = async () => {
@@ -190,17 +187,26 @@ const Conversation = ({ currentRoom }) => {
         setFile(null);
         setText("");
         setReplyTo(null);
+        setIsUploading(true);
+        setUploadProgress(0);
 
-        await fetch(
-          `${process.env.NEXT_PUBLIC_API_BASE}/conversations/sendMessage`,
-          {
-            method: "POST",
-            headers: { Authorization: `Bearer ${token}` },
-            body: formData,
+        await api.post("/conversations/sendMessage", formData, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
           },
-        );
+          onUploadProgress: (progressEvent) => {
+            const percentCompleted = Math.round(
+              (progressEvent.loaded * 100) / progressEvent.total
+            );
+            setUploadProgress(percentCompleted);
+          },
+        });
       } catch (err) {
         console.log("Error uploading attachment:", err);
+      } finally {
+        setIsUploading(false);
+        setUploadProgress(0);
       }
     } else {
       // শুধু টেক্সট হলে সরাসরি আল্ট্রা-ফাস্ট Socket.io ইমিট
@@ -236,7 +242,7 @@ const Conversation = ({ currentRoom }) => {
       <div
         ref={chatEndRef}
         className="p-5 overflow-y-auto space-y-3"
-        style={{ height: `calc(100dvh - ${replyTo ? 309 : 241}px)` }}
+        style={{ height: `calc(100dvh - ${file ? 275 : 245}px)` }}
       >
         {hasMore && (
           <div className="flex justify-center py-4">
@@ -282,9 +288,11 @@ const Conversation = ({ currentRoom }) => {
                   >
                     {att.type === "image" ? (
                       <a href={att.url} target="_blank" rel="noreferrer">
-                        <img
+                        <Image
                           src={att.thumbnailUrl}
                           alt="attachment"
+                          width={300}
+                          height={300}
                           className="w-full object-cover max-h-48"
                         />
                       </a>
@@ -295,7 +303,20 @@ const Conversation = ({ currentRoom }) => {
                         rel="noreferrer"
                         className="flex items-center gap-2 p-2 bg-black/20 text-xs rounded hover:underline"
                       >
-                        <LuFile /> {att.originalName || "View Document"}
+                        {att.type === "application/pdf" ? (
+                          <div className="flex flex-col items-center gap-2">
+                            <div className="bg-base-300 p-5 rounded-lg">
+                              <BsFileEarmarkPdfFill className="text-6xl text-red-400" />
+                            </div>
+                            <span className="truncate max-w-32">
+                              {att.originalName || "View Document"}
+                            </span>
+                          </div>
+                        ) : (
+                          <>
+                            <LuFile /> {att.originalName || "View Document"}
+                          </>
+                        )}
                       </a>
                     )}
                   </div>
@@ -341,6 +362,25 @@ const Conversation = ({ currentRoom }) => {
             </div>
           );
         })}
+
+        {/* Uploading Skeleton */}
+        {isUploading && (
+          <div className="chat chat-end animate-pulse">
+            <div className="chat-bubble relative p-4 min-w-[200px] flex flex-col gap-2 bg-base-300 text-base-content">
+              <div className="flex items-center gap-2 mb-2 opacity-70">
+                <span className="loading loading-spinner loading-sm"></span>
+                <span className="text-sm font-semibold">Sending attachment...</span>
+              </div>
+              <progress
+                className="progress progress-info w-full"
+                value={uploadProgress}
+                max="100"
+              ></progress>
+              <div className="text-right text-xs mt-1 opacity-70">{uploadProgress}%</div>
+            </div>
+          </div>
+        )}
+
         <div ref={chatBottomRef} />
       </div>
       {/* ইনপুট এরিয়া */}
