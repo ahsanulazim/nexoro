@@ -5,6 +5,7 @@ import { useSocket } from "@/context/SocketProvider";
 import { auth } from "@/firebase/firebase.config";
 import moment from "moment";
 import Image from "next/image";
+import Link from "next/link";
 import { useContext, useEffect, useRef, useState } from "react";
 import { BsFileEarmarkPdfFill } from "react-icons/bs";
 import { IoCheckmarkDoneSharp } from "react-icons/io5";
@@ -25,6 +26,7 @@ const Conversation = ({ currentRoom }) => {
   const [replyTo, setReplyTo] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [isConversationDeleted, setIsConversationDeleted] = useState(false);
   const role = currentUser?.user?.role;
 
   const handleLoadMore = async () => {
@@ -140,12 +142,20 @@ const Conversation = ({ currentRoom }) => {
       }
     };
 
+    const handleConversationDeleted = ({ roomId }) => {
+      if (roomId === currentRoom) {
+        setIsConversationDeleted(true);
+      }
+    };
+
     socket.on("receiveMessage", handleReceiveMessage);
     socket.on("messagesRead", handleMessagesRead);
+    socket.on("conversationDeleted", handleConversationDeleted);
 
     return () => {
       socket.off("receiveMessage", handleReceiveMessage);
       socket.off("messagesRead", handleMessagesRead);
+      socket.off("conversationDeleted", handleConversationDeleted);
     };
   }, [socket, currentRoom, role]);
 
@@ -197,7 +207,7 @@ const Conversation = ({ currentRoom }) => {
           },
           onUploadProgress: (progressEvent) => {
             const percentCompleted = Math.round(
-              (progressEvent.loaded * 100) / progressEvent.total
+              (progressEvent.loaded * 100) / progressEvent.total,
             );
             setUploadProgress(percentCompleted);
           },
@@ -369,74 +379,93 @@ const Conversation = ({ currentRoom }) => {
             <div className="chat-bubble relative p-4 min-w-[200px] flex flex-col gap-2 bg-base-300 text-base-content">
               <div className="flex items-center gap-2 mb-2 opacity-70">
                 <span className="loading loading-spinner loading-sm"></span>
-                <span className="text-sm font-semibold">Sending attachment...</span>
+                <span className="text-sm font-semibold">
+                  Sending attachment...
+                </span>
               </div>
               <progress
                 className="progress progress-info w-full"
                 value={uploadProgress}
                 max="100"
               ></progress>
-              <div className="text-right text-xs mt-1 opacity-70">{uploadProgress}%</div>
+              <div className="text-right text-xs mt-1 opacity-70">
+                {uploadProgress}%
+              </div>
             </div>
+          </div>
+        )}
+
+        {/* Conversation Deleted Badge & Button */}
+        {isConversationDeleted && (
+          <div className="flex flex-col items-center justify-center my-8 gap-4">
+            <span className="badge badge-error">Conversation Ended</span>
+            <Link href="/dashboard/support" className="btn btn-nexoro-primary">
+              Back to support page
+            </Link>
           </div>
         )}
 
         <div ref={chatBottomRef} />
       </div>
       {/* ইনপুট এরিয়া */}
-      <div className="p-5 bg-base-300 border-t border-base-200 space-y-2">
-        {/* একটিভ রিপ্লাই বার */}
-        {replyTo && (
-          <div className="flex items-center justify-between bg-base-200 border-l-4 border-l-info px-3 py-1 rounded-md text-xs mb-5">
-            <span className="truncate flex-1">
-              {replyTo.text || "Attachment"}
-            </span>
-            <button
-              onClick={() => setReplyTo(null)}
-              className="btn btn-circle btn-ghost btn-error"
-            >
-              <LuX />
-            </button>
-          </div>
-        )}
+      {!isConversationDeleted && (
+        <div className="p-5 bg-base-300 border-t border-base-200 space-y-2">
+          {/* একটিভ রিপ্লাই বার */}
+          {replyTo && (
+            <div className="flex items-center justify-between bg-base-200 border-l-4 border-l-info px-3 py-1 rounded-md text-xs mb-5">
+              <span className="truncate flex-1">
+                {replyTo.text || "Attachment"}
+              </span>
+              <button
+                onClick={() => setReplyTo(null)}
+                className="btn btn-circle btn-ghost btn-error"
+              >
+                <LuX />
+              </button>
+            </div>
+          )}
 
-        {/* ফাইল সিলেক্টেড ব্যাজ */}
-        {file && (
-          <div className="badge badge-info gap-2 p-3 text-xs">
-            <LuPaperclip /> {file.name}
-            <button onClick={() => setFile(null)} className="hover:text-error">
-              <LuX />
-            </button>
-          </div>
-        )}
+          {/* ফাইল সিলেক্টেড ব্যাজ */}
+          {file && (
+            <div className="badge badge-info gap-2 p-3 text-xs">
+              <LuPaperclip /> {file.name}
+              <button
+                onClick={() => setFile(null)}
+                className="hover:text-error"
+              >
+                <LuX />
+              </button>
+            </div>
+          )}
 
-        <form onSubmit={handleSend} className="flex items-end gap-2">
-          <div className="input w-full flex items-center gap-2 bg-red rounded-xl">
-            <input
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              type="text"
-              placeholder="Write a message..."
-              className="grow bg-transparent focus:outline-none"
-            />
-            <input
-              type="file"
-              onChange={(e) => setFile(e.target.files[0])}
-              id="chat-file"
-              hidden
-            />
-            <label
-              htmlFor="chat-file"
-              className="btn btn-ghost btn-circle btn-sm text-lg cursor-pointer"
-            >
-              <LuPaperclip />
-            </label>
-          </div>
-          <button type="submit" className="btn btn-circle btn-info">
-            <LuSend />
-          </button>
-        </form>
-      </div>
+          <form onSubmit={handleSend} className="flex items-end gap-2">
+            <div className="input w-full flex items-center gap-2 bg-red rounded-xl">
+              <input
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                type="text"
+                placeholder="Write a message..."
+                className="grow bg-transparent focus:outline-none"
+              />
+              <input
+                type="file"
+                onChange={(e) => setFile(e.target.files[0])}
+                id="chat-file"
+                hidden
+              />
+              <label
+                htmlFor="chat-file"
+                className="btn btn-ghost btn-circle btn-sm text-lg cursor-pointer"
+              >
+                <LuPaperclip />
+              </label>
+            </div>
+            <button type="submit" className="btn btn-circle btn-info">
+              <LuSend />
+            </button>
+          </form>
+        </div>
+      )}
     </div>
   );
 };
