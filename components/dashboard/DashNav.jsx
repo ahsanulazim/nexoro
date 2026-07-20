@@ -1,5 +1,6 @@
 import Link from "next/link";
 import UserDropDown from "./UserDropDown";
+import { LuBell } from "react-icons/lu";
 
 const DashNav = () => {
   return (
@@ -37,6 +38,19 @@ const DashNav = () => {
         </div>
       </div>
       <div className="flex gap-2">
+        <details className="dropdown dropdown-end">
+          <summary className="btn btn-circle">
+            <LuBell />
+          </summary>
+          <ul className="menu dropdown-content bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm">
+            <li>
+              <a>Item 1</a>
+            </li>
+            <li>
+              <a>Item 2</a>
+            </li>
+          </ul>
+        </details>
         <div className="dropdown dropdown-end">
           <div
             tabIndex={0}

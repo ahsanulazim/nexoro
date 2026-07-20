@@ -13,10 +13,11 @@ import { useContext, useEffect, useRef, useState } from "react";
 import { MyContext } from "@/context/MyProvider";
 import { auth } from "@/firebase/firebase.config";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 import DeleteChatModal from "./DeleteChatModal";
 import { useQuery } from "@tanstack/react-query";
 import api from "@/axios/axiosInstance";
+import ConversationTabs from "./ConversationTabs";
 
 const ChatSidebar = () => {
   const { message: currentRoom } = useParams();
@@ -26,28 +27,53 @@ const ChatSidebar = () => {
   const { currentUser } = useContext(MyContext);
   const deleteRef = useRef();
 
+  const pathName = usePathname();
+  const platform = pathName.split("/").pop();
+
   const {
     data: conversations,
     isLoading,
     isError,
     refetch,
   } = useQuery({
-    queryKey: ["conversations"],
+    queryKey: ["conversations", platform],
     queryFn: async () => {
       try {
         const token = await auth.currentUser?.getIdToken();
+        const headers = { Authorization: `Bearer ${token}` };
 
-        const res = await api.get("/conversations/getSidebarConversations", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        if (res.data.success) {
-          setConversations(res.data.data);
-          return res.data.data;
+        let data = [];
+
+        if (platform === "inbox") {
+          // Combine all platforms
+          const [webRes, fbRes] = await Promise.all([
+            api.get("/conversations/getSidebarConversations", { headers }),
+            api.get("/facebook/conversations", { headers }),
+          ]);
+          const webData = webRes.data.success ? webRes.data.data : [];
+          const fbData = fbRes.data.success ? fbRes.data.data : [];
+          data = [...webData, ...fbData].sort(
+            (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt),
+          );
+        } else if (platform === "facebook") {
+          const res = await api.get("/facebook/conversations", { headers });
+          data = res.data.success ? res.data.data : [];
+        } else if (platform === "whatsapp") {
+          // Add whatsapp integration here later
+          data = [];
+        } else {
+          // Default to web
+          const res = await api.get("/conversations/getSidebarConversations", {
+            headers,
+          });
+          data = res.data.success ? res.data.data : [];
         }
+
+        setConversations(data);
+        return data;
       } catch (err) {
         console.log("Error fetching sidebar:", err);
+        return [];
       }
     },
   });
@@ -85,70 +111,98 @@ const ChatSidebar = () => {
           </div>
           <SearchChat />
         </div>
-        <ul className="list w-80 px-4 overflow-y-auto h-[calc(100dvh-232px)]">
+        <ConversationTabs />
+        <ul className="list w-80 px-4 overflow-y-auto h-[calc(100dvh-280px)]">
           {/* Sidebar content here */}
           {isLoading ? (
-            <p className="p-5">Loading...</p>
+            Array.from({ length: 10 }).map((_, idx) => (
+              <li key={idx} className="list-row">
+                <div className="avatar">
+                  <div className="size-10 skeleton rounded-full"></div>
+                </div>
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 skeleton rounded w-4/5"></div>
+                  <div className="h-3 skeleton rounded w-1/2"></div>
+                </div>
+              </li>
+            ))
           ) : isError ? (
             <p>Something went wrong</p>
           ) : !conversations || conversations.length === 0 ? (
             <p className="p-5 text-center">No conversation found</p>
           ) : (
-            conversations?.map((conversation) => (
-              <li key={conversation?._id} className="relative group">
-                <Link
-                  href={`/dashboard/inbox/${conversation?.roomId}`}
-                  className={`list-row cursor-pointer hover:bg-main-dark items-center ${
-                    currentRoom === conversation?.roomId ? "bg-main-dark" : ""
-                  }`}
+            conversations?.map((conversation) => {
+              const customerName =
+                conversation?.customer?.userName ||
+                conversation?.customer?.name ||
+                "Customer";
+              const customerId =
+                conversation?.customer?._id || conversation?.customer?.id;
+              const customerAvatar = conversation?.customer?.avatar;
+
+              return (
+                <li
+                  key={conversation?._id || conversation?.roomId}
+                  className="relative group"
                 >
-                  <div
-                    className={`avatar ${onlineStatuses[conversation?.customer._id] ? "avatar-online" : "avatar-offline"}`}
+                  <Link
+                    href={`/dashboard/inbox/${platform}/${conversation?.roomId}`}
+                    className={`list-row cursor-pointer hover:bg-main-dark items-center ${
+                      currentRoom === conversation?.roomId ? "bg-main-dark" : ""
+                    }`}
                   >
-                    <div className="size-10 rounded-full bg-primary text-neutral-content">
-                      <span className="text-xs uppercase font-bold grid place-items-center h-full">
-                        {conversation?.customer?.userName?.slice(0, 2) || "C"}
+                    <div
+                      className={`avatar ${onlineStatuses[customerId] ? "avatar-online" : "avatar-offline"}`}
+                    >
+                      <div className="size-10 rounded-full bg-primary text-neutral-content">
+                        {customerAvatar ? (
+                          <img src={customerAvatar} alt="avatar" />
+                        ) : (
+                          <span className="text-xs uppercase font-bold grid place-items-center h-full">
+                            {customerName.slice(0, 2)}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div>
+                      <div>{customerName}</div>
+                      <div className="text-xs line-clamp-1 font-semibold opacity-60">
+                        {conversation?.lastMessage}
+                      </div>
+                    </div>
+                    {unreadCounts[conversation?.roomId] > 0 && (
+                      <span className="badge badge-sm badge-info">
+                        {unreadCounts[conversation?.roomId]}
                       </span>
+                    )}
+                  </Link>
+                  <div className="dropdown dropdown-end absolute top-1/2 right-5 z-50 -translate-y-1/2 hidden group-hover:inline-block">
+                    <div
+                      tabIndex={0}
+                      role="button"
+                      className="btn m-1 btn-circle btn-sm"
+                    >
+                      <LuEllipsis />
                     </div>
+                    <ul
+                      tabIndex="-1"
+                      className="dropdown-content menu bg-base-100 rounded-box z-1 w-40 p-2 shadow-sm"
+                    >
+                      <li>
+                        <a>
+                          <LuTriangleAlert /> Close Chat
+                        </a>
+                      </li>
+                      <li>
+                        <button onClick={() => handleDeleteChat(conversation)}>
+                          <LuTrash2 /> Delete Chat
+                        </button>
+                      </li>
+                    </ul>
                   </div>
-                  <div>
-                    <div>{conversation?.customer?.userName}</div>
-                    <div className="text-xs line-clamp-1 font-semibold opacity-60">
-                      {conversation?.lastMessage}
-                    </div>
-                  </div>
-                  {unreadCounts[conversation?.roomId] > 0 && (
-                    <span className="badge badge-sm badge-info">
-                      {unreadCounts[conversation?.roomId]}
-                    </span>
-                  )}
-                </Link>
-                <div className="dropdown dropdown-end absolute top-1/2 right-5 z-50 -translate-y-1/2 hidden group-hover:inline-block">
-                  <div
-                    tabIndex={0}
-                    role="button"
-                    className="btn m-1 btn-circle btn-sm"
-                  >
-                    <LuEllipsis />
-                  </div>
-                  <ul
-                    tabIndex="-1"
-                    className="dropdown-content menu bg-base-100 rounded-box z-1 w-40 p-2 shadow-sm"
-                  >
-                    <li>
-                      <a>
-                        <LuTriangleAlert /> Close Chat
-                      </a>
-                    </li>
-                    <li>
-                      <button onClick={() => handleDeleteChat(conversation)}>
-                        <LuTrash2 /> Delete Chat
-                      </button>
-                    </li>
-                  </ul>
-                </div>
-              </li>
-            ))
+                </li>
+              );
+            })
           )}
         </ul>
       </div>
