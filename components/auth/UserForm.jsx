@@ -1,143 +1,161 @@
 "use client";
 
-import { auth } from "@/firebase/firebase.config";
 import Link from "next/link";
-import { LuMail, LuUser } from "react-icons/lu";
-import {
-  useSendEmailVerification,
-  useSignInWithGoogle,
-  useUpdateProfile,
-  useSendPasswordResetEmail,
-} from "react-firebase-hooks/auth";
+import { loginSchema, regSchema, resetSchema } from "@/validator/userValidator";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAppForm } from "../ui/forms/CustomHookForm";
+import { createUser } from "@/api/fetchUsers";
+import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 import {
   createUserWithEmailAndPassword,
+  GoogleAuthProvider,
+  sendEmailVerification,
   signInWithEmailAndPassword,
+  signInWithPopup,
 } from "firebase/auth";
-import PasswordField from "./PassField";
-import { toast } from "react-toastify";
+import { auth } from "@/firebase/firebase.config";
+import { useAuth } from "@/context/AuthProvider";
+import Image from "next/image";
+import { useState } from "react";
 
-const UserForm = ({ login, reset }) => {
-  const [loading, setLoading] = useState(false);
-  const [loginError, setLoginError] = useState(false);
-  const [regError, setRegError] = useState(false);
-  const router = useRouter();
-  const [signInWithGoogle] = useSignInWithGoogle(auth);
-  const [sendEmailVerification] = useSendEmailVerification(auth);
-  const [updateProfile] = useUpdateProfile(auth);
-  const [sendPasswordResetEmail] = useSendPasswordResetEmail(auth);
+const UserForm = ({ isLogin, isReset, verifyEmail }) => {
+  const { setCurrentUser, setIsLoading } = useAuth();
+  const [verificationSent, setVerificationSent] = useState(false);
+  const [isSendingMail, setIsSendingMail] = useState(false);
 
-  //Google Sign in Logic
-  const handleGoogle = async () => {
-    try {
-      const res = await signInWithGoogle();
-      if (res?.user) {
-        // এখানে চাইলে Firestore এ ইউজারের ডেটা সেভ করতে পারেন
-        const userName = res.user.displayName;
-        const email = res.user.email;
-        const google = true;
-        const userRes = await fetch(
-          `${process.env.NEXT_PUBLIC_API_BASE}/users`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              userName,
-              google,
-              email,
-            }),
-          },
-        );
-        const data = await userRes.json();
-        router.push("/dashboard");
+  const { AppField, handleSubmit, reset, AppForm, SubmitButton } = useAppForm({
+    defaultValues: {
+      ...(isLogin || isReset ? {} : { userName: "" }),
+      email: "",
+      password: "",
+    },
+    validators: {
+      onSubmit: isLogin ? loginSchema : isReset ? resetSchema : regSchema,
+    },
+    onSubmit: async ({ value }) => {
+      if (isLogin) {
+        try {
+          const userCred = await signInWithEmailAndPassword(
+            auth,
+            value.email,
+            value.password,
+          );
+          const user = userCred.user;
+          if (user) {
+            toast.success("Login Successful");
+            reset();
+            navigate.push("/dashboard");
+          }
+        } catch (error) {
+          toast.error(error.message);
+        }
+      } else {
+        try {
+          const userCred = await createUserWithEmailAndPassword(
+            auth,
+            value.email,
+            value.password,
+          );
+          const user = userCred.user;
+          if (user) {
+            const uid = user.uid;
+            mutate({ ...value, uid });
+          }
+        } catch (error) {
+          toast.error(error.message);
+        }
       }
-    } catch (err) {
-      console.error("Google sign-in error:", err);
+    },
+  });
+
+  const navigate = useRouter();
+
+  const queryClient = useQueryClient();
+
+  const { mutate, isPending } = useMutation({
+    mutationFn: createUser,
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      toast.success("Registration Successful");
+      setCurrentUser(data);
+      reset();
+      navigate.push("/dashboard");
+    },
+    onError: (error) => {
+      reset();
+      toast.error(error.message);
+    },
+  });
+
+  const googleSync = useMutation({
+    mutationFn: createUser,
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      toast.success("Login Successful");
+      setCurrentUser(data);
+      reset();
+      navigate.push("/dashboard");
+    },
+    onError: (error) => {
+      reset();
+      toast.error(error.message);
+    },
+  });
+
+  const handleEmail = async () => {
+    try {
+      setIsSendingMail(true);
+      await sendEmailVerification(auth.currentUser);
+      setVerificationSent(true);
+      toast.success("Verification email sent");
+    } catch (error) {
+      setIsSendingMail(false);
+      setVerificationSent(false);
+      toast.error(error.message);
     } finally {
-      setLoading(false);
+      setIsSendingMail(false);
     }
   };
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    const email = e.target.email.value;
-    const pass = e.target.pass.value;
-    signInWithEmailAndPassword(auth, email, pass)
-      .then(() => {
-        setLoginError(false);
-        router.push("/dashboard");
-        setLoading(false);
-        // ...
-      })
-      .catch((error) => {
-        setLoading(false);
-        setLoginError(true);
-      });
-  };
-
-  //Registration Logic
-
-  const handleRegister = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    const userName = e.target.name.value;
-    const email = e.target.email.value;
-    const pass = e.target.pass.value;
-    const google = false;
+  //google login
+  const handleGoogle = async () => {
+    const google = new GoogleAuthProvider();
     try {
-      //Firebase User Register
-      const userCred = await createUserWithEmailAndPassword(auth, email, pass);
-      await updateProfile({ displayName: userName });
-      await sendEmailVerification();
-      //Backend User Data Transfer
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/users`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userName,
-          google,
-          email,
-        }),
-      });
-      setLoading(false);
-    } catch (err) {
-      setRegError(true);
-      setLoading(false);
-    }
-  };
-
-  //Reset Password Logic
-  const handleReset = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    const email = e.target.email.value;
-    try {
-      await sendPasswordResetEmail(auth, email);
-      setLoading(false);
-      toast.success("Password reset email sent");
-      //router.push("/login");
-    } catch (err) {
-      console.log(err);
-
-      setLoading(false);
-      toast.error("Failed to send password reset email");
+      const result = await signInWithPopup(auth, google);
+      const user = result.user;
+      if (user) {
+        const userData = {
+          userName: user.displayName,
+          email: user.email,
+          uid: user.uid,
+        };
+        googleSync.mutate(userData);
+      }
+    } catch (error) {
+      toast.error(error.message);
     }
   };
 
   return (
     <div className="bg-base-200 border-base-300 rounded-box w-full sm:max-w-lg border p-5 sm:p-10 mx-auto">
       <h1 className=" text-center font-semibold text-2xl sm:text-4xl mb-5">
-        {login ? "Login" : reset ? "Reset Password" : "Register"}
+        {isLogin
+          ? "Login"
+          : isReset
+            ? "Reset Password"
+            : verifyEmail
+              ? "Verify Email"
+              : "Register"}
       </h1>
 
-      {!reset && (
+      {!isReset && !verifyEmail && (
         <>
           {/* Social Login */}
           <button
-            className="btn bg-white text-black border-[#e5e5e5] grow py-6 rounded-lg w-full"
+            type="button"
             onClick={handleGoogle}
+            className="btn bg-white text-black border-[#e5e5e5] grow py-6 rounded-lg w-full"
           >
             <svg
               aria-label="Google logo"
@@ -172,101 +190,108 @@ const UserForm = ({ login, reset }) => {
         </>
       )}
 
-      <form
-        className="fieldset"
-        onSubmit={(e) =>
-          login ? handleLogin(e) : reset ? handleReset(e) : handleRegister(e)
-        }
-      >
-        {loginError && (
-          <p role="alert" className="alert alert-error mb-2">
-            The provided login credentials are incorrect.
-          </p>
-        )}
-        {!login && regError && (
-          <p role="alert" className="alert alert-error mb-2">
-            The provided Email is Already Registered.
-          </p>
-        )}
-        {/* email & pass login */}
-        {!login && !reset && (
-          <>
-            <label className="label text-sm" htmlFor="name">
-              Full Name
-            </label>
-            <label className="input input-lg w-full validator">
-              <LuUser className="size-4 opacity-50" />
-              <input
-                type="text"
-                required
-                placeholder="Name"
-                name="name"
-                pattern="[A-Za-z ]{3,30}"
-                minLength="3"
-                maxLength="30"
-                title="Only letters"
-              />
-            </label>
-            <p className="validator-hint hidden">
-              Must be 3 to 30 characters
-              <br />
-              containing only letters
-            </p>
-          </>
-        )}
-        <label className="label text-sm" htmlFor="email">
-          Email
-        </label>
-        <label className="input input-lg w-full validator">
-          <LuMail className="size-4 opacity-50" />
-          <input
-            type="email"
-            placeholder="mail@site.com"
-            name="email"
-            required
+      {verifyEmail ? (
+        <div className="text-center">
+          <Image
+            src="/assets/Envelope.svg"
+            className="mx-auto"
+            width={350}
+            height={350}
+            alt="verification email art"
           />
-        </label>
-        <div className="validator-hint hidden">Enter valid email address</div>
-
-        {!reset && <PasswordField login={login} />}
-
-        {login && (
-          <Link href="/forget-password" className="text-sm text-purple-500">
-            Forgot Password?
-          </Link>
-        )}
-
-        <button
-          className={`btn btn-primary btn-lg rounded-md ${
-            !loading &&
-            "bg-main hover:bg-main-dark hover:border-main-dark border-main"
-          } mt-4 shadow-none`}
-          disabled={loading ? true : false}
-        >
-          {loading ? (
-            <span className="loading loading-spinner"></span>
-          ) : login ? (
-            "Login"
-          ) : reset ? (
-            "Send Reset Link"
-          ) : (
-            "Register"
-          )}
-        </button>
-        <p className="text-sm text-center text-balance">
-          {login
-            ? "Don't Have an Account?"
-            : reset
-              ? "Remember Your Password?"
-              : "Already Have an Account?"}{" "}
-          <Link
-            href={login ? "/register" : "/login"}
-            className="link text-purple-500"
+          <p className="text-balance">
+            Please verify your email address by clicking button below.
+          </p>{" "}
+          <button
+            type="button"
+            onClick={handleEmail}
+            disabled={verificationSent || isSendingMail}
+            className={`btn btn-lg ${verificationSent || isSendingMail ? "" : "btn-nexoro-primary"} mt-4`}
           >
-            {login ? "Register Now" : "Login Now"}
-          </Link>
-        </p>
-      </form>
+            {verificationSent ? (
+              "Sent"
+            ) : isSendingMail ? (
+              <span className="loading loading-spinner"></span>
+            ) : (
+              "Send Verification Email"
+            )}
+          </button>
+        </div>
+      ) : (
+        <AppForm>
+          <form
+            className="fieldset"
+            onSubmit={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleSubmit();
+            }}
+          >
+            {/* email & pass login */}
+            {!isLogin && !isReset && (
+              <AppField
+                name="userName"
+                children={(field) => (
+                  <field.UsernameField
+                    label="Full Name"
+                    placeholder="ex: John Doe"
+                  />
+                )}
+              />
+            )}
+
+            <AppField
+              name="email"
+              children={(field) => (
+                <field.EmailField
+                  label="Email"
+                  placeholder="ex: user@email.com"
+                />
+              )}
+            />
+
+            {!isReset && (
+              <AppField
+                name="password"
+                children={(field) => (
+                  <field.PasswordField
+                    label="Password"
+                    placeholder="ex: ******"
+                  />
+                )}
+              />
+            )}
+
+            {isLogin && (
+              <Link href="/forget-password" className="text-sm text-purple-500">
+                Forgot Password?
+              </Link>
+            )}
+
+            <SubmitButton
+              label={
+                isLogin ? "Login" : isReset ? "Send Reset Link" : "Register"
+              }
+              isPending={isPending}
+              className="btn-lg mt-4"
+            />
+
+            <p className="text-sm text-center text-balance">
+              {isLogin
+                ? "Don't Have an Account?"
+                : isReset
+                  ? "Remember Your Password?"
+                  : "Already Have an Account?"}{" "}
+              <Link
+                href={isLogin ? "/register" : "/login"}
+                className="link text-purple-500"
+              >
+                {isLogin ? "Register Now" : "Login Now"}
+              </Link>
+            </p>
+          </form>
+        </AppForm>
+      )}
     </div>
   );
 };

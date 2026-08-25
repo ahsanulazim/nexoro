@@ -1,7 +1,7 @@
 import { LuKey, LuEye, LuCheck, LuX, LuEyeClosed } from "react-icons/lu";
 import { useState } from "react";
 
-const PasswordField = ({ login }) => {
+const PasswordField = ({ isLogin }) => {
   const [showPass, setShowPass] = useState(false);
   const [password, setPassword] = useState("");
 
@@ -33,7 +33,7 @@ const PasswordField = ({ login }) => {
       </label>
       <label className="input input-lg w-full">
         <LuKey className="opacity-50 size-4" />
-        {login ? (
+        {isLogin ? (
           // Login page no validation
           <input
             type={showPass ? "text" : "password"}
@@ -65,7 +65,7 @@ const PasswordField = ({ login }) => {
       </label>
 
       {/* 👉 Validation checklist only for Register */}
-      {!login && password.length > 0 && (
+      {!isLogin && password.length > 0 && (
         <>
           {/* Strength meter */}
           <div className="mt-3">

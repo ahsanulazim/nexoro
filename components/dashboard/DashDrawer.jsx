@@ -17,12 +17,11 @@ import {
 } from "react-icons/lu";
 import { HiOutlineCurrencyBangladeshi } from "react-icons/hi";
 import DashNav from "./DashNav";
-import { useContext } from "react";
-import { MyContext } from "@/context/MyProvider";
 import ActiveLink from "./ActiveLink";
+import { useAuth } from "@/context/AuthProvider";
 
 const DashDrawer = ({ children }) => {
-  const { currentUser } = useContext(MyContext);
+  const { currentUser } = useAuth();
 
   return (
     <div className="drawer lg:drawer-open" data-lenis-ignore>
@@ -31,7 +30,9 @@ const DashDrawer = ({ children }) => {
         {/* Navbar */}
         <DashNav />
         {/* Page content here */}
-        <div className="p-4">{children}</div>
+        <div className="p-4 bg-base-300 min-h-[calc(100dvh-64px)]">
+          {children}
+        </div>
       </div>
 
       <div className="drawer-side is-drawer-close:overflow-visible">

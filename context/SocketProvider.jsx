@@ -4,6 +4,8 @@ import { auth } from "@/firebase/firebase.config";
 import { createContext, useContext, useEffect, useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { io } from "socket.io-client";
+import { toast } from "react-toastify";
+import { useRouter } from "next/navigation";
 
 const SocketContext = createContext();
 
@@ -22,6 +24,10 @@ const SocketProvider = ({ children }) => {
   const [activeUser, setActiveUser] = useState(null);
   const [unreadCounts, setUnreadCounts] = useState({});
   const [conversations, setConversations] = useState([]);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
+
+  const router = useRouter();
 
   useEffect(() => {
     let newSocket = null;
@@ -89,6 +95,32 @@ const SocketProvider = ({ children }) => {
             [roomId]: count,
           }));
         });
+
+        // 🎯 ৪. ফিচার: লাইভ নোটিফিকেশন রিসিভ করা এবং টোস্ট দেখানো
+        newSocket.on("newNotification", (notification) => {
+          setNotifications((prev) => [notification, ...prev]);
+          setUnreadNotificationsCount((prev) => prev + 1);
+
+          toast.info(
+            <div className="cursor-pointer">
+              <p className="font-semibold text-sm">{notification.title}</p>
+              <p className="text-xs text-slate-500 line-clamp-2">{notification.message}</p>
+            </div>,
+            {
+              onClick: () => {
+                if (notification.link) {
+                  router.push(notification.link);
+                }
+              },
+              position: "top-right",
+              autoClose: 5000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+            }
+          );
+        });
       } catch (error) {
         console.log("Socket initialization error:", error);
       }
@@ -103,6 +135,7 @@ const SocketProvider = ({ children }) => {
         newSocket.off("customerStatus");
         newSocket.off("initialUnreadCounts");
         newSocket.off("updateUnreadCount");
+        newSocket.off("newNotification");
         newSocket.close();
       }
     };
@@ -117,6 +150,10 @@ const SocketProvider = ({ children }) => {
     unreadCounts,
     conversations,
     setConversations,
+    notifications,
+    setNotifications,
+    unreadNotificationsCount,
+    setUnreadNotificationsCount,
   };
 
   return <SocketContext value={data}>{children}</SocketContext>;

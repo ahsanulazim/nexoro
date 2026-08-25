@@ -7,6 +7,7 @@ import QueryProvider from "@/query/QueryProvider";
 import { GoogleTagManager } from "@next/third-parties/google";
 import FacebookPixel from "@/components/FacebookPixel";
 import SocketProvider from "@/context/SocketProvider";
+import AuthProvider from "@/context/AuthProvider";
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
@@ -26,24 +27,26 @@ export default function RootLayout({ children }) {
         className={`${spaceGrotesk.variable} font-space-grotesk antialiased`}
       >
         <QueryProvider>
-          <MyProvider>
-            <SocketProvider>
-              <ToastContainer
-                position="top-right"
-                autoClose={3000}
-                hideProgressBar={false}
-                newestOnTop={false}
-                closeOnClick={false}
-                rtl={false}
-                pauseOnFocusLoss
-                draggable
-                pauseOnHover
-                theme="colored"
-                transition={Bounce}
-              />
-              {children}
-            </SocketProvider>
-          </MyProvider>
+          <AuthProvider>
+            <MyProvider>
+              <SocketProvider>
+                <ToastContainer
+                  position="top-right"
+                  autoClose={3000}
+                  hideProgressBar={false}
+                  newestOnTop={false}
+                  closeOnClick={false}
+                  rtl={false}
+                  pauseOnFocusLoss
+                  draggable
+                  pauseOnHover
+                  theme="colored"
+                  transition={Bounce}
+                />
+                {children}
+              </SocketProvider>
+            </MyProvider>
+          </AuthProvider>
         </QueryProvider>
         <FacebookPixel />
       </body>

@@ -4,16 +4,16 @@ import { fetchUsers, getMembers } from "@/api/fetchUsers";
 import DashBread from "@/components/dashboard/DashBread";
 import ClientTable from "@/components/dashboard/users/ClientTable";
 import Loader from "@/components/ui/Loader";
-import { MyContext } from "@/context/MyProvider";
+import { useAuth } from "@/context/AuthProvider";
 import { auth } from "@/firebase/firebase.config";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useContext, useEffect } from "react";
+import { useEffect } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 
 const Users = () => {
   const [user, loading] = useAuthState(auth);
-  const { currentUser } = useContext(MyContext);
+  const { currentUser } = useAuth();
   const router = useRouter();
 
   const {

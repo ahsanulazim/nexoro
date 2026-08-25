@@ -1,10 +1,155 @@
+"use client";
+
 import Link from "next/link";
 import UserDropDown from "./UserDropDown";
-import { LuBell } from "react-icons/lu";
+import { useEffect, useState } from "react";
+import { useSocket } from "@/context/SocketProvider";
+import { auth } from "@/firebase/firebase.config";
+import api from "@/axios/axiosInstance";
+import { useRouter } from "next/navigation";
+import moment from "moment";
+import {
+  LuBell,
+  LuCircleAlert,
+  LuCircleCheck,
+  LuCircleX,
+  LuCreditCard,
+  LuMessageSquare,
+  LuPackage,
+} from "react-icons/lu";
 
 const DashNav = () => {
+  const {
+    notifications,
+    setNotifications,
+    unreadNotificationsCount,
+    setUnreadNotificationsCount,
+  } = useSocket();
+  const router = useRouter();
+
+  // Fetch initial notifications
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const token = await auth.currentUser?.getIdToken();
+        if (!token) return;
+
+        const response = await api.get("/notifications?limit=10", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (response.data.success) {
+          setNotifications(response.data.notifications);
+          setUnreadNotificationsCount(response.data.unreadCount);
+        }
+      } catch (error) {
+        console.error("Failed to load notifications:", error);
+      }
+    };
+
+    // Listen to changes in auth to fetch notifications
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (user) {
+        fetchNotifications();
+      }
+    });
+
+    return () => unsubscribe();
+  }, [setNotifications, setUnreadNotificationsCount]);
+
+  const getNotificationStyles = (type) => {
+    switch (type) {
+      case "new_order":
+        return {
+          icon: <LuPackage className="size-4 text-primary" />,
+          bg: "bg-primary/15",
+        };
+      case "order_cancelled":
+        return {
+          icon: <LuCircleX className="size-4 text-error" />,
+          bg: "bg-error/15",
+        };
+      case "order_completed":
+        return {
+          icon: <LuCircleCheck className="size-4 text-success" />,
+          bg: "bg-success/15",
+        };
+      case "payment_completed":
+        return {
+          icon: <LuCreditCard className="size-4 text-success" />,
+          bg: "bg-success/15",
+        };
+      case "payment_due":
+        return {
+          icon: <LuCircleAlert className="size-4 text-warning" />,
+          bg: "bg-warning/15",
+        };
+      case "new_message":
+        return {
+          icon: <LuMessageSquare className="size-4 text-info" />,
+          bg: "bg-info/15",
+        };
+      default:
+        return {
+          icon: <LuBell className="size-4 text-neutral" />,
+          bg: "bg-neutral/15",
+        };
+    }
+  };
+
+  const handleNotificationClick = async (notification) => {
+    // Mark as read in DB if unread
+    if (!notification.isRead) {
+      try {
+        const token = await auth.currentUser?.getIdToken();
+        await api.patch(
+          `/notifications/${notification._id}/read`,
+          {},
+          { headers: { Authorization: `Bearer ${token}` } },
+        );
+
+        // Update local state
+        setNotifications((prev) =>
+          prev.map((n) =>
+            n._id === notification._id ? { ...n, isRead: true } : n,
+          ),
+        );
+        setUnreadNotificationsCount((prev) => Math.max(0, prev - 1));
+      } catch (error) {
+        console.error("Error marking notification as read:", error);
+      }
+    }
+
+    // Close dropdown
+    const elem = document.activeElement;
+    if (elem) {
+      elem.blur();
+    }
+
+    // Redirect to target link
+    if (notification.link) {
+      router.push(notification.link);
+    }
+  };
+
+  const handleMarkAllRead = async () => {
+    try {
+      const token = await auth.currentUser?.getIdToken();
+      await api.patch(
+        `/notifications/mark-all-read`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+
+      setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+      setUnreadNotificationsCount(0);
+    } catch (error) {
+      console.error("Error marking all notifications as read:", error);
+    }
+  };
+
   return (
-    <nav className="navbar w-full bg-base-300 sticky top-0 z-10">
+    <nav className="navbar w-full bg-base-200 sticky top-0 z-10">
       <label
         htmlFor="my-drawer-4"
         aria-label="open sidebar"
@@ -39,17 +184,79 @@ const DashNav = () => {
       </div>
       <div className="flex gap-2">
         <details className="dropdown dropdown-end">
-          <summary className="btn btn-circle">
-            <LuBell />
+          <summary className="btn btn-circle relative">
+            <LuBell className="size-5" />
+            {unreadNotificationsCount > 0 && (
+              <span className="badge badge-error badge-xs absolute top-1 right-1 px-1.5 py-1 text-[10px]">
+                {unreadNotificationsCount}
+              </span>
+            )}
           </summary>
-          <ul className="menu dropdown-content bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm">
-            <li>
-              <a>Item 1</a>
-            </li>
-            <li>
-              <a>Item 2</a>
-            </li>
-          </ul>
+          <div className="dropdown-content bg-base-100 rounded-box z-20 w-80 p-2 shadow-lg border border-base-200 mt-2">
+            <div className="flex justify-between items-center px-3 py-2 border-b border-base-200">
+              <span className="font-bold text-sm">Notifications</span>
+              {unreadNotificationsCount > 0 && (
+                <button
+                  onClick={handleMarkAllRead}
+                  className="text-xs text-primary hover:underline font-semibold"
+                >
+                  Mark all read
+                </button>
+              )}
+            </div>
+            <ul className="menu max-h-80 overflow-y-auto py-1 px-0 flex flex-col gap-1">
+              {notifications.length === 0 ? (
+                <div className="text-center py-6 text-sm opacity-50">
+                  No notifications yet
+                </div>
+              ) : (
+                notifications.map((notification) => {
+                  const style = getNotificationStyles(notification.type);
+                  return (
+                    <li key={notification._id} className="w-full">
+                      <button
+                        onClick={() => handleNotificationClick(notification)}
+                        className={`flex items-start gap-3 p-3 rounded-lg text-left transition-all ${
+                          notification.isRead
+                            ? "opacity-60 hover:opacity-100"
+                            : "bg-base-200/50 font-medium"
+                        }`}
+                      >
+                        <div
+                          className={`p-2 rounded-full ${style.bg} shrink-0`}
+                        >
+                          {style.icon}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold truncate">
+                            {notification.title}
+                          </p>
+                          <p className="text-xs opacity-75 mt-0.5 line-clamp-2">
+                            {notification.message}
+                          </p>
+                          <p className="text-[10px] opacity-50 mt-1">
+                            {moment(notification.createdAt).fromNow()}
+                          </p>
+                        </div>
+                      </button>
+                    </li>
+                  );
+                })
+              )}
+            </ul>
+            <div className="border-t border-base-200 pt-2 text-center">
+              <Link
+                href="/dashboard/notifications"
+                onClick={() => {
+                  const elem = document.activeElement;
+                  if (elem) elem.blur();
+                }}
+                className="text-xs text-primary hover:underline font-semibold block py-1"
+              >
+                See all notifications
+              </Link>
+            </div>
+          </div>
         </details>
         <div className="dropdown dropdown-end">
           <div
@@ -59,7 +266,7 @@ const DashNav = () => {
           >
             <div className="w-10 rounded-full">
               <img
-                alt="Tailwind CSS Navbar component"
+                alt="User Avatar"
                 src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
               />
             </div>

@@ -3,16 +3,12 @@ import ServiceDrop from "./ServiceDrop";
 
 const ServiceCard = ({ service }) => {
   return (
-    <div className="card max-lg:card-sm bg-base-300 shadow-sm">
+    <div className="card max-lg:card-sm bg-base-200 shadow-sm">
       <div className="card-body">
         <div className="flex items-center justify-between gap-5">
           <div className="flex items-center gap-2">
             <div className="shrink-0 bg-white rounded-box size-12 p-3">
-              <img
-                className="contain"
-                src={service.icon}
-                alt={service.title}
-              />
+              <img className="contain" src={service.icon} alt={service.title} />
             </div>
             <div>
               <h2 className="card-title line-clamp-2">{service.title}</h2>

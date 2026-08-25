@@ -1,6 +1,6 @@
 import { useFieldContext } from "./CustomHookForm";
 
-const TextField = () => {
+const TextField = ({ label, placeholder }) => {
   const field = useFieldContext();
 
   const { errors, isTouched } = field.state.meta;

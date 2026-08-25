@@ -1,12 +1,12 @@
 "use client";
 import api from "@/axios/axiosInstance";
-import { MyContext } from "@/context/MyProvider";
+import { useAuth } from "@/context/AuthProvider";
 import { useSocket } from "@/context/SocketProvider";
 import { auth } from "@/firebase/firebase.config";
 import moment from "moment";
 import Image from "next/image";
 import Link from "next/link";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { BsFileEarmarkPdfFill } from "react-icons/bs";
 import { IoCheckmarkDoneSharp } from "react-icons/io5";
 import { LuArrowUp, LuFile, LuPaperclip, LuSend, LuX } from "react-icons/lu";
@@ -14,7 +14,7 @@ import { toast } from "react-toastify";
 
 const Conversation = ({ currentRoom }) => {
   const { socket, conversations } = useSocket();
-  const { currentUser } = useContext(MyContext);
+  const { currentUser } = useAuth();
   const [messages, setMessages] = useState([]);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);

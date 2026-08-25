@@ -91,10 +91,13 @@ const OrderAddModal = ({ ref, isEditing, orderId }) => {
                 children={(field) => (
                   <field.SearchSelectField
                     label="Select Service"
-                    data={services.map((item) => ({
-                      value: item.slug,
-                      label: item.title,
-                    }))}
+                    data={[
+                      { value: "custom", label: "Custom" },
+                      ...services?.map((item) => ({
+                        value: item.slug,
+                        label: item.title,
+                      })),
+                    ]}
                     isError={servicesError}
                     isLoading={servicesLoading}
                   />
@@ -118,7 +121,12 @@ const OrderAddModal = ({ ref, isEditing, orderId }) => {
                           label: `${plan.planName} - $${plan.price}`,
                         })) || [];
 
-                      return (
+                      return currentSlug === "custom" ? (
+                        <field.TextField
+                          label="Custom Service"
+                          placeholder="Custom Service"
+                        />
+                      ) : (
                         <field.SelectField
                           data={formattedPlans}
                           label="Select Plan"

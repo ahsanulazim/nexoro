@@ -9,8 +9,7 @@ import {
 } from "react-icons/lu";
 import SearchChat from "./SearchChat";
 import { useSocket } from "@/context/SocketProvider";
-import { useContext, useEffect, useRef, useState } from "react";
-import { MyContext } from "@/context/MyProvider";
+import { useEffect, useRef, useState } from "react";
 import { auth } from "@/firebase/firebase.config";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
@@ -18,17 +17,27 @@ import DeleteChatModal from "./DeleteChatModal";
 import { useQuery } from "@tanstack/react-query";
 import api from "@/axios/axiosInstance";
 import ConversationTabs from "./ConversationTabs";
+import { useAuth } from "@/context/AuthProvider";
 
 const ChatSidebar = () => {
   const { message: currentRoom } = useParams();
   const { socket, onlineStatuses, unreadCounts, setConversations } =
     useSocket();
   const [chat, setChat] = useState(null);
-  const { currentUser } = useContext(MyContext);
+  const { currentUser } = useAuth();
   const deleteRef = useRef();
 
   const pathName = usePathname();
-  const platform = pathName.split("/").pop();
+  const pathParts = pathName.split("/").filter(Boolean);
+  let platform = "inbox";
+  if (pathParts.length > 2) {
+    const lastPart = pathParts[pathParts.length - 1];
+    if (lastPart === currentRoom) {
+      platform = pathParts[pathParts.length - 2];
+    } else {
+      platform = lastPart;
+    }
+  }
 
   const {
     data: conversations,
@@ -146,7 +155,11 @@ const ChatSidebar = () => {
                   className="relative group"
                 >
                   <Link
-                    href={`/dashboard/inbox/${platform}/${conversation?.roomId}`}
+                    href={
+                      platform === "inbox"
+                        ? `/dashboard/inbox/${conversation?.roomId}`
+                        : `/dashboard/inbox/${platform}/${conversation?.roomId}`
+                    }
                     className={`list-row cursor-pointer hover:bg-main-dark items-center ${
                       currentRoom === conversation?.roomId ? "bg-main-dark" : ""
                     }`}
@@ -176,7 +189,7 @@ const ChatSidebar = () => {
                       </span>
                     )}
                   </Link>
-                  <div className="dropdown dropdown-end absolute top-1/2 right-5 z-50 -translate-y-1/2 hidden group-hover:inline-block">
+                  <div className="dropdown dropdown-end absolute top-1/2 right-4 z-50 -translate-y-1/2 hidden group-hover:inline-block">
                     <div
                       tabIndex={0}
                       role="button"
@@ -185,7 +198,7 @@ const ChatSidebar = () => {
                       <LuEllipsis />
                     </div>
                     <ul
-                      tabIndex="-1"
+                      tabIndex={-1}
                       className="dropdown-content menu bg-base-100 rounded-box z-1 w-40 p-2 shadow-sm"
                     >
                       <li>

@@ -24,10 +24,17 @@ This project is built using modern web technologies:
   - **Services:** Detailed listing of digital services offered.
   - **Pricing:** Service pricing plans.
 - **Authentication:**
-  - Secure Login and Registration functionality using Firebase.
+  - Secure Login and Registration functionality using Firebase Auth synced to MongoDB.
 - **Dashboard:**
-  - **Client Management:** Add, edit, and view client details.
-  - **Service Management:** Manage service offerings.
+  - **Real-time Notification System:**
+    - Live toast notifications and dynamic header badge (Bell dropdown).
+    - Persisted notification history on `/dashboard/notifications` with tab-based category filtering (All, Orders, Payments, Messages) and pagination.
+    - Automated 60-day cleanup of old notifications using MongoDB TTL indexing.
+  - **Live Support Inbox:** Real-time socket-based support chat with online status indicators and live unread message counts.
+  - **Order & Client Management:** View, edit, and assign orders/clients to team members.
+- **Payment & Checkout Flow:**
+  - EPS payment gateway integration with redirect handling.
+  - Automatic payment status verification and order confirmation.
 - **Responsive Design:** Fully responsive UI/UX optimized for all devices.
 
 ## Getting Started

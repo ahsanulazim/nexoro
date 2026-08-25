@@ -1,39 +1,49 @@
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useParams } from "next/navigation";
 
 const ConversationTabs = () => {
   const pathName = usePathname();
+  const { message: currentRoom } = useParams();
   const mainLink = "/dashboard/inbox";
-  const isActive = (href) =>
-    pathName === href || pathName.includes(href.split("/").pop());
+
+  const pathParts = pathName.split("/").filter(Boolean);
+  let platform = "inbox";
+  if (pathParts.length > 2) {
+    const lastPart = pathParts[pathParts.length - 1];
+    if (lastPart === currentRoom) {
+      platform = pathParts[pathParts.length - 2];
+    } else {
+      platform = lastPart;
+    }
+  }
 
   return (
     <div role="tablist" className="tabs tabs-box">
       <Link
         href={mainLink}
         role="tab"
-        className={`${pathName === mainLink ? "tab-active" : ""} tab flex-1`}
+        className={`${platform === "inbox" ? "tab-active" : ""} tab flex-1`}
       >
         All
       </Link>
       <Link
         href={`${mainLink}/web`}
         role="tab"
-        className={`${isActive(`${mainLink}/web`) ? "tab-active" : ""} tab flex-1`}
+        className={`${platform === "web" ? "tab-active" : ""} tab flex-1`}
       >
         Web
       </Link>
       <Link
         href={`${mainLink}/facebook`}
         role="tab"
-        className={`${isActive(`${mainLink}/facebook`) ? "tab-active" : ""} tab flex-1`}
+        className={`${platform === "facebook" ? "tab-active" : ""} tab flex-1`}
       >
         Facebook
       </Link>
       <Link
         href={`${mainLink}/whatsapp`}
         role="tab"
-        className={`${isActive(`${mainLink}/whatsapp`) ? "tab-active" : ""} tab flex-1`}
+        className={`${platform === "whatsapp" ? "tab-active" : ""} tab flex-1`}
       >
         Whatsapp
       </Link>

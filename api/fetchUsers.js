@@ -1,4 +1,19 @@
+import api from "@/axios/axiosInstance";
 import { auth } from "@/firebase/firebase.config";
+
+//createUser
+export const createUser = async (data) => {
+  const user = auth.currentUser;
+  if (!user) throw new Error("No authenticated user");
+  const token = await user.getIdToken();
+  const res = await api.post("/users", data, {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return res.data;
+};
 
 //get users
 export const fetchUsers = async () => {

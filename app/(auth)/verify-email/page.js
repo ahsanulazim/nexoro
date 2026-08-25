@@ -1,12 +1,11 @@
 "use client";
-
-import DashDrawer from "@/components/dashboard/DashDrawer";
+import UserForm from "@/components/auth/UserForm";
 import Loader from "@/components/ui/Loader";
 import { useAuth } from "@/context/AuthProvider";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
-export default function Layout({ children }) {
+const page = () => {
   const { currentUser, isLoading } = useAuth();
   const router = useRouter();
 
@@ -14,15 +13,16 @@ export default function Layout({ children }) {
     if (!isLoading && !currentUser) {
       router.push("/login");
     }
-
-    if (currentUser && !currentUser?.user?.emailVerified) {
-      router.push("/verify-email");
+    if (!isLoading && currentUser && currentUser?.user?.emailVerified) {
+      router.push("/dashboard");
     }
   }, [currentUser, isLoading, router]);
 
-  if (isLoading) {
+  if (isLoading || !currentUser) {
     return <Loader />;
   }
 
-  return <DashDrawer>{children}</DashDrawer>;
-}
+  return <UserForm isLogin={false} isReset={false} verifyEmail={true} />;
+};
+
+export default page;

@@ -1,19 +1,19 @@
 "use client";
 import { confirmOrder } from "@/api/fetchEps";
-import { MyContext } from "@/context/MyProvider";
+import { useAuth } from "@/context/AuthProvider";
 import { useMutation } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useContext, useEffect } from "react";
+import { useEffect } from "react";
 import { FaCheck } from "react-icons/fa6";
 import { LuLayoutDashboard } from "react-icons/lu";
 import { MoonLoader } from "react-spinners";
 import { toast } from "react-toastify";
 
 const page = () => {
-  const { user } = useContext(MyContext);
+  const { currentUser } = useAuth();
   const searchParams = useSearchParams();
-  const uid = user?.uid;
+  const uid = currentUser?.user?.uid;
   const router = useRouter();
 
   const merchantTransactionId = searchParams.get("MerchantTransactionId");

@@ -35,7 +35,7 @@ const PortfolioCard = ({ portfolio, client }) => {
   };
 
   return (
-    <div className="card bg-base-100 overflow-hidden">
+    <div className="card bg-base-200 overflow-hidden">
       <Link href={`${!client ? "/dashboard" : ""}/portfolio/${portfolio.slug}`}>
         <Image
           width={400}
@@ -45,7 +45,7 @@ const PortfolioCard = ({ portfolio, client }) => {
           alt={portfolio.title}
         />
       </Link>
-      <div className="card-body bg-base-300">
+      <div className="card-body">
         <Link
           href={`/dashboard/portfolio/${portfolio.slug}`}
           className="card-body p-0 gap-1"

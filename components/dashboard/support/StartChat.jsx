@@ -1,12 +1,11 @@
 "use client";
 
-import { MyContext } from "@/context/MyProvider";
+import { useAuth } from "@/context/AuthProvider";
 import Image from "next/image";
 import Link from "next/link";
-import { useContext } from "react";
 
 const StartChat = () => {
-  const { currentUser } = useContext(MyContext);
+  const { currentUser } = useAuth();
 
   const roomId = `room_${currentUser?.user?._id}`;
 
