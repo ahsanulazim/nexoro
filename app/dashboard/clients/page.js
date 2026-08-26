@@ -31,7 +31,7 @@ const Clients = () => {
           </div>
         </section>
         <section>
-          <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(min(360px),1fr))] gap-5">
             {clientDataLoading &&
               Array.from({ length: 8 }).map((_, i) => (
                 <ClientSkeleton key={i} />

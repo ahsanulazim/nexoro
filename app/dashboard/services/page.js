@@ -41,7 +41,7 @@ const Services = () => {
           {services?.length === 0 ? (
             <p>No Services Added Yet</p>
           ) : (
-            <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(min(350px),1fr))] gap-5">
               {services?.map((service) => (
                 <ServiceCard key={service.title} service={service} />
               ))}

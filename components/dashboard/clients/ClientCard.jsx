@@ -3,7 +3,7 @@ import ClientDrop from "./ClientDrop";
 
 const ClientCard = ({ client }) => {
   return (
-    <div className="card bg-base-300 shadow-xl">
+    <div className="card bg-base-100 shadow-xl">
       <div className="card-body">
         <div className="flex items-center justify-between gap-5">
           <div className="flex items-center gap-2">

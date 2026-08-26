@@ -19,17 +19,27 @@ import { HiOutlineCurrencyBangladeshi } from "react-icons/hi";
 import DashNav from "./DashNav";
 import ActiveLink from "./ActiveLink";
 import { useAuth } from "@/context/AuthProvider";
-import Image from "next/image";
+import { useState } from "react";
 
 const DashDrawer = ({ children }) => {
   const { currentUser } = useAuth();
+  const [isChecked, setIsChecked] = useState(false);
 
   return (
-    <div className="drawer lg:drawer-open" data-lenis-ignore>
-      <input id="my-drawer-4" type="checkbox" className="drawer-toggle" />
+    <div
+      className="drawer lg:drawer-open"
+      data-lenis-ignore
+      id="nexoro-dashboard"
+    >
+      <input
+        id="my-drawer-4"
+        type="checkbox"
+        onChange={() => setIsChecked(!isChecked)}
+        className="drawer-toggle"
+      />
       <div className="drawer-content">
         {/* Navbar */}
-        <DashNav />
+        <DashNav isChecked={isChecked} />
         {/* Page content here */}
         <div className="p-4 bg-base-300 min-h-[calc(100dvh-64px)]">
           {children}

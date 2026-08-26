@@ -21,7 +21,7 @@ const AllPortfolio = () => {
 
   return (
     <>
-      <div className="grid grid-cols-5 rounded-xl gap-5">
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(min(300px),1fr))] gap-5">
         {isLoading ? (
           Array.from({ length: 10 }).map((_, i) => (
             <PortfolioSkeleton key={i} />

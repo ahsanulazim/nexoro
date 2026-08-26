@@ -3,6 +3,7 @@
 import DashDrawer from "@/components/dashboard/DashDrawer";
 import Loader from "@/components/ui/Loader";
 import { useAuth } from "@/context/AuthProvider";
+import { DashThemeProvider } from "@/context/DashThemeProvider";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
@@ -24,5 +25,9 @@ export default function Layout({ children }) {
     return <Loader />;
   }
 
-  return <DashDrawer>{children}</DashDrawer>;
+  return (
+    <DashThemeProvider>
+      <DashDrawer>{children}</DashDrawer>
+    </DashThemeProvider>
+  );
 }
