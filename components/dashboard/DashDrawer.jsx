@@ -19,6 +19,7 @@ import { HiOutlineCurrencyBangladeshi } from "react-icons/hi";
 import DashNav from "./DashNav";
 import ActiveLink from "./ActiveLink";
 import { useAuth } from "@/context/AuthProvider";
+import Image from "next/image";
 
 const DashDrawer = ({ children }) => {
   const { currentUser } = useAuth();
@@ -41,7 +42,21 @@ const DashDrawer = ({ children }) => {
           aria-label="close sidebar"
           className="drawer-overlay"
         ></label>
-        <div className="flex min-h-full flex-col items-start bg-base-200 is-drawer-close:w-14 is-drawer-open:w-64">
+        <div className="flex min-h-full flex-col items-start bg-base-100 is-drawer-close:w-14 is-drawer-open:w-64">
+          <div className="flex gap-2 items-center px-2 py-4">
+            <img
+              src="/assets/nexoro_logo_icon.png"
+              className="w-full max-w-10"
+              alt="Nexoro Logo"
+            />
+            <span className="is-drawer-close:hidden">
+              <img
+                src="/assets/nexoro_logo_name.png"
+                className="w-full max-w-18"
+                alt="Nexoro Logo"
+              />
+            </span>
+          </div>
           {/* Sidebar content here */}
           <ul className="menu w-full grow">
             {/* List item */}

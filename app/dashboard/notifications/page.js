@@ -185,13 +185,29 @@ export default function NotificationsPage() {
       </section>
 
       {/* Filters and List view */}
-      <section className="bg-base-300 rounded-box p-6 space-y-6 shadow-sm border border-base-200">
-        <div className="flex gap-2 border-b border-base-100 pb-4 overflow-x-auto">
+      <section className="bg-base-100 rounded-box p-6 space-y-6 shadow-sm border border-base-200">
+        <div className="flex gap-2 overflow-x-auto">
           {[
-            { id: "all", label: "All Notifications" },
-            { id: "orders", label: "Orders" },
-            { id: "payments", label: "Payments" },
-            { id: "messages", label: "Messages" },
+            {
+              id: "all",
+              label: "All Notifications",
+              icon: <LuBell className="text-base" />,
+            },
+            {
+              id: "orders",
+              label: "Orders",
+              icon: <LuPackage className="text-base" />,
+            },
+            {
+              id: "payments",
+              label: "Payments",
+              icon: <LuCreditCard className="text-base" />,
+            },
+            {
+              id: "messages",
+              label: "Messages",
+              icon: <LuMessageSquare className="text-base" />,
+            },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -199,9 +215,10 @@ export default function NotificationsPage() {
               className={`btn btn-sm rounded-full ${
                 activeFilter === tab.id
                   ? "btn-primary font-bold shadow-md"
-                  : "btn-ghost opacity-70 hover:opacity-100"
+                  : "btn-soft opacity-70 hover:opacity-100"
               }`}
             >
+              {tab.icon}
               {tab.label}
             </button>
           ))}
@@ -226,16 +243,16 @@ export default function NotificationsPage() {
             </p>
           </div>
         ) : (
-          <div className="divide-y divide-base-200">
+          <div className="space-y-2">
             {filteredNotifications.map((notification) => {
               const style = getNotificationStyles(notification.type);
               return (
                 <div
                   key={notification._id}
                   onClick={() => handleNotificationClick(notification)}
-                  className={`flex items-start gap-4 py-4 px-3 cursor-pointer hover:bg-base-200/40 rounded-xl transition-all ${
+                  className={`flex items-start bg-base-200 gap-4 py-4 px-3 cursor-pointer hover:bg-base-200/40 rounded-xl transition-all ${
                     !notification.isRead
-                      ? "bg-base-200/25 border-l-4 border-primary"
+                      ? "bg-base-300 border-l-4 border-primary"
                       : ""
                   }`}
                 >
@@ -260,7 +277,7 @@ export default function NotificationsPage() {
                       {notification.message}
                     </p>
                     <div className="flex items-center gap-2 mt-2">
-                      <span className="badge badge-ghost text-[10px] font-semibold tracking-wide uppercase px-2 py-0.5">
+                      <span className="badge badge-soft text-[10px] font-semibold tracking-wide uppercase px-2 py-0.5">
                         {style.label}
                       </span>
                     </div>

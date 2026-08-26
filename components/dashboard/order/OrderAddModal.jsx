@@ -25,14 +25,24 @@ const OrderAddModal = ({ ref, isEditing, orderId }) => {
   const { AppField, AppForm, Subscribe, SubmitButton, handleSubmit, reset } =
     useAppForm({
       defaultValues: {
-        clientId: isEditing ? orderData?.order?.clientId : "",
-        slug: isEditing ? orderData?.order?.service?.slug : "",
-        planId: isEditing ? orderData?.order?.planId : "",
-        status: isEditing ? orderData?.order?.status : "",
-        payment: isEditing ? orderData?.order?.payment : "",
-        paymentMethod: isEditing ? orderData?.order?.paymentMethod : "",
-        discount: isEditing ? orderData?.order?.discount : 0,
-        amount: isEditing ? orderData?.order?.amount : 0,
+        clientId: isEditing ? orderData?.order?.clientId || "" : "",
+        slug: isEditing
+          ? orderData?.order?.service?.slug || orderData?.order?.service || ""
+          : "",
+        planId: isEditing ? orderData?.order?.planId || "" : "",
+        serviceName: isEditing
+          ? orderData?.order?.serviceName ||
+            orderData?.order?.service?.title ||
+            ""
+          : "",
+        servicePrice: isEditing
+          ? orderData?.order?.servicePrice || orderData?.order?.price || 0
+          : 0,
+        status: isEditing ? orderData?.order?.status || "" : "",
+        payment: isEditing ? orderData?.order?.payment || "" : "",
+        paymentMethod: isEditing ? orderData?.order?.paymentMethod || "" : "",
+        discount: isEditing ? orderData?.order?.discount || 0 : 0,
+        amount: isEditing ? orderData?.order?.amount || 0 : 0,
       },
       onSubmit: ({ value }) => {
         isEditing ? mutate({ ...value, orderId }) : mutate(value);
@@ -106,37 +116,55 @@ const OrderAddModal = ({ ref, isEditing, orderId }) => {
 
               <Subscribe
                 selector={(state) => state.values.slug}
-                children={(currentSlug) => (
-                  <AppField
-                    name="planId"
-                    children={(field) => {
-                      const selectedServicePlans = services?.find(
-                        (service) => service.slug === currentSlug,
-                      )?.plans;
+                children={(currentSlug) =>
+                  currentSlug === "custom" ? (
+                    <>
+                      <AppField
+                        name="serviceName"
+                        children={(field) => (
+                          <field.TextField
+                            label="Service Name"
+                            placeholder="Service Name"
+                          />
+                        )}
+                      />
+                      <AppField
+                        name="servicePrice"
+                        children={(field) => (
+                          <field.NumberField
+                            label="Service Price"
+                            placeholder="Service Price"
+                          />
+                        )}
+                      />
+                    </>
+                  ) : (
+                    <AppField
+                      name="planId"
+                      children={(field) => {
+                        const selectedServicePlans = services?.find(
+                          (service) => service.slug === currentSlug,
+                        )?.plans;
 
-                      // ডাটাবেজের (id -> _id) এবং (planName -> name) ফরম্যাট করা
-                      const formattedPlans =
-                        selectedServicePlans?.map((plan) => ({
-                          value: plan.id,
-                          label: `${plan.planName} - $${plan.price}`,
-                        })) || [];
+                        // ডাটাবেজের (id -> _id) এবং (planName -> name) ফরম্যাট করা
+                        const formattedPlans =
+                          selectedServicePlans?.map((plan) => ({
+                            value: plan.id,
+                            label: `${plan.planName} - $${plan.price}`,
+                          })) || [];
 
-                      return currentSlug === "custom" ? (
-                        <field.TextField
-                          label="Custom Service"
-                          placeholder="Custom Service"
-                        />
-                      ) : (
-                        <field.SelectField
-                          data={formattedPlans}
-                          label="Select Plan"
-                          isError={servicesError}
-                          isLoading={servicesLoading}
-                        />
-                      );
-                    }}
-                  />
-                )}
+                        return (
+                          <field.SelectField
+                            data={formattedPlans}
+                            label="Select Plan"
+                            isError={servicesError}
+                            isLoading={servicesLoading}
+                          />
+                        );
+                      }}
+                    />
+                  )
+                }
               />
 
               <AppField
@@ -173,9 +201,16 @@ const OrderAddModal = ({ ref, isEditing, orderId }) => {
                   />
                 )}
               />
-              <AppField
-                name="amount"
-                children={(field) => <field.NumberField label="Amount" />}
+              <Subscribe
+                selector={(state) => state.values.payment}
+                children={(currentPayment) =>
+                  currentPayment !== "Success" ? (
+                    <AppField
+                      name="amount"
+                      children={(field) => <field.NumberField label="Amount" />}
+                    />
+                  ) : null
+                }
               />
 
               <AppField

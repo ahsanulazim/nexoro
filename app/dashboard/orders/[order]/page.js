@@ -16,7 +16,7 @@ const Order = async ({ params }) => {
         <DashBread title="Orders" subtitle="Order Details" />
       </section>
       <section className="grid lg:grid-cols-12 gap-5 items-start">
-        <div className="p-5 bg-base-300 rounded-box lg:col-span-8">
+        <div className="p-5 bg-base-100 rounded-box lg:col-span-8">
           <div>
             <h1 className="text-xl font-bold flex items-center gap-2">
               <LuBox /> Order Details
@@ -27,7 +27,7 @@ const Order = async ({ params }) => {
           </div>
           <div className="divider"></div>
           <div className="flex gap-5 flex-col xl:flex-row">
-            <div className="bg-base-100 p-5 rounded-box xl:flex-1">
+            <div className="bg-base-200 p-5 rounded-box xl:flex-1">
               <h2 className="text-lg font-semibold uppercase">Items</h2>
               <div className="opacity-50">
                 <p>Service: {orderData.order.service.title}</p>
@@ -85,7 +85,7 @@ const Order = async ({ params }) => {
                 </div>
               </div>
             </div>
-            <div className="bg-base-100 p-5 rounded-box xl:flex-1">
+            <div className="bg-base-200 p-5 rounded-box xl:flex-1">
               <h2 className="text-lg font-semibold uppercase">
                 Customer Details
               </h2>
@@ -97,11 +97,11 @@ const Order = async ({ params }) => {
           </div>
         </div>
         <div className="lg:col-span-4">
-          <div className="p-5 bg-base-300 rounded-box">
+          <div className="p-5 bg-base-100 rounded-box">
             <h1 className="font-semibold">Order Actions</h1>
             <OrderAction order={orderData.order} />
           </div>
-          <div className="p-5 bg-base-300 rounded-box mt-5">
+          <div className="p-5 bg-base-100 rounded-box mt-5">
             {orderData.order.assignedTo ? (
               <h1 className="font-semibold">
                 Order Assigned to{" "}

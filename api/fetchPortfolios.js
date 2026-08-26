@@ -34,7 +34,7 @@ export const fetchPortfolios = async ({ queryKey }) => {
     `${process.env.NEXT_PUBLIC_API_BASE}/portfolio/allPortfolios`,
   );
   url.searchParams.append("page", page);
-  url.searchParams.append("limit", 6);
+  url.searchParams.append("limit", 10);
   if (category) {
     url.searchParams.append("category", category);
   }

@@ -48,10 +48,10 @@ const OrderTable = () => {
         setOrderId={setOrderId}
       />
       <OrderModal ref={orderRef} orderId={orderId} setOrderId={setOrderId} />
-      <div className="overflow-x-auto bg-base-200 rounded-box">
+      <div className="overflow-x-auto rounded-box">
         <table className="table">
           <thead>
-            <tr>
+            <tr className="bg-base-200">
               <th>Order ID</th>
               <th>Name</th>
               <th>Service</th>
@@ -66,7 +66,7 @@ const OrderTable = () => {
           <tbody>
             {isLoading ? (
               Array.from({ length: 12 }).map((_, i) => (
-                <tr key={i}>
+                <tr key={i} className="bg-base-100">
                   <th>
                     <div className="skeleton h-5 w-20"></div>
                   </th>
@@ -108,7 +108,7 @@ const OrderTable = () => {
               </tr>
             ) : (
               orders.orders.map((order) => (
-                <tr key={order.orderId}>
+                <tr key={order.orderId} className="bg-base-100">
                   <th>
                     <Link
                       className="link link-hover"
@@ -168,7 +168,7 @@ const OrderTable = () => {
                   <td>
                     {order.createdBy === null ? "Customer" : order.createdBy}
                   </td>
-                  <td>{moment(order.createdAt).format("Do MMM, YYYY")}</td>
+                  <td>{moment(order.createdAt).fromNow()}</td>
                   <td>
                     <Link href={`/dashboard/orders/${order.orderId}`}>
                       <button className="btn btn-success btn-soft btn-circle">
@@ -196,7 +196,7 @@ const OrderTable = () => {
             )}
           </tbody>
           <tfoot>
-            <tr>
+            <tr className="bg-base-200">
               <th>Order ID</th>
               <th>Name</th>
               <th>Service</th>

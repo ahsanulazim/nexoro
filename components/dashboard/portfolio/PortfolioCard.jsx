@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import Link from "next/link";
 import { deletePortfolio } from "@/api/fetchPortfolios";
 import Image from "next/image";
+import moment from "moment";
 
 const PortfolioCard = ({ portfolio, client }) => {
   const queryClient = useQueryClient();
@@ -35,7 +36,7 @@ const PortfolioCard = ({ portfolio, client }) => {
   };
 
   return (
-    <div className="card bg-base-200 overflow-hidden">
+    <div className="card bg-base-100 overflow-hidden">
       <Link href={`${!client ? "/dashboard" : ""}/portfolio/${portfolio.slug}`}>
         <Image
           width={400}
@@ -51,7 +52,7 @@ const PortfolioCard = ({ portfolio, client }) => {
           className="card-body p-0 gap-1"
         >
           <div className="badge badge-success">{portfolio.service.title}</div>
-          <h2 className="card-title text-lg xs:text-xl line-clamp-1">
+          <h2 className="card-title lg:text-lg line-clamp-1">
             {portfolio.title}
           </h2>
           {!client && (
@@ -64,11 +65,7 @@ const PortfolioCard = ({ portfolio, client }) => {
               </p>
               <p className="flex items-center gap-2 opacity-50">
                 <LuCalendar />
-                {new Date(portfolio.added).toLocaleString("en-BD", {
-                  timeZone: "Asia/Dhaka",
-                  dateStyle: "medium",
-                  timeStyle: "short",
-                })}
+                {moment(portfolio.added).fromNow()}
               </p>
             </>
           )}
@@ -76,7 +73,7 @@ const PortfolioCard = ({ portfolio, client }) => {
         {!client && (
           <div>
             <button
-              className="btn btn-error"
+              className="btn btn-sm btn-error"
               onClick={() => handleDelete(portfolio._id, portfolio.public_id)}
               disabled={mutation.isPending}
             >

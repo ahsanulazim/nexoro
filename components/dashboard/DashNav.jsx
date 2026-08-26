@@ -149,7 +149,7 @@ const DashNav = () => {
   };
 
   return (
-    <nav className="navbar w-full bg-base-200 sticky top-0 z-10">
+    <nav className="navbar w-full bg-base-300 border-b border-b-base-100 sticky top-0 z-10">
       <label
         htmlFor="my-drawer-4"
         aria-label="open sidebar"
@@ -173,12 +173,8 @@ const DashNav = () => {
       </label>
       <div className="px-4 flex-1">
         <div className="w-fit">
-          <Link href="/">
-            <img
-              className="w-full max-w-32"
-              src="/assets/nexoro_logo.png"
-              alt="Nexoro Logo"
-            />
+          <Link href="/dashboard">
+            <h1 className="font-bold text-xl">Dashboard</h1>
           </Link>
         </div>
       </div>
@@ -204,7 +200,7 @@ const DashNav = () => {
                 </button>
               )}
             </div>
-            <ul className="menu max-h-80 overflow-y-auto py-1 px-0 flex flex-col gap-1">
+            <ul className="py-1 max-h-96 overflow-y-scroll space-y-1">
               {notifications.length === 0 ? (
                 <div className="text-center py-6 text-sm opacity-50">
                   No notifications yet
@@ -213,7 +209,7 @@ const DashNav = () => {
                 notifications.map((notification) => {
                   const style = getNotificationStyles(notification.type);
                   return (
-                    <li key={notification._id} className="w-full">
+                    <li key={notification._id} className="p-0">
                       <button
                         onClick={() => handleNotificationClick(notification)}
                         className={`flex items-start gap-3 p-3 rounded-lg text-left transition-all ${
