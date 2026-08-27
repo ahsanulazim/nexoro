@@ -84,10 +84,17 @@ const OrderTable = () => {
                     <div className="skeleton h-5 w-24"></div>
                   </td>
                   <td>
+                    <div className="skeleton h-5 w-24"></div>
+                  </td>
+                  <td>
+                    <div className="skeleton h-5 w-24"></div>
+                  </td>
+                  <td>
                     <div className="skeleton h-5 w-20"></div>
                   </td>
                   <td>
                     <div className="flex gap-2">
+                      <div className="skeleton rounded-full size-10"></div>
                       <div className="skeleton rounded-full size-10"></div>
                       <div className="skeleton rounded-full size-10"></div>
                     </div>

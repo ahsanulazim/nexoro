@@ -1,7 +1,9 @@
 @import "tailwindcss";
 
 @plugin "daisyui" {
-  themes: light --default, dark --prefersdark;
+  themes:
+    light --default,
+    dark --prefersdark;
 }
 
 @theme {
@@ -37,7 +39,6 @@
 }
 
 @keyframes gradient {
-
   0%,
   100% {
     background-position: 0% 50%;
@@ -60,9 +61,11 @@
 
 .cardAnimation::after,
 .cardAnimation::before {
-  background: conic-gradient(from var(--gradient-angle),
-      hsl(273, 100%, 50%),
-      hsl(273, 100%, 70%));
+  background: conic-gradient(
+    from var(--gradient-angle),
+    hsl(273, 100%, 50%),
+    hsl(273, 100%, 70%)
+  );
   z-index: -1;
   animation: rotation 5s linear infinite;
 }
@@ -78,13 +81,12 @@
 }
 
 .btn-nexoro-primary {
-  @apply bg-main border-main hover:bg-main-dark hover:border-main-dark;
+  @apply bg-main border-main hover:bg-main-dark hover:border-main-dark text-white;
 }
 
 .btn-nexoro-primary-outline {
   @apply border-main text-main hover:text-white hover:bg-main;
 }
-
 
 .ql-container {
   @apply !border-none;
@@ -117,7 +119,7 @@
 }
 
 .blog-content img {
-  @apply rounded-lg
+  @apply rounded-lg;
 }
 
 .blog-content ol {

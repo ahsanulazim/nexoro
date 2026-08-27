@@ -8,7 +8,7 @@ const ClientCard = ({ client }) => {
         <div className="flex items-center justify-between gap-5">
           <div className="flex items-center gap-2">
             {client.logo ? (
-              <div className="shrink-0 bg-white rounded-box size-12 p-3 flex items-center">
+              <div className="shrink-0 bg-base-content/10 rounded-box size-12 p-3 flex items-center">
                 <img className="contain" src={client.logo} alt={client.name} />
               </div>
             ) : (

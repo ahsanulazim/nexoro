@@ -16,7 +16,7 @@ const SearchSelectField = ({ label, data, isLoading, isError }) => {
       <Select
         classNames={{
           control: (state) =>
-            `!bg-base-100 !border !border-white/25 !rounded-md !p-0.5 `,
+            `!bg-base-100 !border !border-base-content/20 !rounded-md !p-0.5 `,
           menu: () => "!bg-base-100 !rounded-lg !border !border-base-300",
           option: ({ isFocused, isSelected }) =>
             `!cursor-pointer ${

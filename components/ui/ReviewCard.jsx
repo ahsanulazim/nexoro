@@ -18,7 +18,7 @@ const ReviewCard = ({ review, className, controller }) => {
       await queryClient.cancelQueries({ queryKey: ["reviews"] });
       const previousReviews = queryClient.getQueryData(["reviews"]);
       queryClient.setQueryData(["reviews"], (oldReviews) =>
-        oldReviews.filter((review) => review.id !== id)
+        oldReviews.filter((review) => review.id !== id),
       );
       return { previousReviews };
     },
@@ -45,7 +45,7 @@ const ReviewCard = ({ review, className, controller }) => {
             <div className="card-title text-sm">
               <div className="avatar avatar-placeholder">
                 <div className="bg-neutral text-neutral-content w-10 rounded-full">
-                  <span className="text-xs">
+                  <span className="text-sm">
                     {review?.clientName?.slice(0, 1) || "CN"}
                   </span>
                 </div>
@@ -69,14 +69,14 @@ const ReviewCard = ({ review, className, controller }) => {
                 </p>
                 <div className="flex items-center gap-2">
                   <button
-                    className="btn btn-sm btn-square btn-soft btn-error"
+                    className="btn btn-sm btn-square btn-error"
                     onClick={() => removeReview({ id: review._id })}
                     disabled={isPending}
                   >
                     <LuTrash2 />
                   </button>
                   <button
-                    className="btn btn-sm btn-square btn-soft btn-primary"
+                    className="btn btn-sm btn-square btn-primary"
                     onClick={() => editReview.current.showModal()}
                   >
                     <LuSquarePen />

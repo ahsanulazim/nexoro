@@ -2,6 +2,7 @@
 
 import {
   LuBookUser,
+  LuBriefcase,
   LuFlag,
   LuGalleryThumbnails,
   LuHeadset,
@@ -20,10 +21,12 @@ import DashNav from "./DashNav";
 import ActiveLink from "./ActiveLink";
 import { useAuth } from "@/context/AuthProvider";
 import { useState } from "react";
+import { useDashTheme } from "@/context/DashThemeProvider";
 
 const DashDrawer = ({ children }) => {
   const { currentUser } = useAuth();
   const [isChecked, setIsChecked] = useState(false);
+  const { isDark } = useDashTheme();
 
   return (
     <div
@@ -61,7 +64,7 @@ const DashDrawer = ({ children }) => {
             />
             <span className="is-drawer-close:hidden">
               <img
-                src="/assets/nexoro_logo_name.png"
+                src={`/assets/${!isDark ? "nexoro_logo_name_dark.png" : "nexoro_logo_name.png"}`}
                 className="w-full max-w-18"
                 alt="Nexoro Logo"
               />
@@ -94,6 +97,12 @@ const DashDrawer = ({ children }) => {
                   </ActiveLink>
                 </li>
 
+                <li>
+                  <ActiveLink href="/dashboard/projects" dataTip="Projects">
+                    <LuBriefcase className="my-1.5 inline-block size-4" />
+                    <span className="is-drawer-close:hidden">Projects</span>
+                  </ActiveLink>
+                </li>
                 <li>
                   <ActiveLink href="/dashboard/portfolio" dataTip="Portfolio">
                     <LuBookUser className="my-1.5 inline-block size-4" />
