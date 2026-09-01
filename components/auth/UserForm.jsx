@@ -15,14 +15,18 @@ import {
   signInWithPopup,
 } from "firebase/auth";
 import { auth } from "@/firebase/firebase.config";
+import { signOut } from "firebase/auth";
 import { useAuth } from "@/context/AuthProvider";
 import Image from "next/image";
 import { useState } from "react";
 
 const UserForm = ({ isLogin, isReset, verifyEmail }) => {
-  const { setCurrentUser, setIsLoading } = useAuth();
+  const router = useRouter();
+
+  const { currentUser, setCurrentUser, setIsLoading, refreshUser } = useAuth();
   const [verificationSent, setVerificationSent] = useState(false);
   const [isSendingMail, setIsSendingMail] = useState(false);
+  const [isCheckingStatus, setIsCheckingStatus] = useState(false);
 
   const { AppField, handleSubmit, reset, AppForm, SubmitButton } = useAppForm({
     defaultValues: {
@@ -41,12 +45,9 @@ const UserForm = ({ isLogin, isReset, verifyEmail }) => {
             value.email,
             value.password,
           );
-          const user = userCred.user;
-          if (user) {
-            toast.success("Login Successful");
-            reset();
-            navigate.push("/dashboard");
-          }
+
+          toast.success("Login Successful");
+          router.push("/dashboard");
         } catch (error) {
           toast.error(error.message);
         }
@@ -69,8 +70,6 @@ const UserForm = ({ isLogin, isReset, verifyEmail }) => {
     },
   });
 
-  const navigate = useRouter();
-
   const queryClient = useQueryClient();
 
   const { mutate, isPending } = useMutation({
@@ -80,11 +79,20 @@ const UserForm = ({ isLogin, isReset, verifyEmail }) => {
       toast.success("Registration Successful");
       setCurrentUser(data);
       reset();
-      navigate.push("/dashboard");
+      if (!data?.user?.emailVerified) {
+        router.push("/verify-email");
+      } else {
+        router.push("/dashboard");
+      }
     },
     onError: (error) => {
       reset();
-      toast.error(error.message);
+      console.warn("User sync warning:", error.message);
+      if (!auth.currentUser?.emailVerified) {
+        router.push("/verify-email");
+      } else {
+        router.push("/dashboard");
+      }
     },
   });
 
@@ -95,18 +103,41 @@ const UserForm = ({ isLogin, isReset, verifyEmail }) => {
       toast.success("Login Successful");
       setCurrentUser(data);
       reset();
-      navigate.push("/dashboard");
+      if (!data?.user?.emailVerified) {
+        router.push("/verify-email");
+      } else {
+        router.push("/dashboard");
+      }
     },
     onError: (error) => {
       reset();
-      toast.error(error.message);
+      console.warn("Google sync warning:", error.message);
+      if (!auth.currentUser?.emailVerified) {
+        router.push("/verify-email");
+      } else {
+        router.push("/dashboard");
+      }
     },
   });
+
+  //custom verification page
+  const actionCodeSettings = {
+    url:
+      typeof window !== "undefined"
+        ? `${window.location.origin}/verification-status`
+        : "http://localhost:3000/verification-status",
+    handleCodeInApp: true,
+  };
 
   const handleEmail = async () => {
     try {
       setIsSendingMail(true);
-      await sendEmailVerification(auth.currentUser);
+      const user = auth.currentUser;
+      if (!user) {
+        toast.error("Please login to send verification email");
+        return;
+      }
+      await sendEmailVerification(user, actionCodeSettings);
       setVerificationSent(true);
       toast.success("Verification email sent");
     } catch (error) {
@@ -116,6 +147,29 @@ const UserForm = ({ isLogin, isReset, verifyEmail }) => {
     } finally {
       setIsSendingMail(false);
     }
+  };
+
+  const handleCheckStatus = async () => {
+    try {
+      setIsCheckingStatus(true);
+      await refreshUser?.();
+      if (auth.currentUser?.emailVerified || currentUser?.user?.emailVerified) {
+        toast.success("Email verified!");
+        router.push("/dashboard");
+      } else {
+        toast.info("Email is not verified yet. Please check your inbox.");
+      }
+    } catch (error) {
+      toast.error("Failed to check status");
+    } finally {
+      setIsCheckingStatus(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    await signOut(auth);
+    setCurrentUser(null);
+    router.push("/login");
   };
 
   //google login
@@ -200,22 +254,49 @@ const UserForm = ({ isLogin, isReset, verifyEmail }) => {
             alt="verification email art"
           />
           <p className="text-balance">
-            Please verify your email address by clicking button below.
+            Please verify your email address (
+            <span className="font-semibold">
+              {auth.currentUser?.email || currentUser?.user?.email}
+            </span>
+            ) by clicking the button below.
           </p>{" "}
-          <button
-            type="button"
-            onClick={handleEmail}
-            disabled={verificationSent || isSendingMail}
-            className={`btn btn-lg ${verificationSent || isSendingMail ? "" : "btn-nexoro-primary"} mt-4`}
-          >
-            {verificationSent ? (
-              "Sent"
-            ) : isSendingMail ? (
-              <span className="loading loading-spinner"></span>
-            ) : (
-              "Send Verification Email"
-            )}
-          </button>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center items-center mt-6">
+            <button
+              type="button"
+              onClick={handleEmail}
+              disabled={verificationSent || isSendingMail}
+              className={`btn btn-lg ${verificationSent || isSendingMail ? "" : "btn-nexoro-primary"} w-full sm:w-auto`}
+            >
+              {verificationSent ? (
+                "Email Sent"
+              ) : isSendingMail ? (
+                <span className="loading loading-spinner"></span>
+              ) : (
+                "Send Verification Email"
+              )}
+            </button>
+            <button
+              type="button"
+              onClick={handleCheckStatus}
+              disabled={isCheckingStatus}
+              className="btn btn-lg btn-outline w-full sm:w-auto"
+            >
+              {isCheckingStatus ? (
+                <span className="loading loading-spinner"></span>
+              ) : (
+                "I've Verified My Email"
+              )}
+            </button>
+          </div>
+          <div className="mt-6">
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="link text-sm text-error"
+            >
+              Log out / Switch Account
+            </button>
+          </div>
         </div>
       ) : (
         <AppForm>

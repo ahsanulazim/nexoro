@@ -1,7 +1,7 @@
-const loading = () => {
-    return (
-        <div className="text-center py-10">loading...</div>
-    )
-}
+import Loader from "@/components/ui/Loader";
 
-export default loading
+const loading = () => {
+  return <Loader />;
+};
+
+export default loading;

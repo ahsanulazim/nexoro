@@ -1,5 +1,4 @@
 "use client";
-
 import DashDrawer from "@/components/dashboard/DashDrawer";
 import Loader from "@/components/ui/Loader";
 import { useAuth } from "@/context/AuthProvider";
@@ -12,16 +11,16 @@ export default function Layout({ children }) {
   const router = useRouter();
 
   useEffect(() => {
-    if (!isLoading && !currentUser) {
-      router.push("/login");
-    }
+    if (isLoading) return;
 
-    if (currentUser && !currentUser?.user?.emailVerified) {
+    if (!currentUser?.success) {
+      router.push("/login");
+    } else if (!currentUser?.user?.emailVerified) {
       router.push("/verify-email");
     }
   }, [currentUser, isLoading, router]);
 
-  if (isLoading) {
+  if (isLoading || !currentUser?.success) {
     return <Loader />;
   }
 
