@@ -1,21 +1,14 @@
-import { getAllExpenses } from "@/api/fetchExpense";
-import { useQuery } from "@tanstack/react-query";
 import moment from "moment";
 import { LuSquarePen, LuTrash2 } from "react-icons/lu";
 import ExpenseEditForm from "./ExpenseEditForm";
 import { useRef, useState } from "react";
 import ExpenseDeleteModal from "./ExpenseDeleteModal";
 
-const ExpensesTable = () => {
+const ExpensesTable = ({ data, isLoading, isError }) => {
   const [expenseId, setExpenseId] = useState(null);
 
   const expenseEditRef = useRef();
   const expenseDeleteRef = useRef();
-
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ["expenses"],
-    queryFn: getAllExpenses,
-  });
 
   return (
     <div className="overflow-x-auto rounded-box">
@@ -45,6 +38,12 @@ const ExpensesTable = () => {
             <tr>
               <td colSpan={7} className="text-center">
                 Error
+              </td>
+            </tr>
+          ) : data.length === 0 ? (
+            <tr>
+              <td colSpan={7} className="text-center">
+                No expenses added yet
               </td>
             </tr>
           ) : (

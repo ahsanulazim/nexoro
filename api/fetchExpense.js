@@ -5,8 +5,15 @@ export const addExpense = async (data) => {
   return res;
 };
 
-export const getAllExpenses = async () => {
-  const res = await api.get("/expenses/get-expenses");
+export const getAllExpenses = async ({ queryKey }) => {
+  const [, page, search, limit] = queryKey;
+  const res = await api.get("/expenses/get-expenses", {
+    params: {
+      page,
+      search,
+      limit,
+    },
+  });
   return res.data;
 };
 
