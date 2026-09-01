@@ -10,6 +10,7 @@ import {
   LuMessageCircle,
   LuNotebookPen,
   LuPackage,
+  LuReceipt,
   LuSettings,
   LuStar,
   LuStore,
@@ -55,7 +56,7 @@ const DashDrawer = ({ children }) => {
           aria-label="close sidebar"
           className="drawer-overlay"
         ></label>
-        <div className="flex min-h-full flex-col items-start bg-base-100 is-drawer-close:w-14 is-drawer-open:w-64">
+        <div className="flex min-h-full flex-col items-start bg-base-200 is-drawer-close:w-14 is-drawer-open:w-64">
           <div className="flex gap-2 items-center px-2 py-4">
             <img
               src="/assets/nexoro_logo_icon.png"
@@ -126,6 +127,12 @@ const DashDrawer = ({ children }) => {
             ) : null}
             {currentUser?.user?.role === "admin" ? (
               <>
+                <li>
+                  <ActiveLink href="/dashboard/expenses" dataTip="Expenses">
+                    <LuReceipt className="my-1.5 inline-block size-4" />
+                    <span className="is-drawer-close:hidden">Expenses</span>
+                  </ActiveLink>
+                </li>
                 <li>
                   <ActiveLink href="/dashboard/sliders" dataTip="Sliders">
                     <LuGalleryThumbnails className="my-1.5 inline-block size-4" />

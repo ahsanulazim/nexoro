@@ -42,7 +42,7 @@ const OrderModal = ({ ref, orderId }) => {
     <dialog ref={ref} className="modal">
       <div className="modal-box">
         <h3 className="font-bold text-lg">
-          Are you Sure you want to delete this order?
+          Are you sure you want to delete this order?
         </h3>
         <p className="py-4">You won't be able to revert this action!</p>
         <div className="modal-action">

@@ -27,7 +27,7 @@ const ClientRow = ({ client, btn, customer }) => {
       return { previousUsers };
     },
     onSuccess: () => {
-      toast.success(`${client.userName} has been promoted to member.`);
+      toast.success(`${client.name} has been promoted to member.`);
       queryClient.invalidateQueries({ queryKey: ["users"] });
       queryClient.invalidateQueries({ queryKey: ["members"] });
     },
@@ -40,7 +40,7 @@ const ClientRow = ({ client, btn, customer }) => {
   const { mutate: demoteMutation, isPending: isDemoting } = useMutation({
     mutationFn: (email) => demoteMember(email),
     onSuccess: () => {
-      toast.success(`${client.userName} has been demoted to user.`);
+      toast.success(`${client.name} has been demoted to user.`);
       queryClient.invalidateQueries({ queryKey: ["users"] });
       queryClient.invalidateQueries({ queryKey: ["members"] });
     },

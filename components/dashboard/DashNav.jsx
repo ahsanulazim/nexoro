@@ -153,7 +153,7 @@ const DashNav = ({ isChecked }) => {
   };
 
   return (
-    <nav className="navbar w-full bg-base-300 border-b border-b-base-100 sticky top-0 z-10">
+    <nav className="navbar w-full bg-base-100 border-b border-b-base-100 sticky top-0 z-10">
       <label
         htmlFor="my-drawer-4"
         aria-label="open sidebar"
@@ -256,7 +256,7 @@ const DashNav = ({ isChecked }) => {
             role="button"
             className="btn btn-ghost btn-circle avatar avatar-placeholder"
           >
-            <div className="w-10 rounded-full bg-base-100">
+            <div className="w-10 rounded-full bg-base-200">
               <LuUser />
             </div>
           </div>
