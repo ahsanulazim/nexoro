@@ -111,7 +111,7 @@ const page = () => {
               {errors.password.message}
             </span>
           )}
-          <Link href="/forgot-password">
+          <Link href="/forget-password">
             <span className="text-main-light">Forgot Password?</span>
           </Link>
 
