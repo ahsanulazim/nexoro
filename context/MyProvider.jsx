@@ -33,13 +33,17 @@ const MyProvider = ({ children }) => {
 
   //chart Data
   const {
-    data: chartData,
+    data: chartResponse,
     isLoading: chartDataLoading,
     isError: chartDataError,
   } = useQuery({
     queryKey: ["chart"],
-    queryFn: getChart,
+    queryFn: () => getChart("1month"),
   });
+
+  const chartData = Array.isArray(chartResponse)
+    ? chartResponse
+    : chartResponse?.data || [];
 
   //team members data
   const {
