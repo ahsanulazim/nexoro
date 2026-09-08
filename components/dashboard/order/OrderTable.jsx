@@ -102,13 +102,13 @@ const OrderTable = () => {
                 </tr>
               ))
             ) : isError ? (
-              <tr>
+              <tr className="bg-base-100">
                 <td colSpan={9} className="text-center">
                   Error fetching orders
                 </td>
               </tr>
             ) : !orders.orders || orders.orders.length === 0 ? (
-              <tr>
+              <tr className="bg-base-100">
                 <td colSpan={9} className="text-center">
                   No orders found
                 </td>
@@ -128,7 +128,7 @@ const OrderTable = () => {
                   <td>
                     <h2>{order.serviceTitle}</h2>
                     <p className="font-semibold">
-                      {order.planName} - ${order.price}
+                      {order.planName} - ৳{order.price}
                     </p>
                   </td>
                   <td>
@@ -150,7 +150,7 @@ const OrderTable = () => {
                         <small className="flex items-center gap-1">
                           Due Amount -
                           <span className="badge badge-warning badge-sm font-bold">
-                            ${order.dueAmount}
+                            ৳{order.dueAmount}
                           </span>
                         </small>
                       </>

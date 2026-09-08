@@ -107,13 +107,13 @@ const DashboardUi = () => {
       </section>
       <section>
         <div className="grid lg:grid-cols-5 gap-5">
-          <div className="bg-base-200 rounded-box p-5 lg:col-span-3">
+          <div className="bg-base-100 rounded-box p-5 lg:col-span-3">
             <h2 className="uppercase text-sm font-semibold tracking-wider mb-3">
               Revenue
             </h2>
             <RevenueChart />
           </div>
-          <div className="bg-base-200 rounded-box p-5 lg:col-span-2">
+          <div className="bg-base-100 rounded-box p-5 lg:col-span-2">
             <h2 className="uppercase text-sm font-semibold tracking-wider mb-3">
               Orders
             </h2>

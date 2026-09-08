@@ -1,17 +1,9 @@
-//get all clients
+import api from "@/axios/axiosInstance";
+
+// get all clients
 export const fetchClients = async () => {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/clients`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-
-  if (!res.ok) {
-    throw new Error("Failed to fetch clients");
-  }
-
-  return res.json();
+  const res = await api.get("/clients");
+  return res.data;
 };
 
 // add a client
@@ -23,35 +15,25 @@ export const addClient = async (formData) => {
   fd.append("country", formData.country);
   fd.append("email", formData.clientEmail);
   fd.append("folder", "clients");
-  fd.append("logo", formData.logo[0]);
-  fd.append("phone", formData.clientPhone);
-
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/clients`, {
-    method: "POST",
-    body: fd,
-  });
-
-  const data = await res.json();
-  if (!res.ok) {
-    throw new Error(data.message || "Failed to add client");
+  if (formData.logo && formData.logo[0]) {
+    fd.append("logo", formData.logo[0]);
   }
-  return data;
+  fd.append("phone", formData.clientPhone || "");
+
+  const res = await api.post("/clients", fd, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return res.data;
 };
 
-//delete a client
+// delete a client
 export const deleteClient = async (email, public_id) => {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_BASE}/clients/${email}`,
-    {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ public_id }),
-    },
-  );
-  if (!res.ok) {
-    throw new Error("Failed to delete service");
-  }
-  return res.json();
+  const res = await api.delete(`/clients/${encodeURIComponent(email)}`, {
+    data: { public_id },
+  });
+  return res.data;
 };
 
 // Update existing client
@@ -63,19 +45,16 @@ export const updateClient = async (id, formData) => {
   fd.append("country", formData.country);
   fd.append("email", formData.clientEmail);
   fd.append("folder", "clients");
-  if (formData.logo) {
+  if (formData.logo && formData.logo[0]) {
     fd.append("logo", formData.logo[0]);
   }
-  fd.append("phone", formData.clientPhone);
+  fd.append("phone", formData.clientPhone || "");
 
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/clients/${id}`, {
-    method: "PUT",
-    body: fd,
+  const res = await api.put(`/clients/${id}`, fd, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
   });
-
-  const data = await res.json();
-  if (!res.ok) {
-    throw new Error(data.message || "Failed to update client");
-  }
-  return data;
+  return res.data;
 };
+

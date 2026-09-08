@@ -37,14 +37,14 @@ const CustomTooltip = ({ active, payload, label }) => {
             <span className="w-2 h-2 rounded-full bg-[#8c00ff]"></span>
             Earnings:
           </span>
-          <span className="font-bold">${Number(earnings).toLocaleString()}</span>
+          <span className="font-bold">৳{Number(earnings).toLocaleString()}</span>
         </div>
         <div className="flex items-center justify-between gap-3 text-error">
           <span className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-[#ff637d]"></span>
             Dues:
           </span>
-          <span className="font-bold">${Number(dues).toLocaleString()}</span>
+          <span className="font-bold">৳{Number(dues).toLocaleString()}</span>
         </div>
       </div>
     );
@@ -103,11 +103,11 @@ const RevenueChart = () => {
       <div className="flex flex-wrap items-center justify-between gap-3 mb-2">
         <div className="flex flex-wrap items-center gap-2">
           <div className="badge badge-soft badge-primary text-xs font-semibold px-2.5 py-2">
-            Total: ${summary.totalEarnings.toLocaleString()}
+            Total: ৳{summary.totalEarnings.toLocaleString()}
           </div>
           {summary.totalDues > 0 && (
             <div className="badge badge-soft badge-error text-xs font-semibold px-2.5 py-2">
-              Dues: ${summary.totalDues.toLocaleString()}
+              Dues: ৳{summary.totalDues.toLocaleString()}
             </div>
           )}
         </div>

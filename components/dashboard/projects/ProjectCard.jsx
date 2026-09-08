@@ -18,7 +18,7 @@ const ProjectCard = ({ project }) => {
           </div>
         </div>
         <p className="opacity-60">
-          {project.planName} - ${project.servicePrice}
+          {project.planName} - ৳{project.servicePrice}
         </p>
         <div>
           <h3 className="font-bold text-base">Task Status</h3>

@@ -219,12 +219,9 @@ const OrderAddModal = ({ ref, isEditing, orderId }) => {
                   <field.SelectField
                     label="Select Payment Method"
                     data={[
-                      { value: "bank", label: "Bank" },
-                      { value: "bkash", label: "Bkash" },
-                      { value: "nagad", label: "Nagad" },
-                      { value: "rocket", label: "Rocket" },
-                      { value: "upay", label: "Upay" },
-                      { value: "cash", label: "Cash" },
+                      { value: "Bank", label: "Bank" },
+                      { value: "EPS", label: "EPS" },
+                      { value: "Cash", label: "Cash" },
                     ]}
                   />
                 )}

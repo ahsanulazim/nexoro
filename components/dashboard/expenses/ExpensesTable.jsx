@@ -62,7 +62,7 @@ const ExpensesTable = ({ data, isLoading, isError }) => {
                     {expense.paymentStatus.toUpperCase()}
                   </span>
                 </td>
-                <td>${expense.amount}</td>
+                <td>৳{expense.amount}</td>
                 <td>{expense.paymentMethod?.toUpperCase() || "-"}</td>
                 <td>{moment(expense.createdAt).fromNow()}</td>
                 <td>

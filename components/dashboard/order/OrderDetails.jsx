@@ -20,10 +20,10 @@ const OrderDetails = () => {
           <div className="bg-base-200 p-5 rounded-box xl:flex-1">
             <h2 className="text-lg font-semibold uppercase">Items</h2>
             <div className="opacity-50">
-              <p>Service: {orderData.order.service.title}</p>
+              <p>Service: {orderData.order.service?.title || orderData.order.serviceName || orderData.order.service}</p>
               <p>
-                Plan: {orderData.order.plan.planName} - $
-                {orderData.order.plan.price}
+                Plan: {orderData.order.plan?.planName || "Custom Plan"} - ৳
+                {orderData.order.price ?? orderData.order.plan?.price ?? 0}
               </p>
             </div>
             <div className="mt-5 bg-base-300 p-5 rounded-box">
@@ -45,31 +45,34 @@ const OrderDetails = () => {
                 <p className="flex justify-between">
                   Total Amount:{" "}
                   <span className="font-semibold">
-                    ${orderData.order.plan.price}
+                    ৳{orderData.order.price ?? orderData.order.plan?.price ?? 0}
                   </span>
                 </p>
                 <p className="flex justify-between">
                   Discount:{" "}
                   <span className="font-semibold">
-                    ${orderData.order.discount || 0}
+                    ৳{orderData.order.discount || 0}
                   </span>
                 </p>
                 {orderData.order.amount && (
                   <p className="flex justify-between">
                     Paid:{" "}
                     <span className="font-semibold">
-                      ${orderData.order.amount || 0}
+                      ৳{orderData.order.amount || 0}
                     </span>
                   </p>
                 )}
                 <div className="divider my-0.5"></div>
                 <p className="flex justify-between">
-                  Grand Total:{" "}
+                  Due Amount:{" "}
                   <span className="font-semibold text-primary">
-                    $
-                    {orderData.order.plan.price -
-                      ((orderData.order.discount || 0) +
-                        (orderData.order.amount || 0))}
+                    ৳
+                    {Math.max(
+                      0,
+                      (orderData.order.price ?? orderData.order.plan?.price ?? 0) -
+                        ((orderData.order.discount || 0) +
+                          (orderData.order.amount || 0))
+                    )}
                   </span>
                 </p>
               </div>

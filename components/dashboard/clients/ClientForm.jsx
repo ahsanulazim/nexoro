@@ -194,6 +194,7 @@ const ClientForm = ({ ref }) => {
               required: false,
               validate: {
                 lessThan5MB: (files) =>
+                  !files ||
                   !files[0] ||
                   files[0].size <= 5 * 1024 * 1024 ||
                   "File size must be less than 5MB",

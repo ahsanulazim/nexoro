@@ -68,7 +68,7 @@ export const transformAnalytics = (data) => {
     {
       id: "earning",
       title: "Total Earning",
-      count: `$${data?.current?.totalEarning || 0}`,
+      count: `৳${data?.current?.totalEarning || 0}`,
       comparison: calcComparison(
         data?.current?.totalEarning,
         data?.previous?.totalEarning,
@@ -80,7 +80,7 @@ export const transformAnalytics = (data) => {
     {
       id: "due",
       title: "Total Dues",
-      count: `$${data?.current?.dueAmount || 0}`,
+      count: `৳${data?.current?.dueAmount || 0}`,
       comparison: calcComparison(
         data?.current?.dueAmount,
         data?.previous?.dueAmount,

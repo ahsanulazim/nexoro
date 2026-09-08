@@ -43,9 +43,9 @@ const Order = () => {
               <div className="bg-base-200 p-5 rounded-box xl:flex-1">
                 <h2 className="text-lg font-semibold uppercase">Items</h2>
                 <div className="opacity-50">
-                  <p>Service: {data.order.service.title}</p>
+                  <p>Service: {data.order.service?.title || data.order.serviceName || data.order.service}</p>
                   <p>
-                    Plan: {data.order.plan.planName} - ${data.order.plan.price}
+                    Plan: {data.order.plan?.planName || "Custom Plan"} - ৳{data.order.price ?? data.order.plan?.price ?? 0}
                   </p>
                 </div>
                 <div className="mt-5 bg-base-300 p-5 rounded-box">
@@ -67,31 +67,34 @@ const Order = () => {
                     <p className="flex justify-between">
                       Total Amount:{" "}
                       <span className="font-semibold">
-                        ${data.order.plan.price}
+                        ৳{data.order.price ?? data.order.plan?.price ?? 0}
                       </span>
                     </p>
                     <p className="flex justify-between">
                       Discount:{" "}
                       <span className="font-semibold">
-                        ${data.order.discount || 0}
+                        ৳{data.order.discount || 0}
                       </span>
                     </p>
-                    {data.order.amount && (
+                    {data.order.amount ? (
                       <p className="flex justify-between">
                         Paid:{" "}
                         <span className="font-semibold">
-                          ${data.order.amount || 0}
+                          ৳{data.order.amount || 0}
                         </span>
                       </p>
-                    )}
+                    ) : null}
                     <div className="divider my-0.5"></div>
                     <p className="flex justify-between">
-                      Grand Total:{" "}
+                      Due Amount:{" "}
                       <span className="font-semibold text-primary">
-                        $
-                        {data.order.plan.price -
-                          ((data.order.discount || 0) +
-                            (data.order.amount || 0))}
+                        ৳
+                        {Math.max(
+                          0,
+                          (data.order.price ?? data.order.plan?.price ?? 0) -
+                            ((data.order.discount || 0) +
+                              (data.order.amount || 0))
+                        )}
                       </span>
                     </p>
                   </div>
@@ -102,8 +105,8 @@ const Order = () => {
                   Customer Details
                 </h2>
                 <div className="opacity-50">
-                  <p>{data.order.user.name}</p>
-                  <p>Email: {data.order.user.email}</p>
+                  <p>{data.order.user?.name || data.order.clientName || data.order.epsData?.CustomerName || "Unknown User"}</p>
+                  <p>Email: {data.order.user?.email || "No email"}</p>
                 </div>
               </div>
             </div>

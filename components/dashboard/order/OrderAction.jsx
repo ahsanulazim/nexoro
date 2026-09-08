@@ -1,28 +1,41 @@
 "use client";
 
 import { updateOrderStatus } from "@/api/fetchCart";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 
 const OrderAction = ({ order }) => {
-  const mutation = useMutation({
-    mutationFn: updateOrderStatus,
-    onSuccess: () => {
-      toast.success("Status updated successfully");
-    },
-    onError: (error) => {
-      toast.error("Failed to update status");
-    },
-  });
+  const queryClient = useQueryClient();
 
   const {
     register,
     handleSubmit,
+    reset,
     formState: { isDirty },
   } = useForm({
     defaultValues: {
-      status: order.status,
+      status: order?.status || "",
+    },
+  });
+
+  useEffect(() => {
+    if (order?.status) {
+      reset({ status: order.status });
+    }
+  }, [order?.status, reset]);
+
+  const mutation = useMutation({
+    mutationFn: updateOrderStatus,
+    onSuccess: (data, variables) => {
+      toast.success("Status updated successfully");
+      reset({ status: variables.status });
+      queryClient.invalidateQueries({ queryKey: ["order"] });
+      queryClient.invalidateQueries({ queryKey: ["orders"] });
+    },
+    onError: (error) => {
+      toast.error(error?.message || "Failed to update status");
     },
   });
 
@@ -38,11 +51,9 @@ const OrderAction = ({ order }) => {
     <form className="fieldset mt-5" onSubmit={handleSubmit(onSubmit)}>
       <select
         className="select w-full mb-5"
-        defaultValue=""
-        name="status"
-        {...register("status", { required: false })}
+        {...register("status", { required: true })}
       >
-        <option value="" disabled={true}>
+        <option value="" disabled>
           Select Status
         </option>
         <option value="Pending">Pending</option>
@@ -68,7 +79,7 @@ const OrderAction = ({ order }) => {
           onClick={onCancel}
           type="button"
           className="btn btn-error flex-1"
-          disabled={mutation.isPending || order.status === "Cancelled"}
+          disabled={mutation.isPending || order?.status === "Cancelled"}
         >
           Cancel Order
         </button>
