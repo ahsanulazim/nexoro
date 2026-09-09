@@ -36,7 +36,7 @@ const RecentOrderData = () => {
             </tr>
           ) : (
             data.map((order) => (
-              <tr key={order._id}>
+              <tr key={order.orderUid}>
                 <td>{order.orderUid}</td>
                 <td>{order.userName}</td>
                 <td>{order.serviceTitle}</td>

@@ -10,6 +10,8 @@ import moment from "moment";
 import {
   LuBell,
   LuCheck,
+  LuChevronLeft,
+  LuChevronRight,
   LuCircleAlert,
   LuCircleCheck,
   LuCircleX,

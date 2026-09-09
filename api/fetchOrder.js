@@ -35,3 +35,29 @@ export const assignOrder = async ({ orderId, ...data }) => {
   });
   return res.data;
 };
+
+export const updateOrderTasks = async ({ orderId, tasks, assignedTo }) => {
+  const res = await api.put(
+    "/orders/updateTasks",
+    { tasks, assignedTo },
+    {
+      params: {
+        id: orderId,
+      },
+    },
+  );
+  return res.data;
+};
+
+export const updateOrderCosts = async ({ orderId, costs }) => {
+  const res = await api.put(
+    "/orders/updateCosts",
+    { costs },
+    {
+      params: {
+        id: orderId,
+      },
+    },
+  );
+  return res.data;
+};

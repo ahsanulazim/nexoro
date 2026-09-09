@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import UserDropDown from "./UserDropDown";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useSocket } from "@/context/SocketProvider";
 import { auth } from "@/firebase/firebase.config";
 import api from "@/axios/axiosInstance";
@@ -208,7 +208,7 @@ const DashNav = ({ isChecked }) => {
                     <li key={notification._id} className="p-0">
                       <button
                         onClick={() => handleNotificationClick(notification)}
-                        className={`flex items-start gap-3 p-3 rounded-lg text-left transition-all ${
+                        className={`flex items-start gap-3 p-3 rounded-lg text-left transition-all cursor-pointer ${
                           notification.isRead
                             ? "opacity-60 hover:opacity-100"
                             : "bg-base-200/50 font-medium"

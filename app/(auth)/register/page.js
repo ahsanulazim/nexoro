@@ -135,7 +135,11 @@ const Register = () => {
                 },
               })}
             />
-            <button type="button" onClick={() => setIsVisible(!isVisible)}>
+            <button
+              type="button"
+              className="cursor-pointer"
+              onClick={() => setIsVisible(!isVisible)}
+            >
               {isVisible ? <LuEye /> : <LuEyeOff />}
             </button>
           </label>

@@ -9,7 +9,8 @@ import { LuPlus, LuTrash2 } from "react-icons/lu";
 import { toast } from "react-toastify";
 
 const OrderAssign = ({ order }) => {
-  const { team, teamLoading, teamError } = useContext(MyContext);
+  const { assignableUsers, assignableUsersLoading, assignableUsersError } =
+    useContext(MyContext);
   const { Field, handleSubmit, Subscribe } = useForm({
     defaultValues: {
       assignedTo: "",
@@ -54,16 +55,16 @@ const OrderAssign = ({ order }) => {
             }}
           >
             <option value="" disabled={true}>
-              Select Member
+              Select Member or Admin
             </option>
-            {teamLoading ? (
-              <option value="">Loading...</option>
-            ) : teamError ? (
-              <option value="">No team members available</option>
+            {assignableUsersLoading ? (
+              <option value="">Loading users...</option>
+            ) : assignableUsersError || !assignableUsers?.length ? (
+              <option value="">No members or admins available</option>
             ) : (
-              team.map((member) => (
+              assignableUsers.map((member) => (
                 <option key={member._id} value={member._id}>
-                  {member.memberName} - {member.role}
+                  {member.name || member.email} ({member.role})
                 </option>
               ))
             )}
@@ -112,7 +113,8 @@ const OrderAssign = ({ order }) => {
 
       <Subscribe
         selector={(state) => [state.values.assignedTo, state.values.tasks]}
-        children={([assignedTo, tasks]) => {
+      >
+        {([assignedTo, tasks]) => {
           const hasValidTask =
             tasks?.length > 0 && tasks.some((t) => t?.task?.trim());
           return (
@@ -131,7 +133,7 @@ const OrderAssign = ({ order }) => {
             </button>
           );
         }}
-      />
+      </Subscribe>
     </form>
   );
 };

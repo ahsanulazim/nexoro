@@ -102,23 +102,19 @@ const SocketProvider = ({ children }) => {
           setUnreadNotificationsCount((prev) => prev + 1);
 
           toast.info(
-            <div className="cursor-pointer">
+            <>
               <p className="font-semibold text-sm">{notification.title}</p>
-              <p className="text-xs text-slate-500 line-clamp-2">{notification.message}</p>
-            </div>,
+              <p className="text-xs text-white line-clamp-2">
+                {notification.message}
+              </p>
+            </>,
             {
               onClick: () => {
                 if (notification.link) {
                   router.push(notification.link);
                 }
               },
-              position: "top-right",
-              autoClose: 5000,
-              hideProgressBar: false,
-              closeOnClick: true,
-              pauseOnHover: true,
-              draggable: true,
-            }
+            },
           );
         });
       } catch (error) {

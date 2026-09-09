@@ -109,3 +109,9 @@ export const deleteUser = async (email) => {
 
   return res.json();
 };
+
+// Fetch assignable members and admins
+export const fetchAssignableUsers = async () => {
+  const res = await api.get("/users/assignable");
+  return res.data;
+};

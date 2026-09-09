@@ -4,6 +4,7 @@ import { getChart } from "@/api/fetchAnalytics";
 import { fetchClients } from "@/api/fetchClients";
 import { fetchServices } from "@/api/fetchServices";
 import { fetchMembers } from "@/api/fetchTeam";
+import { fetchAssignableUsers } from "@/api/fetchUsers";
 import { useQuery } from "@tanstack/react-query";
 import { createContext, useState } from "react";
 
@@ -55,6 +56,16 @@ const MyProvider = ({ children }) => {
     queryFn: fetchMembers,
   });
 
+  //assignable users (registered members and admins from Users collection)
+  const {
+    data: assignableUsers,
+    isLoading: assignableUsersLoading,
+    isError: assignableUsersError,
+  } = useQuery({
+    queryKey: ["assignableUsers"],
+    queryFn: fetchAssignableUsers,
+  });
+
   const data = {
     cart,
     setCart,
@@ -70,6 +81,9 @@ const MyProvider = ({ children }) => {
     team,
     teamLoading,
     teamError,
+    assignableUsers,
+    assignableUsersLoading,
+    assignableUsersError,
   };
 
   return <MyContext value={data}>{children}</MyContext>;
