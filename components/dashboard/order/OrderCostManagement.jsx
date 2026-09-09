@@ -7,6 +7,7 @@ import moment from "moment";
 import { useRef } from "react";
 import {
   LuCircleDollarSign,
+  LuHandCoins,
   LuPlus,
   LuReceipt,
   LuTrash2,
@@ -65,6 +66,8 @@ const OrderCostManagement = ({ order }) => {
 
   const netRevenue = contractValue - totalCost;
   const realizedProfit = paidAmount - totalCost;
+  const dueAmount =
+    order?.payment === "Success" ? 0 : Math.max(0, contractValue - paidAmount);
 
   const { mutate: updateCosts, isPending } = useMutation({
     mutationFn: updateOrderCosts,
@@ -113,7 +116,7 @@ const OrderCostManagement = ({ order }) => {
       </div>
 
       {/* Revenue & Profit Stat Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
         <div className="bg-base-200/80 p-3 rounded-xl border border-base-300">
           <span className="text-[11px] font-medium opacity-60 flex items-center gap-1">
             <LuWallet className="size-3 text-warning" /> Total Cost
@@ -142,7 +145,7 @@ const OrderCostManagement = ({ order }) => {
           <span className="text-[10px] opacity-50">Projected profit</span>
         </div>
 
-        <div className="col-span-2 sm:col-span-1 bg-base-200/80 p-3 rounded-xl border border-base-300">
+        <div className="bg-base-200/80 p-3 rounded-xl border border-base-300">
           <span className="text-[11px] font-medium opacity-60 flex items-center gap-1">
             <LuCircleDollarSign className="size-3 text-info" /> Realized Cash
           </span>
@@ -155,6 +158,23 @@ const OrderCostManagement = ({ order }) => {
             {realizedProfit.toLocaleString()}
           </p>
           <span className="text-[10px] opacity-50">Paid - Total Cost</span>
+        </div>
+
+        <div className="bg-base-200/80 p-3 rounded-xl border border-base-300">
+          <span className="text-[11px] font-medium opacity-60 flex items-center gap-1">
+            <LuHandCoins className="size-3 text-warning" /> Client Due
+          </span>
+          <p
+            className={`text-base sm:text-lg font-bold mt-0.5 flex items-center ${
+              dueAmount > 0 ? "text-warning" : "text-success"
+            }`}
+          >
+            <FaBangladeshiTakaSign className="inline-block text-sm" />
+            {dueAmount.toLocaleString()}
+          </p>
+          <span className="text-[10px] opacity-50">
+            {dueAmount > 0 ? "Receivable" : "Full paid"}
+          </span>
         </div>
       </div>
 

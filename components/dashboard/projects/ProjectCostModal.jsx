@@ -4,7 +4,7 @@ import OrderCostManagement from "../order/OrderCostManagement";
 const ProjectCostModal = ({ ref, project }) => {
   return (
     <dialog ref={ref} className="modal">
-      <div className="modal-box max-w-lg p-5">
+      <div className="modal-box max-w-xl p-5">
         <div className="flex justify-between items-center pb-3 border-b border-base-200 mb-4">
           <div>
             <h3 className="font-bold text-base flex items-center gap-1.5">
