@@ -12,6 +12,7 @@ import {
   LuChevronUp,
   LuExternalLink,
   LuListTodo,
+  LuPartyPopper,
   LuPlus,
   LuReceipt,
   LuSparkles,
@@ -202,12 +203,17 @@ const ProjectCard = ({
         {/* Task Status Overview */}
         <div className="mt-1">
           <div className="flex justify-between items-center text-xs font-semibold mb-1">
-            <span className="opacity-80">
-              {tasks.find((task) => !task.isCompleted)?.task
-                ? `Next: ${tasks.find((task) => !task.isCompleted)?.task}`
-                : totalCount > 0
-                  ? "All tasks completed! 🎉"
-                  : "No tasks created"}
+            <span className="opacity-80 flex items-center gap-1">
+              {tasks.find((task) => !task.isCompleted)?.task ? (
+                `Next: ${tasks.find((task) => !task.isCompleted)?.task}`
+              ) : totalCount > 0 ? (
+                <>
+                  All tasks completed!{" "}
+                  <LuPartyPopper className="size-4 text-primary inline-form" />
+                </>
+              ) : (
+                "No tasks created"
+              )}
             </span>
             <span className="badge badge-sm badge-ghost">
               {completedCount}/{totalCount}

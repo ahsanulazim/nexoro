@@ -18,14 +18,29 @@ export const createOrder = async (slug, id) => {
 
 //get all orders of every user
 export const fetchAllOrders = async ({ queryKey }) => {
-  const [_key, page] = queryKey;
+  const [_key, params] = queryKey;
+  const page = typeof params === "object" ? params?.page || 1 : params || 1;
+  const status = typeof params === "object" ? params?.status || "all" : "all";
+  const search = typeof params === "object" ? params?.search || "" : "";
+  const limit = typeof params === "object" ? params?.limit || 10 : 10;
+
   const user = auth.currentUser;
   if (!user) return null;
 
   const token = await user.getIdToken();
 
+  const searchParams = new URLSearchParams();
+  searchParams.set("page", page);
+  searchParams.set("limit", limit);
+  if (status && status !== "all") {
+    searchParams.set("status", status);
+  }
+  if (search && search.trim()) {
+    searchParams.set("search", search.trim());
+  }
+
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_BASE}/orders/getAllOrders?page=${page}&limit=10`,
+    `${process.env.NEXT_PUBLIC_API_BASE}/orders/getAllOrders?${searchParams.toString()}`,
     {
       method: "GET",
       headers: {

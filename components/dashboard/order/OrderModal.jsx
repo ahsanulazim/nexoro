@@ -44,7 +44,7 @@ const OrderModal = ({ ref, orderId }) => {
         <h3 className="font-bold text-lg">
           Are you sure you want to delete this order?
         </h3>
-        <p className="py-4">You won't be able to revert this action!</p>
+        <p className="py-4">You won&apos;t be able to revert this action!</p>
         <div className="modal-action">
           <form method="dialog">
             {/* if there is a button in form, it will close the modal */}

@@ -123,6 +123,12 @@ const DashDrawer = ({ children }) => {
                     <span className="is-drawer-close:hidden">Pricing</span>
                   </ActiveLink>
                 </li>
+                <li>
+                  <ActiveLink href="/dashboard/clients" dataTip="Clients">
+                    <LuStore className="my-1.5 inline-block size-4" />
+                    <span className="is-drawer-close:hidden">Clients</span>
+                  </ActiveLink>
+                </li>
               </>
             ) : null}
             {currentUser?.user?.role === "admin" ? (
@@ -149,12 +155,6 @@ const DashDrawer = ({ children }) => {
                   <ActiveLink href="/dashboard/review" dataTip="Review">
                     <LuStar className="my-1.5 inline-block size-4" />
                     <span className="is-drawer-close:hidden">Review</span>
-                  </ActiveLink>
-                </li>
-                <li>
-                  <ActiveLink href="/dashboard/clients" dataTip="Clients">
-                    <LuStore className="my-1.5 inline-block size-4" />
-                    <span className="is-drawer-close:hidden">Clients</span>
                   </ActiveLink>
                 </li>
                 <li>
