@@ -15,26 +15,35 @@ import {
   LuBriefcase,
   LuClock,
   LuReceipt,
+  LuTrendingUp,
+  LuTrendingDown,
+  LuSparkles,
 } from "react-icons/lu";
 import RecentOrderData from "./RecentOrderData";
 import RecentProjectsData from "./RecentProjectsData";
 import Link from "next/link";
+import ClientPortalUi from "./client/ClientPortalUi";
 
 const DashboardUi = () => {
   const { currentUser } = useAuth();
   const { socket } = useSocket();
   const queryClient = useQueryClient();
 
-  // 1. Fetch initial dashboard stats via TanStack Query
+  const isStaff =
+    currentUser?.user?.role === "admin" ||
+    currentUser?.user?.role === "member";
+
+  // 1. Fetch initial dashboard stats via TanStack Query (Only for agency staff)
   const { data: stats, isLoading } = useQuery({
     queryKey: ["dashboardStats"],
     queryFn: getDashboardStats,
     staleTime: 1000 * 60 * 5, // 5 minutes cache fallback
+    enabled: isStaff,
   });
 
   // 2. Real-time updates via Socket.io
   useEffect(() => {
-    if (!socket) return;
+    if (!socket || !isStaff) return;
 
     const handleStatsUpdate = (updatedStats) => {
       // Seamlessly update TanStack Query cache without unnecessary re-fetching
@@ -46,30 +55,107 @@ const DashboardUi = () => {
     return () => {
       socket.off("dashboardStatsUpdate", handleStatsUpdate);
     };
-  }, [socket, queryClient]);
+  }, [socket, queryClient, isStaff]);
+
+  // If logged-in user is a client/customer, render the Dedicated Client Portal!
+  if (!isStaff) {
+    return <ClientPortalUi />;
+  }
+
+  const isNetProfit = stats?.profit?.isProfit !== false;
 
   return (
-    <main className="space-y-5">
+    <main className="space-y-6">
+      {/* Header Greeting */}
       <section>
         <div>
           <h2 className="text-lg font-semibold">
-            {greeting(currentUser?.user?.name.split(" ")[0])}
+            {greeting(currentUser?.user?.name?.split(" ")[0] || "")}
           </h2>
           <p className="text-sm opacity-50">
-            Here's what's happening with your agency today.
+            {"Here's what's happening with your agency today."}
           </p>
         </div>
       </section>
-      <section>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5">
-          {/* Total Customers */}
+
+      {/* 1. Financial Health & Performance Overview */}
+      <section className="space-y-2.5">
+        <div className="flex items-center justify-between">
+          <h3 className="text-xs uppercase font-semibold tracking-wider text-base-content/60">
+            Financial Overview
+          </h3>
+          <span className="text-[11px] text-base-content/40">
+            Current Month (Real-time)
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          {/* Total Income / Revenue */}
           <StatsCard
-            title="Total Customers"
-            stat={stats?.customers}
-            icon={<LuUsers />}
+            title="Total Income"
+            stat={stats?.income}
+            isCurrency={true}
+            icon={<LuTrendingUp className="text-primary" />}
             isLoading={isLoading}
+            subtext={
+              stats?.income?.allTime !== undefined
+                ? `All-time: ৳${stats.income.allTime.toLocaleString()}`
+                : null
+            }
+            highlight="primary"
           />
 
+          {/* Total Expenses (Standalone + Order Project Costs) */}
+          <StatsCard
+            title="Total Expenses"
+            stat={stats?.expenses}
+            isCurrency={true}
+            icon={<LuReceipt className="text-error" />}
+            isLoading={isLoading}
+            inverseTone={true}
+            subtext={
+              stats?.expenses?.standalone !== undefined
+                ? `General: ৳${(stats.expenses.standalone || 0).toLocaleString()} • Orders: ৳${(stats.expenses.orderCosts || 0).toLocaleString()}`
+                : null
+            }
+          />
+
+          {/* Net Profit / Loss */}
+          <StatsCard
+            title={isNetProfit ? "Net Profit" : "Net Loss"}
+            stat={stats?.profit}
+            isCurrency={true}
+            icon={
+              isNetProfit ? (
+                <LuSparkles className="text-success" />
+              ) : (
+                <LuTrendingDown className="text-error" />
+              )
+            }
+            isLoading={isLoading}
+            badgeText={
+              stats?.profit?.margin !== undefined
+                ? `${isNetProfit ? "+" : ""}${stats.profit.margin}% margin`
+                : null
+            }
+            badgeVariant={isNetProfit ? "success" : "error"}
+            highlight={isNetProfit ? "success" : "error"}
+            subtext={
+              stats?.profit?.allTime !== undefined
+                ? `All-time Net: ৳${stats.profit.allTime.toLocaleString()}`
+                : null
+            }
+          />
+        </div>
+      </section>
+
+      {/* 2. Operational Activity Metrics */}
+      <section className="space-y-2.5">
+        <h3 className="text-xs uppercase font-semibold tracking-wider text-base-content/60">
+          Operations & Activity
+        </h3>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {/* Total Orders */}
           <StatsCard
             title="Total Orders"
@@ -95,13 +181,12 @@ const DashboardUi = () => {
             inverseTone={true}
           />
 
-          {/* Total Expenses */}
+          {/* Total Users */}
           <StatsCard
-            title="Total Expenses"
-            stat={stats?.expenses}
-            icon={<LuReceipt />}
+            title="Total Users"
+            stat={stats?.registeredUsers || stats?.users || stats?.customers}
+            icon={<LuUsers />}
             isLoading={isLoading}
-            inverseTone={true}
           />
         </div>
       </section>

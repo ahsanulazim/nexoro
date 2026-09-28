@@ -92,6 +92,13 @@ const DashDrawer = ({ children }) => {
                 </li>
 
                 <li>
+                  <ActiveLink href="/dashboard/inbox" dataTip="Inbox">
+                    <LuMessageCircle className="my-1.5 inline-block size-4" />
+                    <span className="is-drawer-close:hidden">Inbox</span>
+                  </ActiveLink>
+                </li>
+
+                <li>
                   <ActiveLink href="/dashboard/blogs" dataTip="Blog">
                     <LuNotebookPen className="my-1.5 inline-block size-4" />
                     <span className="is-drawer-close:hidden">Blog</span>
@@ -146,12 +153,6 @@ const DashDrawer = ({ children }) => {
                   </ActiveLink>
                 </li>
                 <li>
-                  <ActiveLink href="/dashboard/inbox" dataTip="Inbox">
-                    <LuMessageCircle className="my-1.5 inline-block size-4" />
-                    <span className="is-drawer-close:hidden">Inbox</span>
-                  </ActiveLink>
-                </li>
-                <li>
                   <ActiveLink href="/dashboard/review" dataTip="Review">
                     <LuStar className="my-1.5 inline-block size-4" />
                     <span className="is-drawer-close:hidden">Review</span>
@@ -170,14 +171,30 @@ const DashDrawer = ({ children }) => {
                   </ActiveLink>
                 </li>
               </>
-            ) : (
-              <li>
-                <ActiveLink href="/dashboard/support" dataTip="Support">
-                  <LuHeadset className="my-1.5 inline-block size-4" />
-                  <span className="is-drawer-close:hidden">Support</span>
-                </ActiveLink>
-              </li>
-            )}
+            ) : null}
+            {currentUser?.user?.role !== "admin" &&
+            currentUser?.user?.role !== "member" ? (
+              <>
+                <li>
+                  <ActiveLink href="/dashboard/orders" dataTip="My Orders">
+                    <LuPackage className="my-1.5 inline-block size-4" />
+                    <span className="is-drawer-close:hidden">My Orders</span>
+                  </ActiveLink>
+                </li>
+                <li>
+                  <ActiveLink href="/dashboard/support" dataTip="Support">
+                    <LuHeadset className="my-1.5 inline-block size-4" />
+                    <span className="is-drawer-close:hidden">Support</span>
+                  </ActiveLink>
+                </li>
+                <li>
+                  <ActiveLink href="/dashboard/profile" dataTip="Profile">
+                    <LuBookUser className="my-1.5 inline-block size-4" />
+                    <span className="is-drawer-close:hidden">Profile</span>
+                  </ActiveLink>
+                </li>
+              </>
+            ) : null}
             {/* List item */}
 
             <li>

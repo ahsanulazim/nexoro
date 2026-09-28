@@ -1,6 +1,7 @@
+import { useAuth } from "@/context/AuthProvider";
 import { MyContext } from "@/context/MyProvider";
 import { useContext } from "react";
-import { LuCheck, LuPlus, LuSquarePen, LuTrash2, LuX } from "react-icons/lu";
+import { LuCheck, LuPlus, LuSquarePen, LuTrash2, LuUserCheck, LuX } from "react-icons/lu";
 import { toast } from "react-toastify";
 
 const ProjectModal = ({
@@ -13,6 +14,8 @@ const ProjectModal = ({
   updateTasks,
   order,
 }) => {
+  const { currentUser } = useAuth();
+  const isAdmin = currentUser?.user?.role === "admin";
   const { assignableUsers, assignableUsersLoading } = useContext(MyContext);
   const handleSaveModal = (e) => {
     e.preventDefault();
@@ -73,24 +76,40 @@ const ProjectModal = ({
             <label className="label text-xs font-semibold uppercase opacity-70">
               Assigned Team Member / Admin
             </label>
-            <select
-              className="select select-bordered w-full"
-              value={modalAssignedTo}
-              onChange={(e) => setModalAssignedTo(e.target.value)}
-            >
-              <option value="" disabled>
-                Select Member or Admin
-              </option>
-              {assignableUsersLoading ? (
-                <option value="">Loading users...</option>
-              ) : (
-                assignableUsers?.map((member) => (
-                  <option key={member._id} value={member._id}>
-                    {member.name || member.email} ({member.role})
-                  </option>
-                ))
-              )}
-            </select>
+            {isAdmin ? (
+              <select
+                className="select select-bordered w-full"
+                value={modalAssignedTo}
+                onChange={(e) => setModalAssignedTo(e.target.value)}
+              >
+                <option value="" disabled>
+                  Select Member or Admin
+                </option>
+                {assignableUsersLoading ? (
+                  <option value="">Loading users...</option>
+                ) : (
+                  assignableUsers?.map((member) => (
+                    <option key={member._id} value={member._id}>
+                      {member.name || member.email} ({member.role})
+                    </option>
+                  ))
+                )}
+              </select>
+            ) : (
+              <div className="p-3 rounded-xl bg-base-200/70 border border-base-content/10 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <LuUserCheck className="size-4 text-primary" />
+                  <span className="text-sm font-semibold">
+                    {order?.assignedMember ||
+                      currentUser?.user?.name ||
+                      "Assigned to you"}
+                  </span>
+                </div>
+                <span className="badge badge-primary badge-sm font-semibold">
+                  Assigned
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Tasks List */}

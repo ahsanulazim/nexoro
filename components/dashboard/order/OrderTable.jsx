@@ -11,9 +11,13 @@ import {
   LuRotateCcw,
   LuSquarePen,
   LuTrash2,
+  LuPrinter,
+  LuClock,
 } from "react-icons/lu";
 import OrderAddModal from "./OrderAddModal";
 import OrderModal from "./OrderModal";
+import InvoiceModal from "./InvoiceModal";
+import { useAuth } from "@/context/AuthProvider";
 
 const OrderTable = ({
   orders: propOrders,
@@ -25,9 +29,14 @@ const OrderTable = ({
   searchTerm = "",
   onResetFilters,
 }) => {
+  const { currentUser } = useAuth();
+  const isAdmin = currentUser?.user?.role === "admin";
+
   const orderRef = useRef();
   const orderEditRef = useRef();
+  const invoiceModalRef = useRef();
   const [internalOrderId, setOrderId] = useState(null);
+  const [selectedInvoiceOrder, setSelectedInvoiceOrder] = useState(null);
   const [internalPage, setInternalPage] = useState(1);
 
   // Fallback TanStack Query if props not passed directly
@@ -89,11 +98,14 @@ const OrderTable = ({
         orderId={internalOrderId}
         setOrderId={setOrderId}
       />
-      <OrderModal
-        ref={orderRef}
-        orderId={internalOrderId}
-        setOrderId={setOrderId}
-      />
+      {isAdmin && (
+        <OrderModal
+          ref={orderRef}
+          orderId={internalOrderId}
+          setOrderId={setOrderId}
+        />
+      )}
+      <InvoiceModal ref={invoiceModalRef} order={selectedInvoiceOrder} />
 
       <div className="overflow-x-auto rounded-box border border-base-200 bg-base-100 shadow-xs">
         <table className="table w-full">
@@ -106,7 +118,7 @@ const OrderTable = ({
               <th>Delivery Status</th>
               <th>Assigned</th>
               <th>Created By</th>
-              <th>Date</th>
+              <th>Date / Deadline</th>
               <th className="text-right">Actions</th>
             </tr>
           </thead>
@@ -257,7 +269,7 @@ const OrderTable = ({
                   </td>
                   <td>
                     {order.assignedTo ? (
-                      <span className="badge badge-sm badge-success badge-soft">
+                      <span className="badge badge-sm badge-success badge-soft whitespace-nowrap">
                         {order.assignedMember || "Assigned"}
                       </span>
                     ) : (
@@ -266,14 +278,62 @@ const OrderTable = ({
                       </span>
                     )}
                   </td>
-                  <td className="text-xs text-base-content/70">
-                    {order.createdBy === null ? "Customer" : order.createdBy}
+                  <td className="text-xs">
+                    {!order.createdBy ||
+                    order.createdBy === "User" ||
+                    order.createdBy === "Customer" ? (
+                      <span className="badge badge-sm badge-ghost text-base-content/70">
+                        Customer
+                      </span>
+                    ) : order.createdBy === "Admin" ? (
+                      <span className="badge badge-sm badge-soft">Admin</span>
+                    ) : (
+                      <span
+                        className="badge badge-sm badge-primary badge-soft font-medium whitespace-nowrap"
+                        title={`Created by: ${order.createdBy}`}
+                      >
+                        {order.createdBy}
+                      </span>
+                    )}
                   </td>
-                  <td className="text-xs text-base-content/70 whitespace-nowrap">
-                    {moment(order.createdAt).fromNow()}
+                  <td className="text-xs whitespace-nowrap">
+                    <div className="text-base-content/70">
+                      {moment(order.createdAt).format("MMM DD, YYYY")}
+                    </div>
+                    {order.deadline ? (
+                      <div
+                        className={`mt-1 inline-flex items-center gap-1 font-semibold ${
+                          moment(order.deadline).isBefore(moment(), "day") &&
+                          order.status !== "Completed"
+                            ? "text-error"
+                            : "text-primary"
+                        }`}
+                        title={`Deadline: ${moment(order.deadline).format("LL")}`}
+                      >
+                        <LuClock className="size-3" />
+                        <span>
+                          Due {moment(order.deadline).format("MMM DD, YYYY")}
+                        </span>
+                      </div>
+                    ) : (
+                      <span className="text-[11px] opacity-40 block mt-0.5">
+                        No deadline
+                      </span>
+                    )}
                   </td>
                   <td>
                     <div className="flex items-center justify-end gap-1.5">
+                      <button
+                        type="button"
+                        className="btn btn-secondary btn-soft btn-circle btn-sm"
+                        onClick={() => {
+                          setSelectedInvoiceOrder(order);
+                          invoiceModalRef.current?.showModal();
+                        }}
+                        title="Print / View Invoice"
+                      >
+                        <LuPrinter />
+                      </button>
                       <Link href={`/dashboard/orders/${order.orderId}`}>
                         <button
                           className="btn btn-success btn-soft btn-circle btn-sm"
@@ -292,13 +352,15 @@ const OrderTable = ({
                       >
                         <LuSquarePen />
                       </button>
-                      <button
-                        onClick={() => handleDeleteOrder(order.orderId)}
-                        className="btn btn-error btn-soft btn-circle btn-sm"
-                        title="Delete Order"
-                      >
-                        <LuTrash2 />
-                      </button>
+                      {isAdmin && (
+                        <button
+                          onClick={() => handleDeleteOrder(order.orderId)}
+                          className="btn btn-error btn-soft btn-circle btn-sm"
+                          title="Delete Order"
+                        >
+                          <LuTrash2 />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -314,7 +376,7 @@ const OrderTable = ({
               <th>Delivery Status</th>
               <th>Assigned</th>
               <th>Created By</th>
-              <th>Date</th>
+              <th>Date / Deadline</th>
               <th className="text-right">Actions</th>
             </tr>
           </tfoot>

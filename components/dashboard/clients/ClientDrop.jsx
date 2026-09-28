@@ -35,6 +35,7 @@ const ClientDrop = ({ client }) => {
       }
     },
     onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["clients"] });
       queryClient.invalidateQueries({ queryKey: ["clientData"] });
     },
   });

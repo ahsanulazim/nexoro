@@ -42,8 +42,17 @@ const OrderTaskManagement = ({ order }) => {
           order.assignedMemberEmail.toLowerCase() === currentUserEmail)),
   );
 
+  const isCreatedByMe = Boolean(
+    currentUser?.user &&
+      ((order?.createdById && String(order.createdById) === currentUserId) ||
+        (order?.createdBy &&
+          (order.createdBy.toLowerCase() === currentUserName ||
+            order.createdBy.toLowerCase() === currentUserEmail))),
+  );
+
   const canToggleTask = isAdmin || (isMember && isAssignedToMe);
-  const canManage = isAdmin;
+  const canManage = isAdmin || (isMember && isCreatedByMe && isAssignedToMe);
+  const canAssign = isAdmin || (isMember && isCreatedByMe);
 
   // State for quick inline task adding
   const [newTaskText, setNewTaskText] = useState("");
@@ -80,9 +89,9 @@ const OrderTaskManagement = ({ order }) => {
 
   if (!order) return null;
 
-  // If not yet assigned, show the initial assignment component (only admin can assign)
+  // If not yet assigned, show the initial assignment component (admin or creator member can assign)
   if (!order.assignedTo) {
-    if (!isAdmin) {
+    if (!canAssign) {
       return (
         <div className="p-4 text-center text-sm opacity-60 bg-base-200 rounded-xl">
           This order has not been assigned to any team member yet.
@@ -92,7 +101,8 @@ const OrderTaskManagement = ({ order }) => {
     return (
       <div>
         <h1 className="font-semibold text-lg flex items-center gap-2">
-          <LuUserCheck className="text-primary" /> Assign Order
+          <LuUserCheck className="text-primary" />{" "}
+          {isMember ? "Self-Assign Order" : "Assign Order"}
         </h1>
         <OrderAssign order={order} />
       </div>
@@ -105,8 +115,14 @@ const OrderTaskManagement = ({ order }) => {
   const progressPercent =
     totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
+  const isCancelled = order?.status?.toLowerCase() === "cancelled";
+
   // Toggle single task completion
   const handleToggleTask = (index) => {
+    if (isCancelled) {
+      toast.warning("Cannot update tasks on a cancelled order");
+      return;
+    }
     if (!canToggleTask) {
       toast.warning(
         "Only the assigned member or an administrator can update task status",
@@ -147,9 +163,9 @@ const OrderTaskManagement = ({ order }) => {
     toast.success("Task updated");
   };
 
-  // Delete single task (admin only)
+  // Delete single task
   const handleDeleteTask = (index) => {
-    if (!isAdmin) return;
+    if (!canManage) return;
     const updatedTasks = tasks.filter((_, i) => i !== index);
     updateTasks({
       orderId: order._id,
@@ -158,10 +174,10 @@ const OrderTaskManagement = ({ order }) => {
     toast.success("Task deleted");
   };
 
-  // Quick add new task (admin only)
+  // Quick add new task
   const handleQuickAddTask = (e) => {
     if (e) e.preventDefault();
-    if (!isAdmin) return;
+    if (!canManage) return;
     const trimmed = newTaskText.trim();
     if (!trimmed) return;
 
@@ -263,8 +279,8 @@ const OrderTaskManagement = ({ order }) => {
                       : "bg-base-100 border-base-content/10 shadow-xs"
                   }`}
                 >
-                  {isItemEditing && isAdmin ? (
-                    // Inline Edit Form (Admin only)
+                  {isItemEditing && canManage ? (
+                    // Inline Edit Form (Admin or Creator Member)
                     <div className="flex items-center gap-2 w-full">
                       <input
                         type="text"
@@ -335,8 +351,8 @@ const OrderTaskManagement = ({ order }) => {
                         </span>
                       </div>
 
-                      {/* Action buttons (only visible to Admin) */}
-                      {isAdmin && (
+                      {/* Action buttons (visible to Admin or creator member) */}
+                      {canManage && (
                         <div className="flex items-center gap-1 shrink-0 opacity-80 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                           <button
                             type="button"
@@ -366,8 +382,8 @@ const OrderTaskManagement = ({ order }) => {
           </ul>
         )}
 
-        {/* Quick Add Task Input (Admin Only) */}
-        {isAdmin && (
+        {/* Quick Add Task Input (Admin or Creator Member) */}
+        {canManage && (
           <form
             onSubmit={handleQuickAddTask}
             className="mt-3 flex gap-2 items-center"

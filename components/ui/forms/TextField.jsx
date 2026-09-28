@@ -1,6 +1,6 @@
 import { useFieldContext } from "./CustomHookForm";
 
-const TextField = ({ label, placeholder }) => {
+const TextField = ({ label, placeholder, type = "text", min, max }) => {
   const field = useFieldContext();
 
   const { errors, isTouched } = field.state.meta;
@@ -11,10 +11,12 @@ const TextField = ({ label, placeholder }) => {
         {label}
       </label>
       <input
-        type="text"
+        type={type}
         className="input w-full"
         placeholder={placeholder}
         name={field.name}
+        min={min}
+        max={max}
         value={field.state.value ?? ""}
         onBlur={field.handleBlur}
         onChange={(e) => field.handleChange(e.target.value)}

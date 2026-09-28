@@ -113,7 +113,7 @@ const OrderNav = ({
 
       {/* Debounced Search Bar */}
       <div className="w-full lg:w-80">
-        <label className="input input-sm sm:input-md w-full flex items-center gap-2 bg-base-200/50 focus-within:bg-base-100 border border-base-300 focus-within:border-primary transition-all">
+        <label className="input input-sm sm:input-md w-full">
           <LuSearch className="opacity-50" />
           <input
             type="text"

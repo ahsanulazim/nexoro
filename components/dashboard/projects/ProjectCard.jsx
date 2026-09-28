@@ -10,6 +10,8 @@ import {
   LuCalendar,
   LuChevronDown,
   LuChevronUp,
+  LuCircleCheck,
+  LuClock,
   LuExternalLink,
   LuListTodo,
   LuPartyPopper,
@@ -55,6 +57,9 @@ const ProjectCard = ({
   const totalCount = tasks.length;
   const isAllCompleted = totalCount > 0 && completedCount === totalCount;
   const hasSomeCompleted = completedCount > 0;
+  const isCompleted =
+    project?.status?.toLowerCase() === "completed" || isAllCompleted;
+  const isCancelled = project?.status?.toLowerCase() === "cancelled";
 
   const { mutate: updateTasks, isPending } = useMutation({
     mutationFn: updateOrderTasks,
@@ -71,6 +76,10 @@ const ProjectCard = ({
   });
 
   const handleToggleTask = (taskIndex) => {
+    if (isCancelled) {
+      toast.warning("Cannot update tasks on a cancelled project");
+      return;
+    }
     if (!canUpdateTasks) {
       toast.warning(
         "Only the assigned member or an administrator can update tasks for this project",
@@ -134,11 +143,52 @@ const ProjectCard = ({
         {/* Header: Title & Action icons */}
         <div className="flex gap-3 items-start justify-between">
           <div>
-            {isAssignedToMe && (
-              <span className="badge badge-primary badge-sm bg-main border-main mb-1.5 font-semibold">
-                <LuSparkles /> Assigned to You
+            <div className="flex flex-wrap items-center gap-1.5 mb-1.5">
+              {isAssignedToMe && (
+                <span className="badge badge-primary badge-sm bg-main border-main font-semibold">
+                  <LuSparkles /> Assigned to You
+                </span>
+              )}
+              <span
+                className={`badge badge-sm font-semibold gap-1 ${
+                  isCompleted
+                    ? "badge-success badge-soft"
+                    : isCancelled
+                      ? "badge-error badge-soft"
+                      : "badge-warning badge-soft"
+                }`}
+              >
+                {isCompleted ? (
+                  <>
+                    <LuCircleCheck className="size-3" /> Completed
+                  </>
+                ) : isCancelled ? (
+                  "Cancelled"
+                ) : (
+                  <>
+                    <LuClock className="size-3" /> Active
+                  </>
+                )}
               </span>
-            )}
+              {project.orderId && (
+                <span className="badge badge-sm badge-ghost font-mono text-[11px] opacity-70">
+                  {project.orderId}
+                </span>
+              )}
+              {project.deadline && (
+                <span
+                  className={`badge badge-sm font-semibold gap-1 ${
+                    moment(project.deadline).isBefore(moment(), "day") && !isCompleted
+                      ? "badge-error badge-soft text-error"
+                      : "badge-primary badge-soft text-primary"
+                  }`}
+                  title={`Deadline: ${moment(project.deadline).format("LL")}`}
+                >
+                  <LuClock className="size-3" />
+                  <span>Due {moment(project.deadline).format("MMM DD")}</span>
+                </span>
+              )}
+            </div>
             <h2 className="card-title text-base sm:text-lg font-bold">
               {project.serviceName}
             </h2>
@@ -383,9 +433,24 @@ const ProjectCard = ({
               {project?.assignedTo || "Unassigned"}
             </span>
           </div>
-          <div className="flex items-center gap-1.5 opacity-60">
-            <LuCalendar className="size-3.5" />
-            <span>{moment(project.createdAt).format("LL")}</span>
+          <div className="flex flex-col items-end gap-0.5">
+            {project.deadline ? (
+              <div
+                className={`flex items-center gap-1 font-semibold ${
+                  moment(project.deadline).isBefore(moment(), "day") && !isCompleted
+                    ? "text-error"
+                    : "text-primary"
+                }`}
+                title={`Deadline: ${moment(project.deadline).format("LL")}`}
+              >
+                <LuClock className="size-3.5" />
+                <span>Due {moment(project.deadline).format("MMM DD, YYYY")}</span>
+              </div>
+            ) : null}
+            <div className="flex items-center gap-1 opacity-50 text-[11px]">
+              <LuCalendar className="size-3" />
+              <span>{moment(project.createdAt).format("LL")}</span>
+            </div>
           </div>
         </div>
       </div>

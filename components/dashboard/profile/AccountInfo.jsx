@@ -5,7 +5,7 @@ const AccountInfo = ({ data, value }) => {
   const Icon = LuIcons[data.icon];
 
   return (
-    <div className="overflow-x-auto rounded-box border border-base-content/5 bg-base-300">
+    <div className="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
       <h1 className="p-4 text-xl sm:text-2xl font-semibold flex items-center gap-3 border-b border-b-base-content/5">
         <Icon className="size-6 text-purple-500" />
         {data.title}

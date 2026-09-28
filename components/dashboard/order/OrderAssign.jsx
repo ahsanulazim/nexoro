@@ -1,23 +1,35 @@
 "use client";
 
 import { assignOrder } from "@/api/fetchOrder";
+import { useAuth } from "@/context/AuthProvider";
 import { MyContext } from "@/context/MyProvider";
 import { useForm } from "@tanstack/react-form-nextjs";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useContext } from "react";
-import { LuPlus, LuTrash2 } from "react-icons/lu";
+import { LuPlus, LuTrash2, LuUserCheck } from "react-icons/lu";
 import { toast } from "react-toastify";
 
 const OrderAssign = ({ order }) => {
+  const { currentUser } = useAuth();
+  const isAdmin = currentUser?.user?.role === "admin";
+  const isMember = currentUser?.user?.role === "member";
+  const currentUserId = currentUser?.user?._id
+    ? String(currentUser.user._id)
+    : "";
+
   const { assignableUsers, assignableUsersLoading, assignableUsersError } =
     useContext(MyContext);
   const { Field, handleSubmit, Subscribe } = useForm({
     defaultValues: {
-      assignedTo: "",
+      assignedTo: isMember ? currentUserId : "",
       tasks: [{ task: "" }],
     },
     onSubmit: ({ value }) => {
-      mutate({ orderId: order._id, value });
+      const payload = {
+        ...value,
+        assignedTo: isMember ? currentUserId : value.assignedTo,
+      };
+      mutate({ orderId: order._id, value: payload });
     },
   });
 
@@ -27,10 +39,16 @@ const OrderAssign = ({ order }) => {
     mutationFn: assignOrder,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["order"] });
-      toast.success("Order assigned successfully");
+      queryClient.invalidateQueries({ queryKey: ["orders"] });
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
+      toast.success(
+        isMember
+          ? "Order assigned to yourself successfully"
+          : "Order assigned successfully",
+      );
     },
-    onError: () => {
-      toast.error("Failed to assign order");
+    onError: (err) => {
+      toast.error(err?.response?.data?.message || "Failed to assign order");
     },
   });
 
@@ -43,34 +61,58 @@ const OrderAssign = ({ order }) => {
         handleSubmit();
       }}
     >
-      <Field name="assignedTo">
-        {(field) => (
-          <select
-            className="select w-full mb-5"
-            defaultValue=""
-            name={field.name}
-            onBlur={(e) => field.handleBlur(e.target.value)}
-            onChange={(e) => {
-              field.handleChange(e.target.value);
-            }}
-          >
-            <option value="" disabled={true}>
-              Select Member or Admin
-            </option>
-            {assignableUsersLoading ? (
-              <option value="">Loading users...</option>
-            ) : assignableUsersError || !assignableUsers?.length ? (
-              <option value="">No members or admins available</option>
-            ) : (
-              assignableUsers.map((member) => (
-                <option key={member._id} value={member._id}>
-                  {member.name || member.email} ({member.role})
-                </option>
-              ))
-            )}
-          </select>
-        )}
-      </Field>
+      {isMember ? (
+        <div className="p-3 mb-5 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-lg bg-primary/20 text-primary">
+              <LuUserCheck className="size-4" />
+            </div>
+            <div>
+              <span className="text-[10px] uppercase font-bold tracking-wider opacity-60 block">
+                Assignee (Self-Assign)
+              </span>
+              <span className="text-xs font-semibold text-base-content">
+                {currentUser?.user?.name ||
+                  currentUser?.user?.displayName ||
+                  currentUser?.user?.email}{" "}
+                (You)
+              </span>
+            </div>
+          </div>
+          <span className="badge badge-primary badge-sm font-semibold">
+            Creator
+          </span>
+        </div>
+      ) : (
+        <Field name="assignedTo">
+          {(field) => (
+            <select
+              className="select w-full mb-5"
+              defaultValue=""
+              name={field.name}
+              onBlur={(e) => field.handleBlur(e.target.value)}
+              onChange={(e) => {
+                field.handleChange(e.target.value);
+              }}
+            >
+              <option value="" disabled={true}>
+                Select Member or Admin
+              </option>
+              {assignableUsersLoading ? (
+                <option value="">Loading users...</option>
+              ) : assignableUsersError || !assignableUsers?.length ? (
+                <option value="">No members or admins available</option>
+              ) : (
+                assignableUsers.map((member) => (
+                  <option key={member._id} value={member._id}>
+                    {member.name || member.email} ({member.role})
+                  </option>
+                ))
+              )}
+            </select>
+          )}
+        </Field>
+      )}
       <h2 className="font-bold text-sm">Add Tasks</h2>
       <Field name="tasks" mode="array">
         {(field) => (
@@ -127,6 +169,8 @@ const OrderAssign = ({ order }) => {
                 <>
                   <div className="loading loading-spinner"></div> Assigning...
                 </>
+              ) : isMember ? (
+                "Assign to Myself"
               ) : (
                 "Assign"
               )}

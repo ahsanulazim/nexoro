@@ -102,12 +102,12 @@ const SocketProvider = ({ children }) => {
           setUnreadNotificationsCount((prev) => prev + 1);
 
           toast.info(
-            <>
-              <p className="font-semibold text-sm">{notification.title}</p>
+            <div className="flex flex-col">
+              <h3 className="font-semibold text-sm">{notification.title}</h3>
               <p className="text-xs text-white line-clamp-2">
                 {notification.message}
               </p>
-            </>,
+            </div>,
             {
               onClick: () => {
                 if (notification.link) {

@@ -1,5 +1,6 @@
 import { createOrder, getOrder, updateOrder } from "@/api/fetchOrder";
 import { useAppForm } from "@/components/ui/forms/CustomHookForm";
+import { useAuth } from "@/context/AuthProvider";
 import { MyContext } from "@/context/MyProvider";
 import { orderSchema } from "@/validator/orderValidator";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -7,6 +8,8 @@ import { useContext } from "react";
 import { toast } from "react-toastify";
 
 const OrderAddModal = ({ ref, isEditing, orderId }) => {
+  const { currentUser } = useAuth();
+
   const { data: orderData, isLoading: orderLoading } = useQuery({
     queryKey: ["order", orderId],
     queryFn: getOrder,
@@ -38,14 +41,38 @@ const OrderAddModal = ({ ref, isEditing, orderId }) => {
         servicePrice: isEditing
           ? orderData?.order?.servicePrice || orderData?.order?.price || 0
           : 0,
-        status: isEditing ? orderData?.order?.status || "" : "",
         payment: isEditing ? orderData?.order?.payment || "" : "",
         paymentMethod: isEditing ? orderData?.order?.paymentMethod || "" : "",
         discount: isEditing ? orderData?.order?.discount || 0 : 0,
         amount: isEditing ? orderData?.order?.amount || 0 : 0,
+        deadline: isEditing
+          ? orderData?.order?.deadline
+            ? new Date(orderData.order.deadline).toISOString().split("T")[0]
+            : ""
+          : "",
+        assignToSelf: false,
       },
       onSubmit: ({ value }) => {
-        isEditing ? mutate({ ...value, orderId }) : mutate(value);
+        const isMember = currentUser?.user?.role === "member";
+        const creatorName = isMember
+          ? currentUser?.user?.name ||
+            currentUser?.user?.displayName ||
+            currentUser?.user?.email ||
+            "Member"
+          : currentUser?.user?.name || "Admin";
+        const creatorRole = currentUser?.user?.role || "admin";
+        const creatorId = currentUser?.user?._id || null;
+
+        isEditing
+          ? mutate({ ...value, orderId })
+          : mutate({
+              ...value,
+              createdBy: creatorName,
+              createdByRole: creatorRole,
+              createdById: creatorId,
+              assignToSelf: Boolean(value.assignToSelf),
+              assignedTo: value.assignToSelf ? creatorId : null,
+            });
       },
       validators: {
         onSubmit: orderSchema,
@@ -168,19 +195,67 @@ const OrderAddModal = ({ ref, isEditing, orderId }) => {
               />
 
               <AppField
-                name="status"
+                name="deadline"
                 children={(field) => (
-                  <field.SelectField
-                    label="Select Status"
-                    data={[
-                      { value: "Pending", label: "Pending" },
-                      { value: "Processing", label: "Processing" },
-                      { value: "Completed", label: "Completed" },
-                      { value: "Cancelled", label: "Cancelled" },
-                    ]}
+                  <field.TextField
+                    label="Project Deadline"
+                    type="date"
+                    placeholder="Select deadline"
                   />
                 )}
               />
+
+              {!isEditing && currentUser?.user?.role === "member" && (
+                <AppField
+                  name="assignToSelf"
+                  children={(field) => (
+                    <div className="bg-base-200/50 p-3 rounded-box border border-base-content/10">
+                      <label className="label cursor-pointer justify-between py-0">
+                        <div className="flex flex-col">
+                          <span className="label-text font-semibold text-sm">
+                            Assign this order to me
+                          </span>
+                          <span className="text-[11px] text-base-content/60">
+                            Automatically assign yourself as the project owner
+                          </span>
+                        </div>
+                        <input
+                          type="checkbox"
+                          className="checkbox checkbox-primary checkbox-sm"
+                          checked={Boolean(field.state.value)}
+                          onChange={(e) => field.handleChange(e.target.checked)}
+                        />
+                      </label>
+                    </div>
+                  )}
+                />
+              )}
+
+              {isEditing && (
+                <div className="flex items-center justify-between p-3 bg-base-200/70 border border-base-content/10 rounded-box">
+                  <div>
+                    <span className="text-xs font-semibold uppercase tracking-wider opacity-60 block">
+                      Order Status
+                    </span>
+                    <span className="text-[11px] opacity-70">
+                      Automated based on tasks
+                    </span>
+                  </div>
+                  <span
+                    className={`badge font-semibold ${
+                      orderData?.order?.status === "Completed"
+                        ? "badge-success"
+                        : orderData?.order?.status === "Processing"
+                          ? "badge-warning"
+                          : orderData?.order?.status === "Cancelled"
+                            ? "badge-error"
+                            : "badge-info"
+                    }`}
+                  >
+                    {orderData?.order?.status || "Pending"}
+                  </span>
+                </div>
+              )}
 
               <AppField
                 name="discount"

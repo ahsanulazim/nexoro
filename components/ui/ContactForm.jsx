@@ -26,7 +26,7 @@ const ContactForm = () => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify(formData),
-        }
+        },
       );
       if (!response.ok) {
         throw new Error("Network response was not ok");
@@ -49,8 +49,11 @@ const ContactForm = () => {
         </h2>
         <p className="text-gray-500 text-sm md:text-lg mb-5">
           or reach us manually at{" "}
-          <a href="mailto:contact@nexoro.com" className="text-main font-semibold">
-            contact@nexoro.com
+          <a
+            href="mailto:contact@nexorosolution.com"
+            className="text-main font-semibold"
+          >
+            contact@nexorosolution.com
           </a>
         </p>
         <label className="label">Name</label>
@@ -77,17 +80,18 @@ const ContactForm = () => {
         <label className="label">Email</label>
         <label className="input xl:input-md  w-full rounded-full mb-3">
           <LuMail />
-          <input type="text" name="email" placeholder="Email" className="grow" required />
+          <input
+            type="text"
+            name="email"
+            placeholder="Email"
+            className="grow"
+            required
+          />
         </label>
         <label className="label">Phone</label>
         <label className="input xl:input-md  w-full rounded-full mb-3">
           <LuSmartphone />
-          <input
-            type="tel"
-            name="phone"
-            placeholder="Phone"
-            className="grow"
-          />
+          <input type="tel" name="phone" placeholder="Phone" className="grow" />
         </label>
         <label className="label">Message</label>
         <textarea

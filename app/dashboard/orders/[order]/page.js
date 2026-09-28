@@ -4,14 +4,17 @@ import DashBread from "@/components/dashboard/DashBread";
 import OrderAction from "@/components/dashboard/order/OrderAction";
 import OrderTaskManagement from "@/components/dashboard/order/OrderTaskManagement";
 import OrderCostManagement from "@/components/dashboard/order/OrderCostManagement";
+import InvoiceModal from "@/components/dashboard/order/InvoiceModal";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import moment from "moment";
 import { useParams } from "next/navigation";
+import { useRef } from "react";
 import { FaCircleCheck } from "react-icons/fa6";
-import { LuBox } from "react-icons/lu";
+import { LuBox, LuPrinter, LuClock, LuCalendar } from "react-icons/lu";
 
 const Order = () => {
   const { order } = useParams();
+  const invoiceModalRef = useRef(null);
 
   const { data, isLoading, isError, isFetching } = useQuery({
     queryKey: ["order", order],
@@ -38,6 +41,8 @@ const Order = () => {
 
   return (
     <main>
+      <InvoiceModal ref={invoiceModalRef} order={data?.order} />
+
       <section className="">
         <DashBread title="Orders" subtitle="Order Details" />
       </section>
@@ -48,13 +53,61 @@ const Order = () => {
       ) : (
         <section className="grid lg:grid-cols-12 gap-5 items-start">
           <div className="p-5 bg-base-100 rounded-box lg:col-span-8">
-            <div>
-              <h1 className="text-xl font-bold flex items-center gap-2">
-                <LuBox /> Order Details
-              </h1>
-              <p className="opacity-50 text-sm">
-                Created on: {moment(data.order?.createdAt).format("LLL")}
-              </p>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h1 className="text-xl font-bold flex items-center gap-2">
+                  <LuBox /> Order Details
+                </h1>
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 opacity-60 text-sm mt-1">
+                  <p>Created on: {moment(data.order?.createdAt).format("LLL")}</p>
+                  <span>•</span>
+                  <p>
+                    Created by:{" "}
+                    <span className="font-semibold opacity-100 text-base-content">
+                      {!data.order?.createdBy ||
+                      data.order?.createdBy === "User" ||
+                      data.order?.createdBy === "Customer"
+                        ? "Customer"
+                        : data.order?.createdBy}
+                    </span>
+                  </p>
+                  {data.order?.deadline && (
+                    <>
+                      <span>•</span>
+                      <p className="flex items-center gap-1">
+                        <LuClock
+                          className={`size-3.5 ${
+                            moment(data.order.deadline).isBefore(moment(), "day") &&
+                            data.order.status !== "Completed"
+                              ? "text-error"
+                              : "text-primary"
+                          }`}
+                        />
+                        Deadline:{" "}
+                        <span
+                          className={`font-semibold opacity-100 ${
+                            moment(data.order.deadline).isBefore(moment(), "day") &&
+                            data.order.status !== "Completed"
+                              ? "text-error"
+                              : "text-base-content"
+                          }`}
+                        >
+                          {moment(data.order.deadline).format("LL")}
+                        </span>
+                      </p>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => invoiceModalRef.current?.showModal()}
+                className="btn btn-outline btn-primary btn-sm gap-2 shadow-xs shrink-0 self-start sm:self-center"
+              >
+                <LuPrinter className="size-4" />
+                <span>Print Invoice</span>
+              </button>
             </div>
             <div className="divider"></div>
             <div className="flex gap-5 flex-col xl:flex-row">

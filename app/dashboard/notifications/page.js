@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import moment from "moment";
 import {
   LuBell,
+  LuBriefcase,
   LuCheck,
   LuChevronLeft,
   LuChevronRight,
@@ -16,6 +17,7 @@ import {
   LuCircleCheck,
   LuCircleX,
   LuCreditCard,
+  LuListTodo,
   LuMessageSquare,
   LuPackage,
 } from "react-icons/lu";
@@ -74,6 +76,25 @@ export default function NotificationsPage() {
           icon: <LuPackage className="size-5 text-primary" />,
           bg: "bg-primary/10",
           label: "New Order",
+        };
+      case "project_assigned":
+      case "order_assigned":
+        return {
+          icon: <LuBriefcase className="size-5 text-primary" />,
+          bg: "bg-primary/10",
+          label: "Project Assigned",
+        };
+      case "order_tasks_updated":
+        return {
+          icon: <LuListTodo className="size-5 text-secondary" />,
+          bg: "bg-secondary/10",
+          label: "Tasks Update",
+        };
+      case "order_status_updated":
+        return {
+          icon: <LuPackage className="size-5 text-info" />,
+          bg: "bg-info/10",
+          label: "Order Status",
         };
       case "order_cancelled":
         return {
@@ -160,9 +181,15 @@ export default function NotificationsPage() {
   const filteredNotifications = notificationsList.filter((item) => {
     if (activeFilter === "all") return true;
     if (activeFilter === "orders") {
-      return ["new_order", "order_completed", "order_cancelled"].includes(
-        item.type,
-      );
+      return [
+        "new_order",
+        "order_completed",
+        "order_cancelled",
+        "project_assigned",
+        "order_assigned",
+        "order_tasks_updated",
+        "order_status_updated",
+      ].includes(item.type);
     }
     if (activeFilter === "payments") {
       return ["payment_completed", "payment_due"].includes(item.type);

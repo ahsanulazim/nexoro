@@ -1,8 +1,11 @@
 import api from "@/axios/axiosInstance";
 
-// get all clients
-export const fetchClients = async () => {
-  const res = await api.get("/clients");
+// get clients (supports server-side pagination, search, filters, and request cancellation)
+export const fetchClients = async (params = {}, options = {}) => {
+  const res = await api.get("/clients", {
+    params,
+    signal: options?.signal,
+  });
   return res.data;
 };
 

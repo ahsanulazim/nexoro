@@ -40,6 +40,9 @@ const ClientForm = ({ ref }) => {
     mutationFn: addClient,
     onSuccess: () => {
       queryClient.invalidateQueries({
+        queryKey: ["clients"],
+      });
+      queryClient.invalidateQueries({
         queryKey: ["clientData"],
       });
       ref.current.close();

@@ -11,6 +11,9 @@ export const orderSchema = z
     payment: z.string().min(1, "Payment is required"),
     amount: z.number().optional().nullable().default(0),
     paymentMethod: z.string().optional().nullable(),
+    deadline: z.string().optional().nullable(),
+    assignToSelf: z.boolean().optional().nullable(),
+    assignedTo: z.string().optional().nullable(),
   })
   .superRefine((data, ctx) => {
     if (data.slug === "custom") {

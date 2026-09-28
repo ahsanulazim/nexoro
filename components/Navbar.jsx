@@ -4,9 +4,12 @@ import Link from "next/link";
 import { TbGridDots } from "react-icons/tb";
 import Button from "./ui/Button";
 import { useEffect, useState } from "react";
+import { useAuth } from "@/context/AuthProvider";
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
+  const { currentUser } = useAuth();
+  const isLoggedIn = !!currentUser?.success;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -52,7 +55,13 @@ export default function Navbar() {
               <Link href="/portfolio">Portfolio</Link>
             </li>
             <li className="dots-before dots-after">
-              <Link href="/login">Account</Link>
+              {isLoggedIn ? (
+                <Link href="/dashboard" className="text-primary font-bold">
+                  Dashboard
+                </Link>
+              ) : (
+                <Link href="/login">Account</Link>
+              )}
             </li>
           </ul>
         </div>

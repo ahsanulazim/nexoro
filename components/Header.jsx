@@ -1,9 +1,15 @@
+"use client";
+
 import Link from "next/link";
 import Footer from "./Footer";
 import Navbar from "./Navbar";
 import DrawerNav from "./drawer/DrawerNav";
+import { useAuth } from "@/context/AuthProvider";
 
 export default function Header({ children }) {
+  const { currentUser } = useAuth();
+  const isLoggedIn = !!currentUser?.success;
+
   const navItem = [
     {
       title: "Home",
@@ -52,11 +58,19 @@ export default function Header({ children }) {
               </DrawerNav>
             ))}
           </ul>
-          <Link href="/login">
-            <button className="btn btn-primary bg-main border-main hover:bg-main-dark hover:border-main-dark w-full rounded-md shadow-none">
-              Login
-            </button>
-          </Link>
+          {isLoggedIn ? (
+            <Link href="/dashboard">
+              <button className="btn btn-primary bg-main border-main hover:bg-main-dark hover:border-main-dark w-full rounded-md shadow-none font-bold">
+                Go to Dashboard
+              </button>
+            </Link>
+          ) : (
+            <Link href="/login">
+              <button className="btn btn-primary bg-main border-main hover:bg-main-dark hover:border-main-dark w-full rounded-md shadow-none font-bold">
+                Login
+              </button>
+            </Link>
+          )}
         </div>
       </div>
     </div>

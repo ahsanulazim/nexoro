@@ -10,10 +10,12 @@ import { useRouter } from "next/navigation";
 import moment from "moment";
 import {
   LuBell,
+  LuBriefcase,
   LuCircleAlert,
   LuCircleCheck,
   LuCircleX,
   LuCreditCard,
+  LuListTodo,
   LuMessageSquare,
   LuPackage,
   LuPanelLeftClose,
@@ -67,6 +69,22 @@ const DashNav = ({ isChecked }) => {
         return {
           icon: <LuPackage className="size-4 text-primary" />,
           bg: "bg-primary/15",
+        };
+      case "project_assigned":
+      case "order_assigned":
+        return {
+          icon: <LuBriefcase className="size-4 text-primary" />,
+          bg: "bg-primary/15",
+        };
+      case "order_tasks_updated":
+        return {
+          icon: <LuListTodo className="size-4 text-secondary" />,
+          bg: "bg-secondary/15",
+        };
+      case "order_status_updated":
+        return {
+          icon: <LuPackage className="size-4 text-info" />,
+          bg: "bg-info/15",
         };
       case "order_cancelled":
         return {
@@ -196,7 +214,9 @@ const DashNav = ({ isChecked }) => {
                 </button>
               )}
             </div>
-            <ul className="py-1 max-h-96 overflow-y-scroll space-y-1">
+            <ul
+              className={`py-1 max-h-96 ${notifications.length > 3 ? "overflow-y-scroll" : ""} space-y-1`}
+            >
               {notifications.length === 0 ? (
                 <div className="text-center py-6 text-sm opacity-50">
                   No notifications yet

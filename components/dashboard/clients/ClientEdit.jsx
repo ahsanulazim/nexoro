@@ -48,6 +48,7 @@ export default function ClientEdit({ ref, client }) {
   const mutation = useMutation({
     mutationFn: ({ id, formData }) => updateClient(id, formData),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["clients"] });
       queryClient.invalidateQueries({ queryKey: ["clientData"] });
       ref.current.close();
       toast.success("Client updated successfully");

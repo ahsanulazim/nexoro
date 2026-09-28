@@ -5,15 +5,22 @@ import DashBread from "@/components/dashboard/DashBread";
 import OrderAddModal from "@/components/dashboard/order/OrderAddModal";
 import OrderNav from "@/components/dashboard/order/OrderNav";
 import OrderTable from "@/components/dashboard/order/OrderTable";
+import ClientOrdersView from "@/components/dashboard/client/ClientOrdersView";
+import { useAuth } from "@/context/AuthProvider";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useRef, useState } from "react";
 import { LuPlus, LuShoppingBag } from "react-icons/lu";
 
 const OrdersContent = () => {
+  const { currentUser } = useAuth();
   const orderAddRef = useRef();
   const router = useRouter();
   const searchParams = useSearchParams();
+
+  const isStaff =
+    currentUser?.user?.role === "admin" ||
+    currentUser?.user?.role === "member";
 
   // Initial values from URL if present
   const initialPage = Number(searchParams.get("page") || 1);
@@ -24,7 +31,7 @@ const OrdersContent = () => {
   const [filterTab, setFilterTab] = useState(initialStatus);
   const [searchTerm, setSearchTerm] = useState(initialSearch);
 
-  // TanStack Query for fetching filtered, searched, and paginated orders
+  // TanStack Query for fetching filtered, searched, and paginated orders (Admin/Staff only)
   const {
     data: orders,
     isLoading,
@@ -36,7 +43,13 @@ const OrdersContent = () => {
     ],
     queryFn: fetchAllOrders,
     placeholderData: keepPreviousData,
+    enabled: isStaff,
   });
+
+  // If customer, show dedicated customer orders view
+  if (!isStaff) {
+    return <ClientOrdersView />;
+  }
 
   // URL sync helper
   const updateUrl = (newPage, newStatus, newSearch) => {

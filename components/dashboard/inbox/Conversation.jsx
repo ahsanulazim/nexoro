@@ -130,7 +130,12 @@ const Conversation = ({ currentRoom }) => {
         );
 
         // যদি অন্য কেউ মেসেজ পাঠায় তবে লাইভ markAsRead ট্রিগার হবে
-        if (newMsg.senderRole !== role) {
+        if (
+          (role === "customer" &&
+            ["admin", "member"].includes(newMsg.senderRole)) ||
+          (["admin", "member"].includes(role) &&
+            newMsg.senderRole === "customer")
+        ) {
           socket.emit("markAsRead", { roomId: currentRoom });
         }
       }
@@ -165,14 +170,14 @@ const Conversation = ({ currentRoom }) => {
     if (!text.trim() && !file) return;
 
     let receiverId = "admin";
-    if (role === "admin") {
+    if (role === "admin" || role === "member") {
       const currentConversation = conversations?.find(
         (c) => c.roomId === currentRoom,
       );
       if (currentConversation?.customer?._id) {
         receiverId = currentConversation.customer._id;
       } else {
-        const customerMsg = messages.find((m) => m.senderRole !== "admin");
+        const customerMsg = messages.find((m) => m.senderRole === "customer");
         if (customerMsg) receiverId = customerMsg.senderId;
       }
     }
@@ -273,7 +278,10 @@ const Conversation = ({ currentRoom }) => {
           </div>
         )}
         {messages.map((msg) => {
-          const isMe = msg.senderRole === role;
+          const isMe =
+            msg.senderId === currentUser?.user?._id ||
+            (["admin", "member"].includes(role) &&
+              ["admin", "member"].includes(msg.senderRole));
 
           return (
             <div

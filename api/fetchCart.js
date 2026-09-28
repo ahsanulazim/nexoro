@@ -1,5 +1,4 @@
-//Order Created
-
+import api from "@/axios/axiosInstance";
 import { auth } from "@/firebase/firebase.config";
 
 export const createOrder = async (slug, id) => {
@@ -57,6 +56,27 @@ export const fetchAllOrders = async ({ queryKey }) => {
   return res.json();
 };
 
+// fetch customer specific orders & stats
+export const fetchMyOrders = async () => {
+  const user = auth.currentUser;
+  if (!user) return null;
+
+  const token = await user.getIdToken();
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/orders/getMyOrders`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch client orders");
+  }
+
+  return res.json();
+};
+
 //fetch all country names for billing form
 export const fetchCountries = async () => {
   const response = await fetch(
@@ -72,42 +92,14 @@ export const fetchCountries = async () => {
   return data;
 };
 
-//update order status by admin
-
+//update order status (cancellation) by admin or member
 export const updateOrderStatus = async ({ orderId, status }) => {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_BASE}/orders/updateOrderStatus/${orderId}`,
-    {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ status }),
-    },
-  );
-
-  if (!res.ok) {
-    throw new Error("Failed to update order status");
-  }
-
-  return res.json();
+  const res = await api.put(`/orders/updateOrderStatus/${orderId}`, { status });
+  return res.data;
 };
 
 //delete order by admin
 export const deleteOrder = async (orderId) => {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_BASE}/orders/deleteOrder/${orderId}`,
-    {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    },
-  );
-
-  if (!res.ok) {
-    throw new Error("Failed to delete order");
-  }
-
-  return res.json();
+  const res = await api.delete(`/orders/deleteOrder/${orderId}`);
+  return res.data;
 };

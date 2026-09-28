@@ -16,7 +16,8 @@ export default function Modal({ ref, remove }) {
     onSuccess: (data) => {
       if (data.success) {
         toast.success("User removed successfully");
-        queryClient.invalidateQueries({ queryKey: ["users", user?.uid] });
+        queryClient.invalidateQueries({ queryKey: ["users"] });
+        queryClient.invalidateQueries({ queryKey: ["members"] });
       } else {
         toast.error(data.message || "Failed to remove user");
       }

@@ -1,10 +1,13 @@
 "use client";
 
 import { deleteOrder } from "@/api/fetchCart";
+import { useAuth } from "@/context/AuthProvider";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 
 const OrderModal = ({ ref, orderId }) => {
+  const { currentUser } = useAuth();
+  const isAdmin = currentUser?.user?.role === "admin";
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
@@ -35,8 +38,15 @@ const OrderModal = ({ ref, orderId }) => {
     },
   });
   const handleDelete = () => {
+    if (!isAdmin) {
+      toast.error("Only administrators can delete orders");
+      ref?.current?.close();
+      return;
+    }
     mutation.mutate(orderId);
   };
+
+  if (!isAdmin) return null;
 
   return (
     <dialog ref={ref} className="modal">
