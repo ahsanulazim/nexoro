@@ -6,7 +6,7 @@ import { MyContext } from "@/context/MyProvider";
 import { useForm } from "@tanstack/react-form-nextjs";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useContext } from "react";
-import { LuPlus, LuTrash2, LuUserCheck } from "react-icons/lu";
+import { LuAward, LuPlus, LuTrash2, LuUserCheck } from "react-icons/lu";
 import { toast } from "react-toastify";
 
 const OrderAssign = ({ order }) => {
@@ -22,11 +22,15 @@ const OrderAssign = ({ order }) => {
   const { Field, handleSubmit, Subscribe } = useForm({
     defaultValues: {
       assignedTo: isMember ? currentUserId : "",
+      rewardPoints: order?.rewardPoints ?? 5,
       tasks: [{ task: "" }],
     },
     onSubmit: ({ value }) => {
       const payload = {
         ...value,
+        rewardPoints: isAdmin
+          ? Math.max(0, Number(value.rewardPoints ?? 5))
+          : 5,
         assignedTo: isMember ? currentUserId : value.assignedTo,
       };
       mutate({ orderId: order._id, value: payload });
@@ -41,6 +45,8 @@ const OrderAssign = ({ order }) => {
       queryClient.invalidateQueries({ queryKey: ["order"] });
       queryClient.invalidateQueries({ queryKey: ["orders"] });
       queryClient.invalidateQueries({ queryKey: ["projects"] });
+      queryClient.invalidateQueries({ queryKey: ["leaderboard"] });
+      queryClient.invalidateQueries({ queryKey: ["myPointsSummary"] });
       toast.success(
         isMember
           ? "Order assigned to yourself successfully"
@@ -113,6 +119,45 @@ const OrderAssign = ({ order }) => {
           )}
         </Field>
       )}
+
+      {/* Completion Points Input (Customizable by Admin, default 5) */}
+      {isAdmin ? (
+        <Field name="rewardPoints">
+          {(field) => (
+            <div className="mb-4 p-3 rounded-xl bg-base-200/70 border border-base-300">
+              <label className="label py-0 mb-1.5 flex items-center justify-between">
+                <span className="text-xs font-bold flex items-center gap-1.5">
+                  <LuAward className="text-warning size-4" /> Completion Reward Points
+                </span>
+                <span className="badge badge-warning badge-xs font-semibold">
+                  Default: 5 pts
+                </span>
+              </label>
+              <input
+                type="number"
+                min={0}
+                value={field.state.value}
+                onChange={(e) => field.handleChange(e.target.value)}
+                className="input input-sm input-bordered w-full"
+                placeholder="5"
+              />
+              <p className="text-[11px] opacity-60 mt-1">
+                Points automatically awarded when all tasks are marked completed.
+              </p>
+            </div>
+          )}
+        </Field>
+      ) : (
+        <div className="mb-4 px-3 py-2 rounded-xl bg-warning/10 border border-warning/20 flex items-center justify-between text-xs">
+          <span className="font-semibold flex items-center gap-1.5">
+            <LuAward className="text-warning size-4" /> Completion Reward
+          </span>
+          <span className="badge badge-warning badge-sm font-bold">
+            +{order?.rewardPoints ?? 5} Points
+          </span>
+        </div>
+      )}
+
       <h2 className="font-bold text-sm">Add Tasks</h2>
       <Field name="tasks" mode="array">
         {(field) => (

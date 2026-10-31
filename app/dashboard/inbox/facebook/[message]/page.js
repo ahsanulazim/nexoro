@@ -5,11 +5,11 @@ const page = async ({ params }) => {
   const { message } = await params;
 
   return (
-    <div className="drawer-content flex flex-col">
+    <>
       <ChatNav />
       {/* Page content here */}
       <Conversation currentRoom={message} />
-    </div>
+    </>
   );
 };
 

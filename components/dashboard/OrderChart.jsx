@@ -43,10 +43,12 @@ const CustomTooltip = ({ active, payload, label }) => {
   return null;
 };
 
-const OrderChart = () => {
+const OrderChart = ({ startDate = null, endDate = null, dateLabel = null }) => {
   const [range, setRange] = useState("1month");
   const { socket } = useSocket();
   const queryClient = useQueryClient();
+
+  const isCustomActive = Boolean(startDate);
 
   const {
     data: chartResponse,
@@ -54,8 +56,8 @@ const OrderChart = () => {
     isError,
     refetch,
   } = useQuery({
-    queryKey: ["chartData", "orders", range],
-    queryFn: () => getChart(range),
+    queryKey: ["chartData", "orders", range, startDate, endDate],
+    queryFn: () => getChart(range, startDate, endDate),
     staleTime: 1000 * 60 * 5,
   });
 
@@ -84,8 +86,17 @@ const OrderChart = () => {
     totalOrders: chartData.reduce((acc, curr) => acc + (curr.orders || 0), 0),
   };
 
-  const maxBarSize = range === "1month" ? 14 : range === "6month" ? 36 : 24;
-  const xAxisInterval = range === "1month" ? 3 : 0;
+  const maxBarSize =
+    isCustomActive && chartData.length > 20
+      ? 14
+      : range === "1month"
+      ? 14
+      : range === "6month"
+      ? 36
+      : 24;
+
+  const xAxisInterval =
+    chartData.length > 25 ? 3 : chartData.length > 14 ? 1 : 0;
 
   return (
     <div className="w-full flex flex-col justify-between">
@@ -97,22 +108,28 @@ const OrderChart = () => {
           </div>
         </div>
 
-        {/* Range Filter Buttons */}
-        <div className="join bg-base-300/50 p-0.5 rounded-lg border border-base-content/10">
-          {RANGES.map((r) => (
-            <button
-              key={r.id}
-              onClick={() => setRange(r.id)}
-              className={`join-item btn btn-xs border-0 ${
-                range === r.id
-                  ? "btn-accent shadow-xs font-semibold text-white"
-                  : "btn-ghost opacity-70 hover:opacity-100"
-              }`}
-            >
-              {r.label}
-            </button>
-          ))}
-        </div>
+        {/* Range Filter Buttons or Active Filter Pill */}
+        {isCustomActive ? (
+          <div className="badge badge-outline badge-accent text-xs font-medium px-2 py-1">
+            📅 {dateLabel || "Custom Range"}
+          </div>
+        ) : (
+          <div className="join bg-base-300/50 p-0.5 rounded-lg border border-base-content/10">
+            {RANGES.map((r) => (
+              <button
+                key={r.id}
+                onClick={() => setRange(r.id)}
+                className={`join-item btn btn-xs border-0 ${
+                  range === r.id
+                    ? "btn-accent shadow-xs font-semibold text-white"
+                    : "btn-ghost opacity-70 hover:opacity-100"
+                }`}
+              >
+                {r.label}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Chart Container */}

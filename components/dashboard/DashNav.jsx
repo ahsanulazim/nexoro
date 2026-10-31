@@ -4,9 +4,11 @@ import Link from "next/link";
 import UserDropDown from "./UserDropDown";
 import { useEffect } from "react";
 import { useSocket } from "@/context/SocketProvider";
+import { useAuth } from "@/context/AuthProvider";
 import { auth } from "@/firebase/firebase.config";
 import api from "@/axios/axiosInstance";
 import { useRouter } from "next/navigation";
+import { getStoredProfileMeta } from "@/utils/userInfo";
 import moment from "moment";
 import {
   LuBell,
@@ -20,18 +22,30 @@ import {
   LuPackage,
   LuPanelLeftClose,
   LuPanelLeftOpen,
+  LuTrophy,
   LuUser,
 } from "react-icons/lu";
 import ThemeChanger from "./ThemeChanger";
 
 const DashNav = ({ isChecked }) => {
+  const { currentUser } = useAuth();
   const {
     notifications,
     setNotifications,
     unreadNotificationsCount,
     setUnreadNotificationsCount,
+    browserPermission,
+    isBrowserAlertActive,
+    enableBrowserNotifications,
+    toggleBrowserNotifications,
+    showBrowserNotification,
   } = useSocket();
   const router = useRouter();
+
+  const userPhoto =
+    currentUser?.user?.photoURL ||
+    getStoredProfileMeta(currentUser?.user?.email)?.photoURL ||
+    auth.currentUser?.photoURL;
 
   // Fetch initial notifications
   useEffect(() => {
@@ -110,6 +124,18 @@ const DashNav = ({ isChecked }) => {
         return {
           icon: <LuMessageSquare className="size-4 text-info" />,
           bg: "bg-info/15",
+        };
+      case "points_earned":
+      case "work_submitted":
+        return {
+          icon: <LuTrophy className="size-4 text-warning" />,
+          bg: "bg-warning/15",
+        };
+      case "points_deducted":
+      case "work_rejected":
+        return {
+          icon: <LuCircleX className="size-4 text-error" />,
+          bg: "bg-error/15",
         };
       default:
         return {
@@ -198,7 +224,9 @@ const DashNav = ({ isChecked }) => {
             <LuBell className="size-5" />
             {unreadNotificationsCount > 0 && (
               <span className="badge badge-error badge-xs absolute top-1 right-1 px-1.5 py-1 text-[10px]">
-                {unreadNotificationsCount}
+                {unreadNotificationsCount > 99
+                  ? "99+"
+                  : unreadNotificationsCount}
               </span>
             )}
           </summary>
@@ -214,6 +242,68 @@ const DashNav = ({ isChecked }) => {
                 </button>
               )}
             </div>
+            {/* Desktop Notification Status Strip */}
+            {browserPermission === "default" && (
+              <div className="mx-2 my-2 p-2 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-between gap-2">
+                <div className="text-[11px] leading-tight">
+                  <p className="font-semibold text-primary">
+                    Enable Desktop Alerts
+                  </p>
+                  <p className="opacity-70 text-[10px]">
+                    Get notified when away
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={enableBrowserNotifications}
+                  className="btn btn-xs btn-primary font-medium"
+                >
+                  Turn on
+                </button>
+              </div>
+            )}
+            {browserPermission === "granted" && (
+              <div className="mx-2 my-1.5 px-2.5 py-1 rounded-md bg-base-200/60 flex items-center justify-between text-[11px]">
+                <span className="flex items-center gap-1.5 opacity-80 text-[11px]">
+                  <span
+                    className={`size-1.5 rounded-full ${
+                      isBrowserAlertActive ? "bg-success" : "bg-warning"
+                    }`}
+                  />
+                  Desktop alerts {isBrowserAlertActive ? "active" : "muted"}
+                </span>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      toggleBrowserNotifications(!isBrowserAlertActive)
+                    }
+                    className="text-[10px] text-primary hover:underline font-medium"
+                  >
+                    {isBrowserAlertActive ? "Mute" : "Unmute"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      showBrowserNotification({
+                        title: "Nexoro Test Alert 🔔",
+                        message: "Desktop notifications are working properly!",
+                        tag: "test_" + Date.now(),
+                      })
+                    }
+                    className="text-[10px] opacity-60 hover:opacity-100 font-medium"
+                  >
+                    Test
+                  </button>
+                </div>
+              </div>
+            )}
+            {browserPermission === "denied" && (
+              <div className="mx-2 my-1.5 p-1.5 rounded-md bg-error/10 border border-error/20 text-[11px] text-error">
+                <span>Alerts blocked in browser settings</span>
+              </div>
+            )}
+
             <ul
               className={`py-1 max-h-96 ${notifications.length > 3 ? "overflow-y-scroll" : ""} space-y-1`}
             >
@@ -276,8 +366,16 @@ const DashNav = ({ isChecked }) => {
             role="button"
             className="btn btn-ghost btn-circle avatar avatar-placeholder"
           >
-            <div className="w-10 rounded-full bg-base-200">
-              <LuUser />
+            <div className="w-10 rounded-full bg-base-200 overflow-hidden flex items-center justify-center">
+              {userPhoto ? (
+                <img
+                  src={userPhoto}
+                  alt={currentUser?.user?.name || "User"}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <LuUser />
+              )}
             </div>
           </div>
           <UserDropDown />

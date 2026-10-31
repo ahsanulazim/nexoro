@@ -14,12 +14,14 @@ import {
   LuSettings,
   LuStar,
   LuStore,
+  LuTrophy,
   LuUsers,
   LuUsersRound,
 } from "react-icons/lu";
 import { HiOutlineCurrencyBangladeshi } from "react-icons/hi";
 import DashNav from "./DashNav";
 import ActiveLink from "./ActiveLink";
+import BrowserNotificationBanner from "./BrowserNotificationBanner";
 import { useAuth } from "@/context/AuthProvider";
 import { useState } from "react";
 import { useDashTheme } from "@/context/DashThemeProvider";
@@ -44,8 +46,9 @@ const DashDrawer = ({ children }) => {
       <div className="drawer-content">
         {/* Navbar */}
         <DashNav isChecked={isChecked} />
+        <BrowserNotificationBanner />
         {/* Page content here */}
-        <div className="p-4 bg-base-300 min-h-[calc(100dvh-64px)]">
+        <div className="p-4 bg-base-300 min-h-[calc(100dvh-80px)]">
           {children}
         </div>
       </div>
@@ -109,6 +112,17 @@ const DashDrawer = ({ children }) => {
                   <ActiveLink href="/dashboard/projects" dataTip="Projects">
                     <LuBriefcase className="my-1.5 inline-block size-4" />
                     <span className="is-drawer-close:hidden">Projects</span>
+                  </ActiveLink>
+                </li>
+                <li>
+                  <ActiveLink
+                    href="/dashboard/points"
+                    dataTip="Points & Leaderboard"
+                  >
+                    <LuTrophy className="my-1.5 inline-block size-4" />
+                    <span className="is-drawer-close:hidden">
+                      Points & Leaderboard
+                    </span>
                   </ActiveLink>
                 </li>
                 <li>

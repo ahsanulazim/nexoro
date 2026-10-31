@@ -4,6 +4,12 @@ import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 
 export default function ClientEdit({ ref, client }) {
+  const isPlaceholder = Boolean(
+    client?.isPlaceholderEmail ||
+      String(client?.email || "").endsWith("@client.nexoro.local")
+  );
+  const displayEmail = isPlaceholder ? "" : client?.email || "";
+
   const {
     register,
     handleSubmit,
@@ -11,19 +17,19 @@ export default function ClientEdit({ ref, client }) {
     formState: { errors, isDirty },
   } = useForm({
     defaultValues: {
-      name: client?.name,
+      clientName: client?.name,
       company: client?.company,
       clientRole: client?.role,
-      clientEmail: client?.email,
+      clientEmail: displayEmail,
       clientPhone: client?.phone,
       country: client?.country,
       logo: null,
     },
     values: {
-      name: client?.name,
+      clientName: client?.name,
       company: client?.company,
       clientRole: client?.role,
-      clientEmail: client?.email,
+      clientEmail: displayEmail,
       clientPhone: client?.phone,
       country: client?.country,
       logo: null,
@@ -56,13 +62,16 @@ export default function ClientEdit({ ref, client }) {
     onError: (error) => {
       toast.error(error.message);
     },
-    onSettled: () => {
-      // reset(); // Redundant with 'values' prop
-    },
   });
 
   const handleClient = (data) => {
-    mutation.mutate({ id: client._id, formData: data });
+    mutation.mutate({
+      id: client._id,
+      formData: {
+        ...data,
+        clientEmail: data.clientEmail?.trim() || client?.email,
+      },
+    });
   };
 
   const handleClose = () => {
@@ -101,7 +110,7 @@ export default function ClientEdit({ ref, client }) {
           <input
             type="text"
             className="input w-full"
-            placeholder="Write Client's Name"
+            placeholder="Write Company Name"
             {...register("company", {
               required: "Company Name is required",
               minLength: {
@@ -153,14 +162,18 @@ export default function ClientEdit({ ref, client }) {
           )}
 
           <label className="label" htmlFor="clientEmail">
-            Email<span className="text-red-600">*</span>
+            Email {!isPlaceholder && <span className="text-red-600">*</span>}
           </label>
           <input
             type="email"
             className="input w-full"
-            placeholder="Write client's Email Address"
+            placeholder={
+              isPlaceholder
+                ? "Add client email (optional for chat client)"
+                : "Write client's Email Address"
+            }
             {...register("clientEmail", {
-              required: "Client's Email is required",
+              required: isPlaceholder ? false : "Client's Email is required",
               pattern: {
                 value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
                 message: "Invalid email format",
@@ -192,7 +205,7 @@ export default function ClientEdit({ ref, client }) {
           )}
 
           <label className="label" htmlFor="logo">
-            Upload Logo <span className="text-red-600">*</span>
+            Upload Logo
           </label>
           <input
             type="file"

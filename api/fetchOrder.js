@@ -36,10 +36,15 @@ export const assignOrder = async ({ orderId, ...data }) => {
   return res.data;
 };
 
-export const updateOrderTasks = async ({ orderId, tasks, assignedTo }) => {
+export const updateOrderTasks = async ({
+  orderId,
+  tasks,
+  assignedTo,
+  rewardPoints,
+}) => {
   const res = await api.put(
     "/orders/updateTasks",
-    { tasks, assignedTo },
+    { tasks, assignedTo, rewardPoints },
     {
       params: {
         id: orderId,

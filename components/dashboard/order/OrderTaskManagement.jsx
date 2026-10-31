@@ -4,6 +4,7 @@ import { updateOrderTasks } from "@/api/fetchOrder";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 import {
+  LuAward,
   LuCheck,
   LuPencil,
   LuPlus,
@@ -66,6 +67,9 @@ const OrderTaskManagement = ({ order }) => {
   const [modalAssignedTo, setModalAssignedTo] = useState(
     order?.assignedTo || "",
   );
+  const [modalRewardPoints, setModalRewardPoints] = useState(
+    order?.rewardPoints ?? 5,
+  );
   const [modalTasks, setModalTasks] = useState([]);
 
   // Mutation for updating tasks
@@ -75,6 +79,8 @@ const OrderTaskManagement = ({ order }) => {
       queryClient.invalidateQueries({ queryKey: ["order"] });
       queryClient.invalidateQueries({ queryKey: ["orders"] });
       queryClient.invalidateQueries({ queryKey: ["projects"] });
+      queryClient.invalidateQueries({ queryKey: ["leaderboard"] });
+      queryClient.invalidateQueries({ queryKey: ["myPointsSummary"] });
       if (modalRef.current?.open) {
         modalRef.current.close();
       }
@@ -194,6 +200,7 @@ const OrderTaskManagement = ({ order }) => {
   const handleOpenManageModal = () => {
     if (!canManage) return;
     setModalAssignedTo(order.assignedTo || "");
+    setModalRewardPoints(order.rewardPoints ?? 5);
     setModalTasks(
       tasks.length > 0
         ? tasks.map((t) => ({ ...t }))
@@ -210,11 +217,14 @@ const OrderTaskManagement = ({ order }) => {
           <span className="text-xs uppercase tracking-wider opacity-60 block">
             Assigned Member
           </span>
-          <div className="flex items-center gap-2 mt-0.5">
+          <div className="flex flex-wrap items-center gap-2 mt-0.5">
             <h2 className="font-bold text-base text-base-content">
               {order.assignedMember || "Assigned"}
             </h2>
             <span className="badge badge-success badge-sm">Active</span>
+            <span className="badge badge-warning badge-soft badge-sm font-semibold gap-1">
+              <LuAward className="size-3" /> +{order.rewardPoints ?? 5} pts
+            </span>
           </div>
         </div>
         {canManage && (
@@ -415,6 +425,8 @@ const OrderTaskManagement = ({ order }) => {
           order={order}
           modalAssignedTo={modalAssignedTo}
           setModalAssignedTo={setModalAssignedTo}
+          modalRewardPoints={modalRewardPoints}
+          setModalRewardPoints={setModalRewardPoints}
           modalTasks={modalTasks}
           setModalTasks={setModalTasks}
           isPending={isPending}

@@ -1,13 +1,15 @@
 import { useAuth } from "@/context/AuthProvider";
 import { MyContext } from "@/context/MyProvider";
 import { useContext } from "react";
-import { LuCheck, LuPlus, LuSquarePen, LuTrash2, LuUserCheck, LuX } from "react-icons/lu";
+import { LuAward, LuCheck, LuPlus, LuSquarePen, LuTrash2, LuUserCheck, LuX } from "react-icons/lu";
 import { toast } from "react-toastify";
 
 const ProjectModal = ({
   ref,
   modalAssignedTo,
   setModalAssignedTo,
+  modalRewardPoints,
+  setModalRewardPoints,
   modalTasks,
   setModalTasks,
   isPending,
@@ -34,6 +36,9 @@ const ProjectModal = ({
     updateTasks({
       orderId: order._id,
       assignedTo: modalAssignedTo,
+      ...(isAdmin && modalRewardPoints !== undefined
+        ? { rewardPoints: Math.max(0, Number(modalRewardPoints)) }
+        : {}),
       tasks: cleanedTasks,
     });
     toast.success("Tasks and assignment updated successfully");
@@ -111,6 +116,30 @@ const ProjectModal = ({
               </div>
             )}
           </div>
+
+          {/* Completion Reward Points (Admin Customizable) */}
+          {isAdmin && (
+            <div className="p-3 rounded-xl bg-base-200/60 border border-base-300">
+              <label className="label py-0 mb-1 flex items-center justify-between">
+                <span className="text-xs font-semibold uppercase opacity-70 flex items-center gap-1.5">
+                  <LuAward className="text-warning size-4" /> Completion Reward Points
+                </span>
+                <span className="badge badge-warning badge-xs font-semibold">
+                  Default: 5 pts
+                </span>
+              </label>
+              <input
+                type="number"
+                min={0}
+                value={modalRewardPoints ?? 5}
+                onChange={(e) =>
+                  setModalRewardPoints && setModalRewardPoints(e.target.value)
+                }
+                className="input input-sm input-bordered w-full"
+                placeholder="5"
+              />
+            </div>
+          )}
 
           {/* Tasks List */}
           <div>

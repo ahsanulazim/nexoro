@@ -3,44 +3,342 @@ import api from "@/axios/axiosInstance";
 import { useAuth } from "@/context/AuthProvider";
 import { useSocket } from "@/context/SocketProvider";
 import { auth } from "@/firebase/firebase.config";
-import moment from "moment";
-import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
-import { BsFileEarmarkPdfFill } from "react-icons/bs";
+import {
+  memo,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useMemo,
+} from "react";
 import { IoCheckmarkDoneSharp } from "react-icons/io5";
-import { LuArrowUp, LuFile, LuPaperclip, LuSend, LuX } from "react-icons/lu";
+import {
+  LuArrowDown,
+  LuArrowUp,
+  LuCloudUpload,
+  LuCornerUpLeft,
+  LuFile,
+  LuInfo,
+  LuPaperclip,
+  LuSend,
+  LuX,
+  LuZap,
+} from "react-icons/lu";
 import { toast } from "react-toastify";
+import CRMPanel from "./CRMPanel";
+import CannedResponsesModal from "./CannedResponsesModal";
+import MessageAttachments from "./attachments/MessageAttachments";
+import AttachmentComposerPreview from "./attachments/AttachmentComposerPreview";
+import {
+  groupMessages,
+  getInitials,
+  getAvatarColor,
+  formatMessageTime,
+  formatFullDateTime,
+} from "@/utils/messageGrouping";
+import {
+  validateFileBatch,
+  categorizeAttachment,
+} from "@/utils/attachmentHelper";
+
+const QUICK_SLASH_HINTS = [
+  {
+    shortcut: "/greeting",
+    label: "Greeting",
+    text: "Hello! Thank you for reaching out to Nexoro Solutions. How can we assist you today?",
+  },
+  {
+    shortcut: "/services",
+    label: "Services",
+    text: "We provide Web Development, Mobile Apps, UI/UX Design, and Digital Marketing. Let us know your requirements or check our portfolio for details!",
+  },
+  {
+    shortcut: "/pricing",
+    label: "Pricing",
+    text: "Our service pricing is tailored based on project scope. Please let us know your requirements, or view our plans on our website.",
+  },
+  {
+    shortcut: "/call",
+    label: "Call",
+    text: "Would you like to schedule a quick 10-minute consultation call? Please let us know what time works best for you.",
+  },
+  {
+    shortcut: "/hours",
+    label: "Hours",
+    text: "Our team is available Saturday to Thursday, 10:00 AM - 7:00 PM. We will get back to you shortly.",
+  },
+  {
+    shortcut: "/payment",
+    label: "Payment",
+    text: "We accept payments via bKash, Nagad, Bank Transfer, and Credit/Debit cards. You can also pay directly through our client dashboard.",
+  },
+];
+
+const cleanRoomId = (r) =>
+  String(r || "").replace(/^(fb_|ig_|wa_|room_)/, "");
+
+/**
+ * Memoized Timeline Item so typing in the composer never re-renders message bubbles.
+ */
+const TimelineItemView = memo(function TimelineItemView({
+  item,
+  customerName,
+  customerAvatar,
+  onReply,
+}) {
+  if (item.type === "date-separator") {
+    return (
+      <div className="flex items-center justify-center my-4">
+        <span className="text-[11px] font-semibold text-base-content/60 bg-base-200/90 border border-base-300/40 px-3 py-1 rounded-full shadow-2xs select-none">
+          {item.label}
+        </span>
+      </div>
+    );
+  }
+
+  if (item.type === "system-message") {
+    return (
+      <div className="flex justify-center my-3">
+        <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 text-xs font-medium max-w-md text-center shadow-2xs">
+          <LuInfo className="size-3.5 shrink-0" />
+          <span>{item.message.text || "System Event"}</span>
+        </div>
+      </div>
+    );
+  }
+
+  const isMe = item.isMe;
+  const lastMsgTime =
+    item.lastMessage?.formattedTime ||
+    formatMessageTime(item.lastMessage?.createdAt);
+
+  return (
+    <div
+      className={`flex flex-col mb-3.5 [content-visibility:auto] [contain-intrinsic-size:0_64px] ${
+        isMe ? "items-end" : "items-start"
+      }`}
+    >
+      <div
+        className={`flex flex-col space-y-1 w-full ${
+          isMe ? "items-end" : "items-start"
+        }`}
+      >
+        {item.messages.map((msg) => {
+          const timeLabel =
+            msg.formattedTime || formatMessageTime(msg.createdAt);
+          const fullDateLabel =
+            msg.formattedFullDate || formatFullDateTime(msg.createdAt);
+
+          return (
+            <div
+              key={msg._id || msg.metaMessageId}
+              className={`flex items-start gap-2 max-w-[85%] md:max-w-[75%] group/msg ${
+                isMe ? "flex-row-reverse" : "flex-row"
+              }`}
+            >
+              {/* Avatar only at beginning of incoming group, placeholder otherwise */}
+              {!isMe && (
+                <div className="shrink-0 size-8 mt-0.5">
+                  {msg.showAvatar ? (
+                    <div
+                      className={`size-8 rounded-full overflow-hidden flex items-center justify-center font-bold text-xs uppercase shadow-2xs select-none relative border shrink-0 ${getAvatarColor(
+                        customerName || msg.senderName || item.senderId
+                      )}`}
+                    >
+                      <span className="pointer-events-none select-none">
+                        {getInitials(customerName || msg.senderName)}
+                      </span>
+                      {(customerAvatar || msg.senderAvatar) && (
+                        <img
+                          src={customerAvatar || msg.senderAvatar}
+                          alt={customerName || msg.senderName || "Customer"}
+                          loading="lazy"
+                          decoding="async"
+                          className="absolute inset-0 size-full object-cover"
+                          onError={(e) => {
+                            e.currentTarget.style.display = "none";
+                          }}
+                        />
+                      )}
+                    </div>
+                  ) : (
+                    <div className="size-8" aria-hidden="true" />
+                  )}
+                </div>
+              )}
+
+              {/* Bubble and Actions */}
+              <div className="relative group max-w-full">
+                <div
+                  className={`relative p-2.5 sm:p-3 text-sm shadow-2xs transition-all wrap-break-word ${
+                    isMe
+                      ? "bg-primary text-primary-content"
+                      : "bg-base-200 text-base-content border border-base-300/60"
+                  } ${msg.bubbleCornerClass}`}
+                  title={fullDateLabel}
+                >
+                  {/* Reply preview */}
+                  {msg.replyTo && (
+                    <div
+                      className={`border-l-3 rounded-sm border-l-info text-xs p-2 pointer-events-none mb-1.5 opacity-80 ${
+                        isMe
+                          ? "bg-black/20 text-primary-content"
+                          : "bg-base-100 text-base-content"
+                      }`}
+                    >
+                      <p className="truncate flex items-center gap-1">
+                        {msg.replyTo.text ? (
+                          msg.replyTo.text
+                        ) : (
+                          <>
+                            <LuFile className="inline size-3 shrink-0" />
+                            <span>Attachment</span>
+                          </>
+                        )}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Attachments */}
+                  {msg.attachments && msg.attachments.length > 0 && (
+                    <MessageAttachments
+                      attachments={msg.attachments}
+                      isMe={isMe}
+                    />
+                  )}
+
+                  {/* Text */}
+                  {msg.text && (
+                    <p className="whitespace-pre-wrap leading-relaxed select-text">
+                      {msg.text}
+                    </p>
+                  )}
+                </div>
+
+                {/* Hover Reply Button */}
+                <button
+                  type="button"
+                  onClick={() =>
+                    onReply({
+                      messageId: msg._id,
+                      senderId: msg.senderId,
+                      text: msg.text,
+                      attachments: msg.attachments,
+                    })
+                  }
+                  className={`absolute top-1/2 -translate-y-1/2 opacity-0 group-hover/msg:opacity-100 btn btn-circle btn-xs btn-neutral border border-base-300 transition-opacity z-10 ${
+                    isMe ? "-left-8" : "-right-8"
+                  }`}
+                  title="Reply"
+                >
+                  <LuCornerUpLeft className="size-3" />
+                </button>
+              </div>
+
+              {/* Exact time on hover next to bubble */}
+              <span className="opacity-0 group-hover/msg:opacity-100 transition-opacity text-[10px] text-base-content/50 select-none self-center shrink-0 px-1">
+                {timeLabel}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Group Footer: subtle timestamp and delivery/read receipt for outgoing only */}
+      <div
+        className={`flex items-center gap-1.5 text-[10px] text-base-content/50 mt-1 select-none ${
+          isMe ? "pr-1" : "pl-10"
+        }`}
+      >
+        <span>{lastMsgTime}</span>
+        {isMe && (
+          <span>
+            {item.lastMessage.isRead ? (
+              <IoCheckmarkDoneSharp
+                className="text-info text-xs inline"
+                title="Seen"
+              />
+            ) : (
+              <IoCheckmarkDoneSharp
+                className="text-xs inline opacity-60"
+                title="Delivered"
+              />
+            )}
+          </span>
+        )}
+      </div>
+    </div>
+  );
+});
 
 const Conversation = ({ currentRoom }) => {
   const { socket, conversations } = useSocket();
   const { currentUser } = useAuth();
   const [messages, setMessages] = useState([]);
   const [page, setPage] = useState(1);
+  const [nextCursor, setNextCursor] = useState(null);
   const [hasMore, setHasMore] = useState(false);
   const [loading, setLoading] = useState(false);
   const chatEndRef = useRef(null);
   const chatBottomRef = useRef(null);
+  const cannedRef = useRef(null);
+  const fileInputRef = useRef(null);
   const [text, setText] = useState("");
-  const [file, setFile] = useState(null);
   const [replyTo, setReplyTo] = useState(null);
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
+  const [stagedFiles, setStagedFiles] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDraggingOver, setIsDraggingOver] = useState(false);
   const [isConversationDeleted, setIsConversationDeleted] = useState(false);
+  const [showSlashHints, setShowSlashHints] = useState(false);
+  const [showNewMessagesPill, setShowNewMessagesPill] = useState(false);
+  const isNearBottomRef = useRef(true);
+  const messagesCountRef = useRef(0);
   const role = currentUser?.user?.role;
+
+  useEffect(() => {
+    messagesCountRef.current = messages.length;
+  }, [messages.length]);
+
+  // Check if user is scrolled near bottom of chat
+  const checkIfNearBottom = useCallback(() => {
+    const el = chatEndRef.current;
+    if (!el) return true;
+    const threshold = 120;
+    const isNear =
+      el.scrollHeight - el.scrollTop - el.clientHeight <= threshold;
+    isNearBottomRef.current = isNear;
+    if (isNear) {
+      setShowNewMessagesPill(false);
+    }
+    return isNear;
+  }, []);
+
+  const scrollToBottom = useCallback((behavior = "smooth") => {
+    chatBottomRef.current?.scrollIntoView({ behavior });
+    setShowNewMessagesPill(false);
+    isNearBottomRef.current = true;
+  }, []);
 
   const handleLoadMore = async () => {
     if (loading || !hasMore || !currentRoom) return;
 
+    const scrollContainer = chatEndRef.current;
+    const prevScrollHeight = scrollContainer ? scrollContainer.scrollHeight : 0;
+    const prevScrollTop = scrollContainer ? scrollContainer.scrollTop : 0;
+
     setLoading(true);
     try {
       const token = await auth.currentUser.getIdToken();
+      const cursorParam =
+        nextCursor || (messages.length > 0 ? messages[0]?.createdAt : null);
 
       const res = await api.get("/conversations/getMessages", {
         params: {
           roomId: currentRoom,
           page: page + 1,
-          limit: 20,
+          limit: 25,
+          ...(cursorParam ? { before: cursorParam } : {}),
         },
         headers: {
           Authorization: `Bearer ${token}`,
@@ -49,10 +347,22 @@ const Conversation = ({ currentRoom }) => {
 
       const result = res.data;
       if (result.success && result.data?.length > 0) {
-        // নতুন লোড হওয়া মেসেজগুলো পুরোনো মেসেজের আগে যোগ হবে (reverse করে)
-        setMessages((prev) => [...result.data.reverse(), ...prev]);
+        // Prepend older messages
+        setMessages((prev) => [...result.data, ...prev]);
         setPage((prev) => prev + 1);
         setHasMore(result.pagination?.hasMore ?? false);
+        setNextCursor(
+          result.pagination?.nextCursor || result.data[0]?.createdAt || null
+        );
+
+        // Preserve scroll position so reading isn't interrupted
+        requestAnimationFrame(() => {
+          if (scrollContainer) {
+            const newScrollHeight = scrollContainer.scrollHeight;
+            scrollContainer.scrollTop =
+              newScrollHeight - prevScrollHeight + prevScrollTop;
+          }
+        });
       } else {
         setHasMore(false);
       }
@@ -86,7 +396,7 @@ const Conversation = ({ currentRoom }) => {
           params: {
             roomId: currentRoom,
             page: 1,
-            limit: 20,
+            limit: 25,
           },
           headers: {
             Authorization: `Bearer ${token}`,
@@ -97,11 +407,16 @@ const Conversation = ({ currentRoom }) => {
           setMessages(result.data);
           setPage(1);
           setHasMore(result.pagination?.hasMore ?? false);
-          // মেসেজ লোড হওয়ার সাথে সাথে স্ক্রোল ডাউন
+          setNextCursor(
+            result.pagination?.nextCursor || result.data?.[0]?.createdAt || null
+          );
+          setShowNewMessagesPill(false);
+          isNearBottomRef.current = true;
+          // Initial message load scroll down
           setTimeout(
             () =>
               chatBottomRef.current?.scrollIntoView({ behavior: "instant" }),
-            50,
+            50
           );
         }
       } catch (err) {
@@ -117,17 +432,56 @@ const Conversation = ({ currentRoom }) => {
     };
   }, [currentRoom, currentUser, socket]);
 
-  // ২. রিয়েলটাইম মেসেজ রিসিভ লিসেনার
+  // ২. রিয়েলটাইম মেসেজ রিসিভ ও সিঙ্ক লিসেনার (messages.length ডিপেন্ডেন্সি ছাড়া, যাতে প্রতি মেসেজে লিসেনার রি-বাইন্ড না হয়)
   useEffect(() => {
     if (!socket || !currentRoom) return;
 
     const handleReceiveMessage = (newMsg) => {
-      if (newMsg.roomId === currentRoom) {
-        setMessages((prev) => [...prev, newMsg]);
-        setTimeout(
-          () => chatBottomRef.current?.scrollIntoView({ behavior: "smooth" }),
-          50,
-        );
+      const isMatch =
+        newMsg.roomId === currentRoom ||
+        cleanRoomId(newMsg.roomId) === cleanRoomId(currentRoom);
+
+      if (isMatch) {
+        setMessages((prev) => {
+          // Check for duplicate messages by ID or content window
+          const exists = prev.some(
+            (m) =>
+              (m._id && newMsg._id && String(m._id) === String(newMsg._id)) ||
+              (m.metaMessageId &&
+                newMsg.metaMessageId &&
+                m.metaMessageId === newMsg.metaMessageId) ||
+              (m.externalMetaId &&
+                newMsg.metaMessageId &&
+                m.externalMetaId === newMsg.metaMessageId) ||
+              (m.text &&
+                newMsg.text &&
+                m.text.trim() === newMsg.text.trim() &&
+                (m.senderRole === newMsg.senderRole ||
+                  m.senderId === newMsg.senderId) &&
+                Math.abs(
+                  new Date(m.createdAt || 0).getTime() -
+                    new Date(newMsg.createdAt || 0).getTime()
+                ) < 25000)
+          );
+          if (exists) return prev;
+          return [...prev, newMsg];
+        });
+
+        const isMe =
+          newMsg.senderId === currentUser?.user?._id ||
+          (["admin", "member"].includes(role) &&
+            ["admin", "member"].includes(newMsg.senderRole));
+
+        // Auto-scroll if user is sending or already near bottom, else show pill
+        if (isMe || isNearBottomRef.current) {
+          setTimeout(
+            () => chatBottomRef.current?.scrollIntoView({ behavior: "smooth" }),
+            50
+          );
+          setShowNewMessagesPill(false);
+        } else {
+          setShowNewMessagesPill(true);
+        }
 
         // যদি অন্য কেউ মেসেজ পাঠায় তবে লাইভ markAsRead ট্রিগার হবে
         if (
@@ -141,108 +495,451 @@ const Conversation = ({ currentRoom }) => {
       }
     };
 
+    const handleConversationSynced = async (data) => {
+      const targetRoom = data?.roomId;
+      if (!targetRoom) return;
+      const isMatch =
+        targetRoom === currentRoom ||
+        cleanRoomId(targetRoom) === cleanRoomId(currentRoom);
+
+      if (!isMatch) return;
+
+      try {
+        const token = await auth.currentUser?.getIdToken();
+        const res = await api.get("/conversations/getMessages", {
+          params: {
+            roomId: currentRoom,
+            page: 1,
+            limit: Math.min(Math.max(messagesCountRef.current, 25), 100),
+          },
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const result = res.data;
+        if (result.success && Array.isArray(result.data)) {
+          setMessages(result.data);
+          if (isNearBottomRef.current) {
+            setTimeout(
+              () =>
+                chatBottomRef.current?.scrollIntoView({ behavior: "smooth" }),
+              50
+            );
+          }
+        }
+      } catch (err) {
+        console.log("Error silently refreshing messages:", err);
+      }
+    };
+
     const handleMessagesRead = ({ roomId }) => {
-      if (roomId === currentRoom) {
-        setMessages((prev) => prev.map((m) => ({ ...m, isRead: true })));
+      if (
+        roomId === currentRoom ||
+        cleanRoomId(roomId) === cleanRoomId(currentRoom)
+      ) {
+        setMessages((prev) =>
+          prev.every((m) => m.isRead)
+            ? prev
+            : prev.map((m) => (m.isRead ? m : { ...m, isRead: true }))
+        );
       }
     };
 
     const handleConversationDeleted = ({ roomId }) => {
-      if (roomId === currentRoom) {
+      if (
+        roomId === currentRoom ||
+        cleanRoomId(roomId) === cleanRoomId(currentRoom)
+      ) {
         setIsConversationDeleted(true);
       }
     };
 
+    const handleDeliveryFailed = ({ roomId, message }) => {
+      if (
+        roomId === currentRoom ||
+        cleanRoomId(roomId) === cleanRoomId(currentRoom)
+      ) {
+        toast.error(message || "Message delivery to external channel failed.");
+      }
+    };
+
     socket.on("receiveMessage", handleReceiveMessage);
+    socket.on("conversationMessagesSynced", handleConversationSynced);
     socket.on("messagesRead", handleMessagesRead);
     socket.on("conversationDeleted", handleConversationDeleted);
+    socket.on("messageDeliveryFailed", handleDeliveryFailed);
 
     return () => {
       socket.off("receiveMessage", handleReceiveMessage);
+      socket.off("conversationMessagesSynced", handleConversationSynced);
       socket.off("messagesRead", handleMessagesRead);
       socket.off("conversationDeleted", handleConversationDeleted);
+      socket.off("messageDeliveryFailed", handleDeliveryFailed);
     };
-  }, [socket, currentRoom, role]);
+  }, [socket, currentRoom, role, currentUser?.user?._id]);
+
+  // Determine active platform from currentRoom or conversation
+  const currentConversation = useMemo(() => {
+    return conversations?.find(
+      (c) =>
+        c?.roomId === currentRoom ||
+        (c?.roomId && cleanRoomId(c.roomId) === cleanRoomId(currentRoom))
+    );
+  }, [conversations, currentRoom]);
+
+  const activePlatform = useMemo(() => {
+    if (!currentRoom) return "web";
+    if (currentRoom.startsWith("fb_")) return "facebook";
+    if (currentRoom.startsWith("ig_")) return "instagram";
+    if (currentRoom.startsWith("wa_")) return "whatsapp";
+    if (currentConversation?.platform) return currentConversation.platform;
+    return "web";
+  }, [currentRoom, currentConversation]);
+
+  // ৩. One-time sync when opening a Facebook conversation (webhooks handle live messages)
+  useEffect(() => {
+    if (!currentRoom || activePlatform !== "facebook") return;
+
+    let isMounted = true;
+    const initialTimer = setTimeout(async () => {
+      if (!isMounted) return;
+      try {
+        const token = await auth.currentUser?.getIdToken();
+        if (!token) return;
+        await api.post(
+          `/facebook/sync?roomId=${currentRoom}&limit=10`,
+          {},
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+      } catch (e) {
+        // Silent catch for background sync
+      }
+    }, 1000);
+
+    return () => {
+      isMounted = false;
+      clearTimeout(initialTimer);
+    };
+  }, [currentRoom, activePlatform]);
+
+  // Clean up staged local preview URLs on unmount or room change
+  useEffect(() => {
+    return () => {
+      stagedFiles.forEach((it) => {
+        if (it.localPreviewUrl) URL.revokeObjectURL(it.localPreviewUrl);
+      });
+    };
+  }, [currentRoom]);
+
+  // Upload individual staged item to server
+  const uploadStagedItem = async (item) => {
+    try {
+      const token = await auth.currentUser?.getIdToken();
+      const formData = new FormData();
+      formData.append("files", item.file);
+      formData.append("platform", activePlatform);
+      formData.append("folder", "chat_attachments");
+
+      const res = await api.post("/conversations/uploadAttachments", formData, {
+        signal: item.abortController.signal,
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+        onUploadProgress: (progressEvent) => {
+          const total = progressEvent.total || item.size;
+          const percent = Math.min(
+            99,
+            Math.round((progressEvent.loaded * 100) / total)
+          );
+          setStagedFiles((prev) =>
+            prev.map((it) =>
+              it.id === item.id ? { ...it, progress: percent } : it
+            )
+          );
+        },
+      });
+
+      if (res.data?.success && res.data?.data?.length > 0) {
+        const uploaded = res.data.data[0];
+        setStagedFiles((prev) =>
+          prev.map((it) =>
+            it.id === item.id
+              ? {
+                  ...it,
+                  status: "ready",
+                  progress: 100,
+                  uploadedAttachment: uploaded,
+                }
+              : it
+          )
+        );
+      } else {
+        throw new Error(res.data?.message || "Upload failed");
+      }
+    } catch (err) {
+      if (err.name === "CanceledError" || err.message === "canceled") {
+        return; // User cancelled
+      }
+      console.error("Upload error for file:", item.name, err);
+      const errMsg =
+        err.response?.data?.message || err.message || "Upload failed";
+      setStagedFiles((prev) =>
+        prev.map((it) =>
+          it.id === item.id
+            ? { ...it, status: "error", errorMessage: errMsg }
+            : it
+        )
+      );
+      toast.error(`Upload failed: ${item.name} (${errMsg})`);
+    }
+  };
+
+  // Stage files from picker, drag & drop, or clipboard paste
+  const handleStageFiles = (fileList) => {
+    if (!fileList || fileList.length === 0) return;
+    const files = Array.from(fileList);
+
+    const batchRes = validateFileBatch(
+      files,
+      stagedFiles.length,
+      activePlatform
+    );
+    if (!batchRes.valid) {
+      return toast.error(batchRes.error);
+    }
+
+    const newItems = files.map((f) => {
+      const category = categorizeAttachment(f.type, f.name);
+      const localPreviewUrl =
+        category === "image" ? URL.createObjectURL(f) : null;
+      return {
+        id: `staged_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`,
+        file: f,
+        name: f.name,
+        size: f.size,
+        category,
+        status: "uploading",
+        progress: 0,
+        localPreviewUrl,
+        uploadedAttachment: null,
+        errorMessage: null,
+        abortController: new AbortController(),
+      };
+    });
+
+    setStagedFiles((prev) => [...prev, ...newItems]);
+
+    // Launch upload for each item
+    for (const item of newItems) {
+      uploadStagedItem(item);
+    }
+  };
+
+  const handleRetryUpload = useCallback(
+    (itemId) => {
+      const target = stagedFiles.find((it) => it.id === itemId);
+      if (!target) return;
+
+      const updated = {
+        ...target,
+        status: "uploading",
+        progress: 0,
+        errorMessage: null,
+        abortController: new AbortController(),
+      };
+
+      setStagedFiles((prev) =>
+        prev.map((it) => (it.id === itemId ? updated : it))
+      );
+      uploadStagedItem(updated);
+    },
+    [stagedFiles]
+  );
+
+  const handleRemoveStaged = useCallback((itemId) => {
+    setStagedFiles((prev) => {
+      const target = prev.find((it) => it.id === itemId);
+      if (target) {
+        if (target.abortController) {
+          target.abortController.abort();
+        }
+        if (target.localPreviewUrl) {
+          URL.revokeObjectURL(target.localPreviewUrl);
+        }
+      }
+      return prev.filter((it) => it.id !== itemId);
+    });
+  }, []);
+
+  // Clipboard paste listener
+  const handlePaste = (e) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    const pastedFiles = [];
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].kind === "file") {
+        const file = items[i].getAsFile();
+        if (file) pastedFiles.push(file);
+      }
+    }
+    if (pastedFiles.length > 0) {
+      e.preventDefault();
+      handleStageFiles(pastedFiles);
+    }
+  };
+
+  // Drag and Drop handlers
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!isDraggingOver) setIsDraggingOver(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.currentTarget.contains(e.relatedTarget)) return;
+    setIsDraggingOver(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDraggingOver(false);
+    if (e.dataTransfer?.files?.length > 0) {
+      handleStageFiles(e.dataTransfer.files);
+    }
+  };
 
   // ৩. মেসেজ সাবমিট হ্যান্ডলার (FormData vs Socket.io)
   const handleSend = async (e) => {
     e.preventDefault();
-    if (!text.trim() && !file) return;
+    if (isSubmitting) return;
+
+    const trimmedText = text.trim();
+    const hasText = trimmedText !== "";
+    const hasAttachments = stagedFiles.length > 0;
+
+    if (!hasText && !hasAttachments) return;
+
+    // Check if any items are actively uploading
+    const isStillUploading = stagedFiles.some(
+      (it) => it.status === "uploading"
+    );
+    if (isStillUploading) {
+      return toast.info(
+        "Please wait for your attachments to finish uploading."
+      );
+    }
+
+    // Check if any items failed
+    const failedItems = stagedFiles.filter((it) => it.status === "error");
+    if (failedItems.length > 0) {
+      return toast.error(
+        "Please remove or retry attachments that failed before sending."
+      );
+    }
+
+    setIsSubmitting(true);
 
     let receiverId = "admin";
     if (role === "admin" || role === "member") {
-      const currentConversation = conversations?.find(
-        (c) => c.roomId === currentRoom,
-      );
       if (currentConversation?.customer?._id) {
         receiverId = currentConversation.customer._id;
+      } else if (currentConversation?.customer?.id) {
+        receiverId = currentConversation.customer.id;
+      } else if (currentConversation?.platformId) {
+        receiverId = currentConversation.platformId;
       } else {
         const customerMsg = messages.find((m) => m.senderRole === "customer");
         if (customerMsg) receiverId = customerMsg.senderId;
+        else receiverId = currentRoom.replace(/^(fb_|ig_|wa_|room_)/, "");
       }
     }
 
-    if (file) {
-      // ফাইল থাকলে HTTP POST (Multipart FormData) রিকোয়েস্ট যাবে
-      if (file.size > 1024 * 1024 * 5) {
-        return toast.error("File size must be less than 5MB");
-      }
-      try {
-        const token = await auth.currentUser.getIdToken();
-        const formData = new FormData();
-        formData.append("file", file);
-        formData.append("text", text);
-        formData.append("receiverId", receiverId);
-        formData.append("folder", "chat_attachments");
-        if (replyTo) {
-          formData.append("replyTo", JSON.stringify(replyTo));
-        }
+    const readyAttachments = stagedFiles
+      .filter((it) => it.status === "ready" && it.uploadedAttachment)
+      .map((it) => it.uploadedAttachment);
 
-        // স্টেট ক্লিয়ার
-        setFile(null);
-        setText("");
-        setReplyTo(null);
-        setIsUploading(true);
-        setUploadProgress(0);
+    try {
+      if (readyAttachments.length > 0) {
+        // HTTP POST with JSON attachments & text
+        const token = await auth.currentUser?.getIdToken();
+        const payload = {
+          text: trimmedText,
+          receiverId,
+          roomId: currentRoom,
+          replyTo: replyTo ? JSON.stringify(replyTo) : null,
+          attachments: JSON.stringify(readyAttachments),
+        };
 
-        await api.post("/conversations/sendMessage", formData, {
+        await api.post("/conversations/sendMessage", payload, {
           headers: {
             Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
-          },
-          onUploadProgress: (progressEvent) => {
-            const percentCompleted = Math.round(
-              (progressEvent.loaded * 100) / progressEvent.total,
-            );
-            setUploadProgress(percentCompleted);
+            "Content-Type": "application/json",
           },
         });
-      } catch (err) {
-        console.log("Error uploading attachment:", err);
-      } finally {
-        setIsUploading(false);
-        setUploadProgress(0);
-      }
-    } else {
-      // শুধু টেক্সট হলে সরাসরি আল্ট্রা-ফাস্ট Socket.io ইমিট
-      const payload = {
-        text,
-        receiverId,
-        replyTo: replyTo
-          ? {
-              messageId: replyTo.messageId,
-              senderId: replyTo.senderId,
-              text: replyTo.text,
-              attachments: replyTo.attachments,
-            }
-          : null,
-      };
+      } else {
+        // Fast socket emit for text-only messages
+        const payload = {
+          text: trimmedText,
+          receiverId,
+          roomId: currentRoom,
+          replyTo: replyTo
+            ? {
+                messageId: replyTo.messageId,
+                senderId: replyTo.senderId,
+                text: replyTo.text,
+                attachments: replyTo.attachments,
+              }
+            : null,
+        };
 
-      socket.emit("sendMessage", payload);
+        socket.emit("sendMessage", payload);
+      }
+
+      // Cleanup local preview URLs
+      stagedFiles.forEach((it) => {
+        if (it.localPreviewUrl) URL.revokeObjectURL(it.localPreviewUrl);
+      });
+
+      // Clear composer
       setText("");
       setReplyTo(null);
+      setStagedFiles([]);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    } catch (err) {
+      console.error("Error sending message:", err);
+      toast.error(
+        err.response?.data?.message || "Failed to send message. Please retry."
+      );
+      // Draft text & attachments preserved on failure
+    } finally {
+      setIsSubmitting(false);
     }
   };
+
+  const customer = currentConversation?.customer;
+  const customerAvatar = customer?.avatar;
+  const customerName =
+    customer?.userName || customer?.name || customer?.email || "Customer";
+
+  const groupedTimeline = useMemo(() => {
+    return groupMessages(messages, {
+      thresholdMs: 5 * 60 * 1000,
+      isMeFn: (msg) =>
+        msg.senderId === currentUser?.user?._id ||
+        (["admin", "member"].includes(role) &&
+          ["admin", "member"].includes(msg.senderRole)),
+    });
+  }, [messages, currentUser?.user?._id, role]);
+
+  const handleSelectReply = useCallback((replyPayload) => {
+    setReplyTo(replyPayload);
+  }, []);
 
   if (!currentRoom) {
     return (
@@ -253,226 +950,230 @@ const Conversation = ({ currentRoom }) => {
   }
 
   return (
-    <div className="bg-base-100">
-      <div
-        ref={chatEndRef}
-        className="p-5 overflow-y-auto space-y-3"
-        style={{ height: `calc(100dvh - ${file ? 275 : 245}px)` }}
-      >
-        {hasMore && (
-          <div className="flex justify-center py-4">
+    <div className="bg-base-100 flex flex-1 overflow-hidden relative">
+      {/* Main Chat Column */}
+      <div className="flex-1 flex-col min-w-0 relative">
+        <div
+          ref={chatEndRef}
+          onScroll={checkIfNearBottom}
+          className="flex-1 p-3 md:p-5 overflow-y-auto h-[calc(100dvh-233px)]"
+        >
+          {hasMore && (
+            <div className="flex justify-center py-4">
+              <button
+                onClick={handleLoadMore}
+                disabled={loading}
+                className="btn btn-sm rounded-full"
+              >
+                {loading ? (
+                  <span className="loading loading-spinner loading-sm"></span>
+                ) : (
+                  <>
+                    <LuArrowUp />
+                    Load more
+                  </>
+                )}
+              </button>
+            </div>
+          )}
+
+          {/* Grouped Message Timeline (Memoized items) */}
+          {groupedTimeline.map((item) => (
+            <TimelineItemView
+              key={item.id}
+              item={item}
+              customerName={customerName}
+              customerAvatar={customerAvatar}
+              onReply={handleSelectReply}
+            />
+          ))}
+
+          {/* Conversation Deleted Badge & Button */}
+          {isConversationDeleted && (
+            <div className="flex flex-col items-center justify-center my-8 gap-4">
+              <span className="badge badge-error">Conversation Ended</span>
+              <Link
+                href="/dashboard/support"
+                className="btn btn-nexoro-primary"
+              >
+                Back to support page
+              </Link>
+            </div>
+          )}
+
+          <div ref={chatBottomRef} />
+        </div>
+
+        {/* Drag and Drop Visual Overlay */}
+        {isDraggingOver && (
+          <div
+            onDragLeave={handleDragLeave}
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
+            className="absolute inset-0 z-30 bg-primary/15 backdrop-blur-xs border-2 border-dashed border-primary flex flex-col items-center justify-center gap-3 p-6 select-none transition-all"
+          >
+            <div className="size-16 rounded-full bg-primary/20 text-primary flex items-center justify-center animate-bounce">
+              <LuCloudUpload className="size-8" />
+            </div>
+            <div className="text-center">
+              <p className="font-semibold text-base text-primary">
+                Drop files here to attach
+              </p>
+              <p className="text-xs text-base-content/70 mt-1">
+                Images, videos, audio, or documents
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Floating New Messages Indicator */}
+        {showNewMessagesPill && (
+          <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-20 pointer-events-auto">
             <button
-              onClick={handleLoadMore}
-              disabled={loading}
-              className="btn btn-sm rounded-full"
+              type="button"
+              onClick={() => scrollToBottom("smooth")}
+              className="btn btn-xs sm:btn-sm btn-primary rounded-full shadow-xl gap-1.5 animate-bounce text-xs font-semibold px-4 border border-primary-content/20"
             >
-              {loading ? (
-                <span className="loading loading-spinner loading-sm"></span>
-              ) : (
-                <>
-                  <LuArrowUp />
-                  Load more
-                </>
-              )}
+              <LuArrowDown className="text-sm" />
+              <span>New messages</span>
             </button>
           </div>
         )}
-        {messages.map((msg) => {
-          const isMe =
-            msg.senderId === currentUser?.user?._id ||
-            (["admin", "member"].includes(role) &&
-              ["admin", "member"].includes(msg.senderRole));
 
-          return (
-            <div
-              key={msg._id}
-              className={`chat ${isMe ? "chat-end" : "chat-start"}`}
-            >
-              {/* রিপ্লাই করা ওরিজিনাল মেসেজ প্রিভিউ */}
+        {/* Canned Responses Modal for staff */}
+        {(role === "admin" || role === "member") && (
+          <CannedResponsesModal
+            ref={cannedRef}
+            onSelectResponse={(selectedText) => {
+              setText(selectedText);
+              setShowSlashHints(false);
+            }}
+          />
+        )}
 
-              <div className="chat-bubble relative group max-w-[75%] p-2">
-                {msg.replyTo && (
-                  <div className="border-l-3 rounded-sm border-l-info chat-header opacity-60 text-xs bg-base-100 p-2 pointer-events-none mb-1">
-                    <p className="truncate">
-                      {msg.replyTo.text || "📄 Attachment"}
-                    </p>
-                  </div>
-                )}
-                {/* ফাইল অ্যাটাচমেন্ট থাকলে ইমেজ/ডকুমেন্ট রেন্ডার */}
-                {msg.attachments?.map((att, i) => (
-                  <div
-                    key={i}
-                    className="mb-1 max-w-xs rounded-lg overflow-hidden"
-                  >
-                    {att.type === "image" ? (
-                      <a href={att.url} target="_blank" rel="noreferrer">
-                        <Image
-                          src={att.thumbnailUrl}
-                          alt="attachment"
-                          width={300}
-                          height={300}
-                          className="w-full object-cover max-h-48"
-                        />
-                      </a>
-                    ) : (
-                      <a
-                        href={att.url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="flex items-center gap-2 p-2 bg-black/20 text-xs rounded hover:underline"
-                      >
-                        {att.type === "application/pdf" ? (
-                          <div className="flex flex-col items-center gap-2">
-                            <div className="bg-base-300 p-5 rounded-lg">
-                              <BsFileEarmarkPdfFill className="text-6xl text-red-400" />
-                            </div>
-                            <span className="truncate max-w-32">
-                              {att.originalName || "View Document"}
-                            </span>
-                          </div>
-                        ) : (
-                          <>
-                            <LuFile /> {att.originalName || "View Document"}
-                          </>
-                        )}
-                      </a>
-                    )}
-                  </div>
-                ))}
-
-                {msg.text && (
-                  <p className="text-sm whitespace-pre-wrap">{msg.text}</p>
-                )}
-
-                {/* হোভার রিপ্লাই বাটন */}
+        {/* Input Area */}
+        {!isConversationDeleted && (
+          <div
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            className="p-3 md:p-4 bg-base-300 border-t border-base-200 space-y-2 relative"
+          >
+            {/* Active Reply Bar */}
+            {replyTo && (
+              <div className="flex items-center justify-between bg-base-200 border-l-4 border-l-info px-3 py-1.5 rounded-md text-xs mb-2">
+                <span className="truncate flex-1">
+                  Replying to: {replyTo.text || "Attachment"}
+                </span>
                 <button
-                  type="button"
-                  onClick={() =>
-                    setReplyTo({
-                      messageId: msg._id,
-                      senderId: msg.senderId,
-                      text: msg.text,
-                      attachments: msg.attachments,
-                    })
-                  }
-                  className={`absolute top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 btn btn-circle btn-xs btn-neutral border border-base-300 transition-opacity ${
-                    isMe ? "-left-8" : "-right-8"
-                  }`}
+                  onClick={() => setReplyTo(null)}
+                  className="btn btn-circle btn-ghost btn-xs text-error"
                 >
-                  ↩
+                  <LuX />
                 </button>
               </div>
+            )}
 
-              <div className="chat-footer text-[10px] mt-0.5 flex items-center gap-1">
-                <span className="opacity-70">
-                  {moment(msg.createdAt).calendar()}
+            {/* Staged Attachments Preview Bar */}
+            <AttachmentComposerPreview
+              stagedFiles={stagedFiles}
+              onRemove={handleRemoveStaged}
+              onRetry={handleRetryUpload}
+            />
+
+            {/* Quick Slash Suggestions Bar (Triggered by /) */}
+            {(role === "admin" || role === "member") && showSlashHints && (
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
+                <span className="text-[10px] text-base-content/50 uppercase font-semibold shrink-0 inline-flex items-center gap-1">
+                  <LuZap className="size-3 text-amber-500" />
+                  <span>Quick Replies:</span>
                 </span>
-                {isMe && (
-                  <span>
-                    {msg.isRead ? (
-                      <IoCheckmarkDoneSharp className="text-info text-sm" />
-                    ) : (
-                      <IoCheckmarkDoneSharp className="text-sm" />
-                    )}
-                  </span>
+                {QUICK_SLASH_HINTS.map((item) => (
+                  <button
+                    key={item.shortcut}
+                    type="button"
+                    onClick={() => {
+                      setText(item.text);
+                      setShowSlashHints(false);
+                    }}
+                    className="px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-500 hover:bg-amber-500/20 font-medium shrink-0 border border-amber-500/20 text-xs transition-colors"
+                  >
+                    {item.shortcut}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            <form onSubmit={handleSend} className="flex items-end gap-2">
+              {/* Quick Canned Responses Button (for staff) */}
+              {(role === "admin" || role === "member") && (
+                <button
+                  type="button"
+                  onClick={() => cannedRef.current?.showModal()}
+                  className="btn btn-circle btn-ghost btn-sm text-amber-500 hover:bg-amber-500/10 text-lg shrink-0"
+                  title="Quick Canned Replies (or type / in chat)"
+                >
+                  <LuZap />
+                </button>
+              )}
+
+              <div className="input w-full flex items-center gap-2 bg-base-100 border border-base-300 focus-within:border-primary/50 focus-within:ring-1 focus-within:ring-primary/20 rounded-xl transition-all">
+                <input
+                  value={text}
+                  onPaste={handlePaste}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setText(val);
+                    if (val.startsWith("/") && val.length < 15) {
+                      setShowSlashHints(true);
+                    } else {
+                      setShowSlashHints(false);
+                    }
+                  }}
+                  type="text"
+                  placeholder={
+                    role === "admin" || role === "member"
+                      ? "Write a message, paste image, or type / for quick replies..."
+                      : "Write a message or paste image..."
+                  }
+                  className="grow bg-transparent focus:outline-none text-xs md:text-sm"
+                />
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  multiple
+                  onChange={(e) => handleStageFiles(e.target.files)}
+                  id="chat-file"
+                  hidden
+                />
+                <label
+                  htmlFor="chat-file"
+                  className="btn btn-ghost btn-circle btn-sm text-lg cursor-pointer"
+                  title="Attach files (Images, video, audio, documents)"
+                >
+                  <LuPaperclip />
+                </label>
+              </div>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="btn btn-circle btn-primary shrink-0"
+                title="Send Message"
+              >
+                {isSubmitting ? (
+                  <span className="loading loading-spinner loading-xs"></span>
+                ) : (
+                  <LuSend />
                 )}
-              </div>
-            </div>
-          );
-        })}
-
-        {/* Uploading Skeleton */}
-        {isUploading && (
-          <div className="chat chat-end animate-pulse">
-            <div className="chat-bubble relative p-4 min-w-[200px] flex flex-col gap-2 bg-base-300 text-base-content">
-              <div className="flex items-center gap-2 mb-2 opacity-70">
-                <span className="loading loading-spinner loading-sm"></span>
-                <span className="text-sm font-semibold">
-                  Sending attachment...
-                </span>
-              </div>
-              <progress
-                className="progress progress-info w-full"
-                value={uploadProgress}
-                max="100"
-              ></progress>
-              <div className="text-right text-xs mt-1 opacity-70">
-                {uploadProgress}%
-              </div>
-            </div>
+              </button>
+            </form>
           </div>
         )}
-
-        {/* Conversation Deleted Badge & Button */}
-        {isConversationDeleted && (
-          <div className="flex flex-col items-center justify-center my-8 gap-4">
-            <span className="badge badge-error">Conversation Ended</span>
-            <Link href="/dashboard/support" className="btn btn-nexoro-primary">
-              Back to support page
-            </Link>
-          </div>
-        )}
-
-        <div ref={chatBottomRef} />
       </div>
-      {/* ইনপুট এরিয়া */}
-      {!isConversationDeleted && (
-        <div className="p-5 bg-base-300 border-t border-base-200 space-y-2">
-          {/* একটিভ রিপ্লাই বার */}
-          {replyTo && (
-            <div className="flex items-center justify-between bg-base-200 border-l-4 border-l-info px-3 py-1 rounded-md text-xs mb-5">
-              <span className="truncate flex-1">
-                {replyTo.text || "Attachment"}
-              </span>
-              <button
-                onClick={() => setReplyTo(null)}
-                className="btn btn-circle btn-ghost btn-error"
-              >
-                <LuX />
-              </button>
-            </div>
-          )}
 
-          {/* ফাইল সিলেক্টেড ব্যাজ */}
-          {file && (
-            <div className="badge badge-info gap-2 p-3 text-xs">
-              <LuPaperclip /> {file.name}
-              <button
-                onClick={() => setFile(null)}
-                className="hover:text-error"
-              >
-                <LuX />
-              </button>
-            </div>
-          )}
-
-          <form onSubmit={handleSend} className="flex items-end gap-2">
-            <div className="input w-full flex items-center gap-2 bg-red rounded-xl">
-              <input
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                type="text"
-                placeholder="Write a message..."
-                className="grow bg-transparent focus:outline-none"
-              />
-              <input
-                type="file"
-                onChange={(e) => setFile(e.target.files[0])}
-                id="chat-file"
-                hidden
-              />
-              <label
-                htmlFor="chat-file"
-                className="btn btn-ghost btn-circle btn-sm text-lg cursor-pointer"
-              >
-                <LuPaperclip />
-              </label>
-            </div>
-            <button type="submit" className="btn btn-circle btn-info">
-              <LuSend />
-            </button>
-          </form>
-        </div>
+      {/* CRM Side Panel (Visible for staff when toggled) */}
+      {(role === "admin" || role === "member") && (
+        <CRMPanel roomId={currentRoom} />
       )}
     </div>
   );

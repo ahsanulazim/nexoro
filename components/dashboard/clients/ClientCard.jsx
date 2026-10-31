@@ -106,7 +106,9 @@ const ClientCard = ({ client }) => {
           <div className="flex items-center justify-between gap-2 group/email">
             <div className="flex items-center gap-2 min-w-0 text-base-content/70">
               <LuMail className="size-3.5 shrink-0 opacity-60 text-primary" />
-              {client.email ? (
+              {client.email &&
+              !client.isPlaceholderEmail &&
+              !String(client.email).endsWith("@client.nexoro.local") ? (
                 <a
                   href={`mailto:${client.email}`}
                   className="truncate hover:text-primary hover:underline transition-colors"
@@ -115,23 +117,27 @@ const ClientCard = ({ client }) => {
                   {client.email}
                 </a>
               ) : (
-                <span className="opacity-40 italic">No email</span>
+                <span className="opacity-40 italic">
+                  No email (Social Chat Client)
+                </span>
               )}
             </div>
-            {client.email && (
-              <button
-                type="button"
-                onClick={handleCopyEmail}
-                className="btn btn-ghost btn-circle btn-xs text-base-content/50 hover:text-primary transition-colors shrink-0"
-                title="Copy email"
-              >
-                {copiedEmail ? (
-                  <LuCheck className="size-3.5 text-success" />
-                ) : (
-                  <LuCopy className="size-3" />
-                )}
-              </button>
-            )}
+            {client.email &&
+              !client.isPlaceholderEmail &&
+              !String(client.email).endsWith("@client.nexoro.local") && (
+                <button
+                  type="button"
+                  onClick={handleCopyEmail}
+                  className="btn btn-ghost btn-circle btn-xs text-base-content/50 hover:text-primary transition-colors shrink-0"
+                  title="Copy email"
+                >
+                  {copiedEmail ? (
+                    <LuCheck className="size-3.5 text-success" />
+                  ) : (
+                    <LuCopy className="size-3" />
+                  )}
+                </button>
+              )}
           </div>
 
           {/* Phone */}

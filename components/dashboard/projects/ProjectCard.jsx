@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useRef, useState } from "react";
 import { FaCircleCheck, FaStar } from "react-icons/fa6";
 import {
+  LuAward,
   LuCalendar,
   LuChevronDown,
   LuChevronUp,
@@ -67,6 +68,8 @@ const ProjectCard = ({
       queryClient.invalidateQueries({ queryKey: ["projects"] });
       queryClient.invalidateQueries({ queryKey: ["order"] });
       queryClient.invalidateQueries({ queryKey: ["orders"] });
+      queryClient.invalidateQueries({ queryKey: ["leaderboard"] });
+      queryClient.invalidateQueries({ queryKey: ["myPointsSummary"] });
       setActiveTogglingIndex(null);
     },
     onError: (err) => {
@@ -175,6 +178,20 @@ const ProjectCard = ({
                   {project.orderId}
                 </span>
               )}
+              <span
+                className={`badge badge-sm font-semibold gap-1 ${
+                  isCompleted
+                    ? "badge-success badge-soft"
+                    : "badge-warning badge-soft"
+                }`}
+                title={
+                  isCompleted
+                    ? `+${project.rewardPoints ?? 5} Points Earned`
+                    : `Complete all tasks to earn +${project.rewardPoints ?? 5} Points`
+                }
+              >
+                <LuAward className="size-3" /> +{project.rewardPoints ?? 5} pts
+              </span>
               {project.deadline && (
                 <span
                   className={`badge badge-sm font-semibold gap-1 ${

@@ -20,10 +20,18 @@ import {
   LuListTodo,
   LuMessageSquare,
   LuPackage,
+  LuTrophy,
 } from "react-icons/lu";
 
 export default function NotificationsPage() {
-  const { setUnreadNotificationsCount } = useSocket();
+  const {
+    setUnreadNotificationsCount,
+    browserPermission,
+    isBrowserAlertActive,
+    enableBrowserNotifications,
+    toggleBrowserNotifications,
+    showBrowserNotification,
+  } = useSocket();
   const router = useRouter();
 
   const [notificationsList, setNotificationsList] = useState([]);
@@ -126,6 +134,20 @@ export default function NotificationsPage() {
           bg: "bg-info/10",
           label: "Message",
         };
+      case "points_earned":
+      case "work_submitted":
+        return {
+          icon: <LuTrophy className="size-5 text-warning" />,
+          bg: "bg-warning/10",
+          label: "Work Points",
+        };
+      case "points_deducted":
+      case "work_rejected":
+        return {
+          icon: <LuCircleX className="size-5 text-error" />,
+          bg: "bg-error/10",
+          label: "Points Update",
+        };
       default:
         return {
           icon: <LuBell className="size-5 text-neutral" />,
@@ -211,6 +233,91 @@ export default function NotificationsPage() {
         >
           <LuCheck className="size-4" /> Mark all read
         </button>
+      </section>
+
+      {/* Desktop Notification Settings Card */}
+      <section className="bg-base-100 rounded-box p-4 shadow-sm border border-base-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div
+            className={`p-3 rounded-xl ${
+              browserPermission === "granted"
+                ? "bg-success/15 text-success"
+                : browserPermission === "denied"
+                  ? "bg-error/15 text-error"
+                  : "bg-primary/15 text-primary"
+            }`}
+          >
+            <LuBell className="size-5" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h3 className="font-semibold text-sm sm:text-base">
+                Browser Desktop Notifications
+              </h3>
+              <span
+                className={`badge badge-sm font-medium ${
+                  browserPermission === "granted"
+                    ? isBrowserAlertActive
+                      ? "badge-success"
+                      : "badge-warning"
+                    : browserPermission === "denied"
+                      ? "badge-error"
+                      : "badge-ghost"
+                }`}
+              >
+                {browserPermission === "granted"
+                  ? isBrowserAlertActive
+                    ? "Active"
+                    : "Muted"
+                  : browserPermission === "denied"
+                    ? "Blocked"
+                    : "Not Enabled"}
+              </span>
+            </div>
+            <p className="text-xs opacity-75 mt-0.5">
+              {browserPermission === "granted"
+                ? "You will receive real-time desktop popups for orders, messages, and updates even when your browser is minimized."
+                : browserPermission === "denied"
+                  ? "Notifications are blocked in your browser settings. Please click the padlock or tune icon in the address bar to allow notifications."
+                  : "Allow browser notifications to get alerted immediately when orders, messages, or payments arrive."}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto justify-end">
+          {browserPermission === "default" && (
+            <button
+              onClick={enableBrowserNotifications}
+              className="btn btn-sm btn-primary font-semibold w-full sm:w-auto"
+            >
+              Enable Desktop Alerts
+            </button>
+          )}
+
+          {browserPermission === "granted" && (
+            <>
+              <button
+                onClick={() => toggleBrowserNotifications(!isBrowserAlertActive)}
+                className="btn btn-sm btn-ghost border border-base-300 font-medium"
+              >
+                {isBrowserAlertActive ? "Mute Alerts" : "Unmute Alerts"}
+              </button>
+              <button
+                onClick={() =>
+                  showBrowserNotification({
+                    title: "Nexoro Desktop Alert 🔔",
+                    message:
+                      "Browser notifications are set up and working properly!",
+                    tag: "test_" + Date.now(),
+                  })
+                }
+                className="btn btn-sm btn-outline btn-primary font-semibold"
+              >
+                Send Test
+              </button>
+            </>
+          )}
+        </div>
       </section>
 
       {/* Filters and List view */}
