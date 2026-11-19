@@ -2,6 +2,7 @@
 
 import {
   LuBadgeCheck,
+  LuBan,
   LuDownload,
   LuEllipsis,
   LuEllipsisVertical,
@@ -36,14 +37,40 @@ import {
   formatRelativeShort,
 } from "@/utils/messageGrouping";
 
-const ITEM_STRIDE = 68; // 64px row height + 4px gap
-const OVERSCAN_COUNT = 8;
-const VIRTUALIZATION_THRESHOLD = 40;
+const cleanRoomId = (id) => {
+  if (!id) return "";
+  const decoded = decodeURIComponent(String(id)).trim();
+  const stripped = decoded.replace(/^(fb_|ig_|wa_|room_)/, "");
+  const digits = stripped.replace(/[^0-9]/g, "");
+  if (digits.length >= 10) {
+    return digits.slice(-10);
+  }
+  return stripped.toLowerCase();
+};
 
-const cleanRoomId = (id) =>
-  String(id || "").replace(/^(fb_|ig_|wa_|room_)/, "");
+const renderPlatformBadge = (convPlatform, isSelected = false) => {
+  if (isSelected) {
+    let icon = <FaGlobe className="text-[9px]" />;
+    let label = "Web";
+    if (convPlatform === "whatsapp") {
+      icon = <FaWhatsapp className="text-[10px]" />;
+      label = "WA";
+    } else if (convPlatform === "facebook") {
+      icon = <FaFacebookF className="text-[9px]" />;
+      label = "FB";
+    } else if (convPlatform === "instagram") {
+      icon = <FaInstagram className="text-[10px]" />;
+      label = "IG";
+    }
 
-const renderPlatformBadge = (convPlatform) => {
+    return (
+      <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.2 rounded-full bg-primary-content/20 text-primary-content border border-primary-content/30">
+        {icon}
+        <span>{label}</span>
+      </span>
+    );
+  }
+
   switch (convPlatform) {
     case "whatsapp":
       return (
@@ -97,7 +124,7 @@ const SidebarConversationItem = memo(function SidebarConversationItem({
       : `/dashboard/inbox/${platform}/${conversation?.roomId}`;
 
   return (
-    <li className="relative group h-16">
+    <li className="relative group h-16 [content-visibility:auto] [contain-intrinsic-size:auto_64px]">
       <Link
         href={href}
         prefetch={false}
@@ -150,7 +177,7 @@ const SidebarConversationItem = memo(function SidebarConversationItem({
               >
                 {customerName}
               </span>
-              {renderPlatformBadge(conversation?.platform)}
+              {renderPlatformBadge(conversation?.platform, isSelected)}
               {(conversation?.isClient ||
                 conversation?.clientId ||
                 conversation?.customer?.clientId) && (
@@ -164,6 +191,19 @@ const SidebarConversationItem = memo(function SidebarConversationItem({
                 >
                   <LuBadgeCheck className="text-[10px]" />
                   <span>Client</span>
+                </span>
+              )}
+              {conversation?.isBlocked && (
+                <span
+                  className={`inline-flex items-center gap-0.5 text-[10px] font-semibold px-1.5 py-0.2 rounded-full shrink-0 border ${
+                    isSelected
+                      ? "bg-red-500/30 text-white border-red-300/40"
+                      : "bg-error/15 text-error border-error/25"
+                  }`}
+                  title="Blocked Contact"
+                >
+                  <LuBan className="text-[10px]" />
+                  <span>Blocked</span>
                 </span>
               )}
             </div>
@@ -206,7 +246,11 @@ const SidebarConversationItem = memo(function SidebarConversationItem({
         <div
           tabIndex={0}
           role="button"
-          className="btn btn-ghost btn-circle btn-xs"
+          className={`btn btn-ghost btn-circle btn-xs ${
+            isSelected
+              ? "text-primary-content hover:bg-primary-content/20"
+              : "text-base-content/60 hover:text-base-content"
+          }`}
         >
           <LuEllipsis />
         </div>
@@ -241,10 +285,6 @@ const ChatSidebar = () => {
   const [isLoadingMoreDB, setIsLoadingMoreDB] = useState(false);
   const [dbNextCursor, setDbNextCursor] = useState(null);
   const [hasMoreDB, setHasMoreDB] = useState(false);
-
-  // Virtual scroll state
-  const [scrollTop, setScrollTop] = useState(0);
-  const [viewportHeight, setViewportHeight] = useState(640);
 
   const [fbCursor, setFbCursor] = useState(() => {
     if (typeof window !== "undefined") {
@@ -513,10 +553,20 @@ const ChatSidebar = () => {
             lastMessage: payload.lastMessage ?? existing.lastMessage,
             updatedAt:
               payload.updatedAt || new Date().toISOString(),
+            lastCustomerMessageAt:
+              payload.lastCustomerMessageAt ?? existing.lastCustomerMessageAt,
+            unreadCount:
+              typeof payload.unreadCount === "number"
+                ? payload.unreadCount
+                : existing.unreadCount,
             platform: payload.platform || existing.platform,
             customer: payload.customer || existing.customer,
             isClient: payload.isClient ?? existing.isClient,
             clientId: payload.clientId ?? existing.clientId,
+            isBlocked:
+              payload.isBlocked !== undefined
+                ? payload.isBlocked
+                : existing.isBlocked,
           };
           const next = [
             updatedItem,
@@ -528,14 +578,21 @@ const ChatSidebar = () => {
         }
 
         // If brand new conversation has customer info attached, prepend directly without HTTP call
-        if (payload.customer) {
+        // (Ensure it matches current platform tab to avoid cross-platform pollution)
+        const itemPlatform = payload.platform || "web";
+        const isPlatformMatch =
+          platform === "inbox" || platform === itemPlatform;
+
+        if (payload.customer && isPlatformMatch) {
           foundInCache = true;
           const newItem = {
             _id: payload.roomId,
             roomId: payload.roomId,
-            platform: payload.platform || "web",
+            platform: itemPlatform,
             lastMessage: payload.lastMessage || "",
             updatedAt: payload.updatedAt || new Date().toISOString(),
+            lastCustomerMessageAt: payload.lastCustomerMessageAt,
+            unreadCount: payload.unreadCount ?? 1,
             customerId: payload.customerId,
             customer: payload.customer,
           };
@@ -566,12 +623,28 @@ const ChatSidebar = () => {
       });
     };
 
+    const handleBlockStatusUpdated = ({ roomId, isBlocked }) => {
+      if (!roomId) return;
+      queryClient.setQueryData(["conversations", platform], (old = []) => {
+        if (!Array.isArray(old)) return old;
+        const next = old.map((c) =>
+          c.roomId === roomId || cleanRoomId(c.roomId) === cleanRoomId(roomId)
+            ? { ...c, isBlocked }
+            : c
+        );
+        setConversations(next);
+        return next;
+      });
+    };
+
     socket.on("newConversationUpdate", handleConversationUpdate);
     socket.on("conversationDeleted", handleConversationDeleted);
+    socket.on("conversationBlockStatusUpdated", handleBlockStatusUpdated);
 
     return () => {
       socket.off("newConversationUpdate", handleConversationUpdate);
       socket.off("conversationDeleted", handleConversationDeleted);
+      socket.off("conversationBlockStatusUpdated", handleBlockStatusUpdated);
     };
   }, [socket, currentUser, platform, queryClient, refetch, setConversations]);
 
@@ -640,36 +713,16 @@ const ChatSidebar = () => {
     handleSyncFacebookRef.current?.(fbCursorRef.current || "", true);
   }, [platform, debouncedSearch]);
 
-  // Measure container height for virtualization
-  useEffect(() => {
-    const el = listContainerRef.current;
-    if (!el) return;
-    setViewportHeight(el.clientHeight || 640);
-
-    if (typeof ResizeObserver !== "undefined") {
-      const ro = new ResizeObserver((entries) => {
-        for (const entry of entries) {
-          if (entry.contentRect.height > 0) {
-            setViewportHeight(entry.contentRect.height);
-          }
-        }
-      });
-      ro.observe(el);
-      return () => ro.disconnect();
-    }
-  }, []);
-
-  // Handle scroll for virtualization + infinite pagination
+  // Handle scroll for infinite pagination
   const handleScroll = useCallback(
     (e) => {
       const {
-        scrollTop: currentScrollTop,
+        scrollTop,
         scrollHeight,
         clientHeight,
       } = e.currentTarget;
-      setScrollTop(currentScrollTop);
 
-      if (currentScrollTop + clientHeight >= scrollHeight - 100) {
+      if (scrollTop + clientHeight >= scrollHeight - 80) {
         if (hasMoreDB && !isLoadingMoreDB && !debouncedSearch) {
           loadMoreDBConversations();
         } else if (
@@ -715,7 +768,7 @@ const ChatSidebar = () => {
       },
       {
         root: container,
-        rootMargin: "100px",
+        rootMargin: "80px",
         threshold: 0.1,
       }
     );
@@ -734,43 +787,15 @@ const ChatSidebar = () => {
     loadOlderFacebookChats,
   ]);
 
-  // Compute virtual window slice when list exceeds threshold
-  const totalCount = filteredConversations.length;
-  const isVirtualized = totalCount > VIRTUALIZATION_THRESHOLD;
-
-  const { visibleItems, topPadding, bottomPadding } = useMemo(() => {
-    if (!isVirtualized) {
-      return {
-        visibleItems: filteredConversations,
-        topPadding: 0,
-        bottomPadding: 0,
-      };
-    }
-
-    const startIdx = Math.max(
-      0,
-      Math.floor(scrollTop / ITEM_STRIDE) - OVERSCAN_COUNT
-    );
-    const visibleCount =
-      Math.ceil(viewportHeight / ITEM_STRIDE) + OVERSCAN_COUNT * 2;
-    const endIdx = Math.min(totalCount, startIdx + visibleCount);
-
-    return {
-      visibleItems: filteredConversations.slice(startIdx, endIdx),
-      topPadding: startIdx * ITEM_STRIDE,
-      bottomPadding: Math.max(0, (totalCount - endIdx) * ITEM_STRIDE),
-    };
-  }, [isVirtualized, filteredConversations, scrollTop, viewportHeight, totalCount]);
-
   const cleanCurrentRoom = useMemo(
     () => (currentRoom ? cleanRoomId(currentRoom) : ""),
     [currentRoom]
   );
 
   return (
-    <div className="drawer-side h-[calc(100dvh-96px)] bg-base-100 border-r border-base-300">
+    <div className="flex flex-col w-full h-full bg-base-100 overflow-hidden">
       <DeleteChatModal ref={deleteRef} chat={chat} />
-      <div className="flex flex-col w-84">
+      <div className="flex flex-col w-full h-full">
         {/* Header & Search */}
         <div className="p-4 bg-base-100 backdrop-blur space-y-3 border-b border-base-100">
           <div className="flex items-center justify-between gap-2">
@@ -860,15 +885,11 @@ const ChatSidebar = () => {
           </div>
         )}
 
-        {/* Conversation List (Virtualized when large) */}
+        {/* Conversation List */}
         <ul
           ref={listContainerRef}
           onScroll={handleScroll}
-          className={`list px-2 py-2 overflow-y-auto ${
-            platform === "facebook"
-              ? "h-[calc(100dvh-336px)]"
-              : "h-[calc(100dvh-295px)]"
-          } space-y-1`}
+          className="list px-2 py-2 overflow-y-auto flex-1 space-y-1"
         >
           {isLoading ? (
             Array.from({ length: 7 }).map((_, idx) => (
@@ -904,27 +925,34 @@ const ChatSidebar = () => {
             </div>
           ) : (
             <>
-              {topPadding > 0 && (
-                <li
-                  style={{ height: `${topPadding}px` }}
-                  className="list-none pointer-events-none"
-                  aria-hidden="true"
-                />
-              )}
-
-              {visibleItems.map((conversation) => {
+              {filteredConversations.map((conversation) => {
                 const customerId =
                   conversation?.customer?._id || conversation?.customer?.id;
-                const isOnline = customerId
+                let isOnline = customerId
                   ? Boolean(onlineStatuses[customerId])
                   : false;
+
+                // For WhatsApp, check activity within 24h window
+                if (conversation?.platform === "whatsapp") {
+                  const lastAct =
+                    conversation?.lastCustomerMessageAt ||
+                    conversation?.updatedAt;
+                  if (lastAct) {
+                    const diff = Date.now() - new Date(lastAct).getTime();
+                    isOnline = diff <= 24 * 60 * 60 * 1000;
+                  }
+                }
+
                 const isSelected =
                   currentRoom === conversation?.roomId ||
                   Boolean(
                     cleanCurrentRoom &&
                       cleanCurrentRoom === cleanRoomId(conversation?.roomId)
                   );
-                const unread = unreadCounts[conversation?.roomId] || 0;
+                const unread =
+                  unreadCounts[conversation?.roomId] ??
+                  conversation?.unreadCount ??
+                  0;
 
                 return (
                   <SidebarConversationItem
@@ -938,14 +966,6 @@ const ChatSidebar = () => {
                   />
                 );
               })}
-
-              {bottomPadding > 0 && (
-                <li
-                  style={{ height: `${bottomPadding}px` }}
-                  className="list-none pointer-events-none"
-                  aria-hidden="true"
-                />
-              )}
 
               {/* Skeleton loader when loading older chats on scroll */}
               {(isLoadingMoreDB ||
@@ -966,28 +986,52 @@ const ChatSidebar = () => {
                 </>
               )}
 
-              {/* Sentinel for infinite scrolling */}
-              {(hasMoreDB || (platform === "facebook" && hasMoreFB)) &&
-                !isLoadingMoreDB &&
-                !isSyncingFB &&
-                !debouncedSearch && (
-                  <li
-                    ref={bottomSentinelRef}
-                    className="h-2 w-full list-none pointer-events-none opacity-0"
-                    aria-hidden="true"
-                  />
-                )}
+              {/* Load Older Conversations Button & Sentinel */}
+              {!debouncedSearch && (
+                <li className="py-2.5 px-3 list-none">
+                  {hasMoreDB || (platform === "facebook" && hasMoreFB) ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (hasMoreDB && !isLoadingMoreDB) {
+                          loadMoreDBConversations();
+                        } else if (platform === "facebook" && hasMoreFB) {
+                          loadOlderFacebookChats();
+                        }
+                      }}
+                      disabled={isLoadingMoreDB || isSyncingFB}
+                      className="btn btn-sm btn-outline btn-primary rounded-xl w-full gap-2 shadow-2xs text-xs font-semibold"
+                    >
+                      {isLoadingMoreDB || isSyncingFB ? (
+                        <>
+                          <span className="loading loading-spinner loading-xs" />
+                          <span>Loading older conversations...</span>
+                        </>
+                      ) : (
+                        <>
+                          <LuDownload className="size-3.5" />
+                          <span>Load older conversations</span>
+                        </>
+                      )}
+                    </button>
+                  ) : (
+                    <div className="text-center py-1.5">
+                      <span className="text-[11px] text-base-content/40 font-medium">
+                        All conversations loaded
+                      </span>
+                    </div>
+                  )}
 
-              {/* End of list message for Facebook */}
-              {platform === "facebook" &&
-                !hasMoreDB &&
-                !hasMoreFB &&
-                filteredConversations.length > 0 &&
-                !debouncedSearch && (
-                  <li className="py-2.5 text-center text-[11px] text-base-content/40 list-none font-medium">
-                    All Facebook conversations loaded
-                  </li>
-                )}
+                  {/* Sentinel for auto-load on scroll */}
+                  {(hasMoreDB || (platform === "facebook" && hasMoreFB)) && (
+                    <div
+                      ref={bottomSentinelRef}
+                      className="h-2 w-full pointer-events-none opacity-0"
+                      aria-hidden="true"
+                    />
+                  )}
+                </li>
+              )}
             </>
           )}
         </ul>

@@ -9,6 +9,11 @@ import FacebookPixel from "@/components/FacebookPixel";
 import SocketProvider from "@/context/SocketProvider";
 import AuthProvider from "@/context/AuthProvider";
 
+// @next-codemod-ignore Cache Components adoption: this segment temporarily allows blocking.
+// Remove this opt-out after verifying the segment passes validation without it.
+// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
+//export const instant = false;
+
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
   subsets: ["latin"],

@@ -1,27 +1,32 @@
-import EditBlog from '@/components/dashboard/blogs/EditBlog'
-import DashBread from '@/components/dashboard/DashBread'
+import EditBlog from "@/components/dashboard/blogs/EditBlog";
+import DashBread from "@/components/dashboard/DashBread";
+
+// @next-codemod-ignore Cache Components adoption: this segment temporarily allows blocking.
+// Remove this opt-out after verifying the segment passes validation without it.
+// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
+//export const instant = false;
 
 const Blog = async ({ params }) => {
+  const { blog } = await params;
 
-    const { blog } = await params;
+  const blogData = await fetch(
+    `${process.env.NEXT_PUBLIC_API_BASE}/blogs/getBlog/${blog}`,
+  ).then((res) => res.json());
 
-    const blogData = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/blogs/getBlog/${blog}`).then(res => res.json())
+  return (
+    <main className="flex flex-col gap-4">
+      <section className="">
+        <DashBread title="Blogs" subtitle="Edit Blog" />
+        <div className="flex items-center justify-between gap-5">
+          <h1 className="text-4xl font-semibold">Edit Blog</h1>
+        </div>
+      </section>
+      <section>
+        {/* Edit Blog */}
+        <EditBlog blog={blogData} />
+      </section>
+    </main>
+  );
+};
 
-
-    return (
-        <main className="flex flex-col gap-4">
-            <section className="">
-                <DashBread title="Blogs" subtitle="Edit Blog" />
-                <div className="flex items-center justify-between gap-5">
-                    <h1 className="text-4xl font-semibold">Edit Blog</h1>
-                </div>
-            </section>
-            <section>
-                {/* Edit Blog */}
-                <EditBlog blog={blogData} />
-            </section>
-        </main>
-    )
-}
-
-export default Blog
+export default Blog;

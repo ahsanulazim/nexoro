@@ -154,6 +154,17 @@ const SocketProvider = ({ children }) => {
           });
         });
 
+        // ৩b. ফিচার: কনভারসেশন ব্লক/আনব্লক স্ট্যাটাস লাইভ আপডেট
+        newSocket.on("conversationBlockStatusUpdated", ({ roomId, isBlocked }) => {
+          setConversations((prev) =>
+            Array.isArray(prev)
+              ? prev.map((c) =>
+                  c.roomId === roomId ? { ...c, isBlocked } : c
+                )
+              : prev
+          );
+        });
+
         // 🎯 ৪. ফিচার: লাইভ নোটিফিকেশন রিসিভ করা এবং টোস্ট দেখানো
         newSocket.on("newNotification", (notification) => {
           setNotifications((prev) => [notification, ...prev]);
@@ -238,6 +249,7 @@ const SocketProvider = ({ children }) => {
         newSocket.off("customerStatus");
         newSocket.off("initialUnreadCounts");
         newSocket.off("updateUnreadCount");
+        newSocket.off("conversationBlockStatusUpdated");
         newSocket.off("newNotification");
         newSocket.close();
       }

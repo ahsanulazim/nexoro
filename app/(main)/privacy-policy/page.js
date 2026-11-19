@@ -2,6 +2,11 @@ import PrivacyContent from "@/components/privacy/PrivacyContent";
 import PrivacyNav from "@/components/privacy/PrivacyNav";
 import TitleBanner from "@/components/ui/TitleBanner";
 
+// @next-codemod-ignore Cache Components adoption: this segment temporarily allows blocking.
+// Remove this opt-out after verifying the segment passes validation without it.
+// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
+//export const instant = false;
+
 const PrivacyPolicy = () => {
   return (
     <main>

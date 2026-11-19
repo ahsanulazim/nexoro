@@ -1,6 +1,7 @@
 "use client";
 
 import Modal from "@/components/modal/Modal";
+import PermissionsModal from "@/components/dashboard/permissions/PermissionsModal";
 import { useMemo, useRef, useState } from "react";
 import {
   LuChevronLeft,
@@ -25,6 +26,7 @@ const UserTable = ({
   setPageSize,
 }) => {
   const [removeEmail, setRemoveEmail] = useState(null);
+  const [permissionsMember, setPermissionsMember] = useState(null);
   const deleteModalRef = useRef(null);
 
   // Fallback internal pagination if not controlled
@@ -81,6 +83,12 @@ const UserTable = ({
   return (
     <>
       <Modal ref={deleteModalRef} remove={removeEmail} />
+      <PermissionsModal
+        member={permissionsMember}
+        isOpen={!!permissionsMember}
+        onClose={() => setPermissionsMember(null)}
+        currentLoggedInEmail={currentLoggedInEmail}
+      />
 
       <div className="rounded-box border border-base-200/80 bg-base-100 shadow-xs overflow-hidden">
         {/* Table Container */}
@@ -177,6 +185,7 @@ const UserTable = ({
                     key={user._id || user.uid || user.email}
                     client={user}
                     onRemove={handleOpenDeleteModal}
+                    onManagePermissions={(member) => setPermissionsMember(member)}
                     currentLoggedInEmail={currentLoggedInEmail}
                   />
                 ))

@@ -54,12 +54,12 @@ export default function AttachmentComposerPreview({
         return (
           <div
             key={item.id}
-            className={`relative flex items-center gap-2 p-1.5 pl-2 pr-1.5 rounded-xl border text-xs shrink-0 max-w-[210px] sm:max-w-[240px] transition-all ${
+            className={`relative flex items-center gap-2 p-1.5 pl-2 pr-1.5 rounded-xl border text-xs shrink-0 max-w-[210px] sm:max-w-60 transition-all ${
               isError
                 ? "bg-error/10 border-error/30 text-error"
                 : isReady
-                ? "bg-base-200/90 border-success/30 text-base-content"
-                : "bg-base-200 border-base-300 text-base-content"
+                  ? "bg-base-200/90 border-success/30 text-base-content"
+                  : "bg-base-200 border-base-300 text-base-content"
             }`}
           >
             {/* Thumbnail / Icon container */}
@@ -76,23 +76,31 @@ export default function AttachmentComposerPreview({
               {/* Ready checkmark badge */}
               {isReady && (
                 <div className="absolute bottom-0 right-0 size-3.5 bg-success text-success-content rounded-tl-md flex items-center justify-center">
-                  <LuCheck className="size-2.5 stroke-[3]" />
+                  <LuCheck className="size-2.5 stroke-3" />
                 </div>
               )}
             </div>
 
             {/* Filename & size / status */}
             <div className="min-w-0 flex-1 flex flex-col">
-              <span className="truncate font-medium text-[11px]" title={item.name}>
+              <span
+                className="truncate font-medium text-[11px]"
+                title={item.name}
+              >
                 {item.name}
               </span>
               <div className="flex items-center gap-1.5 text-[10px] opacity-75">
                 <span>{formatFileSize(item.size)}</span>
                 {isUploading && (
-                  <span className="text-info font-mono">{item.progress || 0}%</span>
+                  <span className="text-info font-mono">
+                    {item.progress || 0}%
+                  </span>
                 )}
                 {isError && (
-                  <span className="text-error font-medium truncate" title={item.errorMessage}>
+                  <span
+                    className="text-error font-medium truncate"
+                    title={item.errorMessage}
+                  >
                     Failed
                   </span>
                 )}

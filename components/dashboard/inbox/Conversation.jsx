@@ -4,18 +4,14 @@ import { useAuth } from "@/context/AuthProvider";
 import { useSocket } from "@/context/SocketProvider";
 import { auth } from "@/firebase/firebase.config";
 import Link from "next/link";
-import {
-  memo,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  useMemo,
-} from "react";
-import { IoCheckmarkDoneSharp } from "react-icons/io5";
+import { memo, useCallback, useEffect, useRef, useState, useMemo } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { IoCheckmarkDoneSharp, IoCheckmarkSharp } from "react-icons/io5";
 import {
   LuArrowDown,
   LuArrowUp,
+  LuCircleAlert,
+  LuClock,
   LuCloudUpload,
   LuCornerUpLeft,
   LuFile,
@@ -24,10 +20,15 @@ import {
   LuSend,
   LuX,
   LuZap,
+  LuBan,
+  LuShieldCheck,
+  LuCreditCard,
+  LuExternalLink,
 } from "react-icons/lu";
 import { toast } from "react-toastify";
 import CRMPanel from "./CRMPanel";
 import CannedResponsesModal from "./CannedResponsesModal";
+import BlockUserModal from "./BlockUserModal";
 import MessageAttachments from "./attachments/MessageAttachments";
 import AttachmentComposerPreview from "./attachments/AttachmentComposerPreview";
 import {
@@ -75,8 +76,70 @@ const QUICK_SLASH_HINTS = [
   },
 ];
 
-const cleanRoomId = (r) =>
-  String(r || "").replace(/^(fb_|ig_|wa_|room_)/, "");
+const cleanRoomId = (r) => {
+  if (!r) return "";
+  const decoded = decodeURIComponent(String(r)).trim();
+  const stripped = decoded.replace(/^(fb_|ig_|wa_|room_)/, "");
+  const digits = stripped.replace(/[^0-9]/g, "");
+  if (digits.length >= 10) {
+    return digits.slice(-10);
+  }
+  return stripped.toLowerCase();
+};
+
+/**
+ * Helper: Extract payment URL from message text or deal object
+ */
+const extractPaymentUrl = (msg) => {
+  if (msg?.deal?.paymentUrl) return msg.deal.paymentUrl;
+  if (!msg?.text) return null;
+  const match = msg.text.match(/(https?:\/\/[^\s<>'"]+\/pay\/[^\s<>'"]+|\/pay\/[^\s<>'"]+)/i);
+  return match ? match[0] : null;
+};
+
+/**
+ * Helper: Autolink all URLs inside message text
+ */
+const renderFormattedMessageText = (text, isMe) => {
+  if (!text) return null;
+
+  const urlRegex = /(https?:\/\/[^\s<>'"]+|www\.[^\s<>'"]+)/gi;
+  const parts = text.split(urlRegex);
+
+  return (
+    <p className="whitespace-pre-wrap leading-relaxed select-text">
+      {parts.map((part, index) => {
+        if (part.match(urlRegex)) {
+          const href = part.startsWith("http") ? part : `https://${part}`;
+          const isPayLink = part.includes("/pay/");
+
+          return (
+            <a
+              key={index}
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className={`underline font-bold break-all transition-all inline-flex items-center gap-0.5 cursor-pointer select-text ${
+                isPayLink
+                  ? isMe
+                    ? "text-yellow-300 hover:text-white bg-black/25 px-1 py-0.5 rounded"
+                    : "text-primary hover:underline bg-primary/10 px-1 py-0.5 rounded"
+                  : isMe
+                    ? "text-primary-content hover:underline"
+                    : "text-primary hover:underline"
+              }`}
+            >
+              <span>{part}</span>
+              <LuExternalLink className="size-3 shrink-0 inline-block ml-0.5" />
+            </a>
+          );
+        }
+        return part;
+      })}
+    </p>
+  );
+};
 
 /**
  * Memoized Timeline Item so typing in the composer never re-renders message bubbles.
@@ -143,7 +206,7 @@ const TimelineItemView = memo(function TimelineItemView({
                   {msg.showAvatar ? (
                     <div
                       className={`size-8 rounded-full overflow-hidden flex items-center justify-center font-bold text-xs uppercase shadow-2xs select-none relative border shrink-0 ${getAvatarColor(
-                        customerName || msg.senderName || item.senderId
+                        customerName || msg.senderName || item.senderId,
                       )}`}
                     >
                       <span className="pointer-events-none select-none">
@@ -208,12 +271,63 @@ const TimelineItemView = memo(function TimelineItemView({
                     />
                   )}
 
-                  {/* Text */}
-                  {msg.text && (
-                    <p className="whitespace-pre-wrap leading-relaxed select-text">
-                      {msg.text}
-                    </p>
-                  )}
+                  {/* Text with clickable URLs */}
+                  {msg.text && renderFormattedMessageText(msg.text, isMe)}
+
+                  {/* Deal / Invoice Card (Shown if msg.deal exists or if any /pay/ URL is detected in text) */}
+                  {(() => {
+                    const payUrl = extractPaymentUrl(msg);
+                    if (!msg.deal && !payUrl) return null;
+
+                    const title = msg.deal?.serviceName || "Custom Deal Invoice";
+                    const amount = msg.deal?.amount;
+                    const status = msg.deal?.status || "Pending";
+
+                    return (
+                      <div
+                        className={`mt-2.5 p-3 rounded-xl border text-xs space-y-2.5 ${
+                          isMe
+                            ? "bg-black/30 border-white/20 text-white"
+                            : "bg-base-100 border-base-300 text-base-content"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="font-bold flex items-center gap-1.5 truncate">
+                            <LuCreditCard className="size-4 text-primary shrink-0" />
+                            <span className="truncate">{title}</span>
+                          </span>
+                          <span
+                            className={`badge badge-xs font-semibold shrink-0 ${
+                              status === "Paid"
+                                ? "badge-success text-success-content"
+                                : "badge-warning"
+                            }`}
+                          >
+                            {status}
+                          </span>
+                        </div>
+
+                        {amount !== undefined && amount !== null && (
+                          <div className="text-sm font-black text-primary">
+                            BDT {Number(amount).toLocaleString()}
+                          </div>
+                        )}
+
+                        {payUrl && (
+                          <a
+                            href={payUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            className="btn btn-xs btn-primary w-full gap-1.5 font-bold shadow-xs cursor-pointer select-none"
+                          >
+                            <span>Open Payment / Invoice Page</span>
+                            <LuExternalLink className="size-3" />
+                          </a>
+                        )}
+                      </div>
+                    );
+                  })()}
                 </div>
 
                 {/* Hover Reply Button */}
@@ -254,15 +368,39 @@ const TimelineItemView = memo(function TimelineItemView({
         <span>{lastMsgTime}</span>
         {isMe && (
           <span>
-            {item.lastMessage.isRead ? (
+            {item.lastMessage.deliveryStatus === "failed" ? (
+              <span
+                className="text-error inline-flex items-center gap-0.5"
+                title={item.lastMessage.failureReason || "Failed to deliver"}
+              >
+                <LuCircleAlert className="size-3 inline" />
+                <span className="text-[9px]">Failed</span>
+              </span>
+            ) : item.lastMessage.deliveryStatus === "read" ||
+              Boolean(item.lastMessage.readAt) ? (
               <IoCheckmarkDoneSharp
                 className="text-info text-xs inline"
                 title="Seen"
               />
-            ) : (
+            ) : item.lastMessage.deliveryStatus === "delivered" ? (
               <IoCheckmarkDoneSharp
-                className="text-xs inline opacity-60"
+                className="text-xs inline opacity-70"
                 title="Delivered"
+              />
+            ) : item.lastMessage.deliveryStatus === "sent" ? (
+              <IoCheckmarkSharp
+                className="text-xs inline opacity-60"
+                title="Sent"
+              />
+            ) : item.lastMessage.deliveryStatus === "pending" ? (
+              <LuClock
+                className="size-2.5 inline opacity-50 animate-pulse"
+                title="Sending..."
+              />
+            ) : (
+              <IoCheckmarkSharp
+                className="text-xs inline opacity-60"
+                title="Sent"
               />
             )}
           </span>
@@ -282,6 +420,7 @@ const Conversation = ({ currentRoom }) => {
   const [loading, setLoading] = useState(false);
   const chatEndRef = useRef(null);
   const chatBottomRef = useRef(null);
+  const chatContentRef = useRef(null);
   const cannedRef = useRef(null);
   const fileInputRef = useRef(null);
   const [text, setText] = useState("");
@@ -292,6 +431,8 @@ const Conversation = ({ currentRoom }) => {
   const [isConversationDeleted, setIsConversationDeleted] = useState(false);
   const [showSlashHints, setShowSlashHints] = useState(false);
   const [showNewMessagesPill, setShowNewMessagesPill] = useState(false);
+  const [isBlockModalOpen, setIsBlockModalOpen] = useState(false);
+  const queryClient = useQueryClient();
   const isNearBottomRef = useRef(true);
   const messagesCountRef = useRef(0);
   const role = currentUser?.user?.role;
@@ -319,6 +460,33 @@ const Conversation = ({ currentRoom }) => {
     setShowNewMessagesPill(false);
     isNearBottomRef.current = true;
   }, []);
+
+  // Keep scroll anchored to bottom on content changes (images/media loading, container resizing)
+  useEffect(() => {
+    const scrollContainer = chatEndRef.current;
+    const contentEl = chatContentRef.current;
+    if (!scrollContainer || !contentEl) return;
+
+    let rafId;
+    const ro = new ResizeObserver(() => {
+      if (isNearBottomRef.current) {
+        cancelAnimationFrame(rafId);
+        rafId = requestAnimationFrame(() => {
+          if (scrollContainer && isNearBottomRef.current) {
+            scrollContainer.scrollTop = scrollContainer.scrollHeight;
+          }
+        });
+      }
+    });
+
+    ro.observe(contentEl);
+    ro.observe(scrollContainer);
+
+    return () => {
+      ro.disconnect();
+      cancelAnimationFrame(rafId);
+    };
+  }, [currentRoom]);
 
   const handleLoadMore = async () => {
     if (loading || !hasMore || !currentRoom) return;
@@ -352,7 +520,7 @@ const Conversation = ({ currentRoom }) => {
         setPage((prev) => prev + 1);
         setHasMore(result.pagination?.hasMore ?? false);
         setNextCursor(
-          result.pagination?.nextCursor || result.data[0]?.createdAt || null
+          result.pagination?.nextCursor || result.data[0]?.createdAt || null,
         );
 
         // Preserve scroll position so reading isn't interrupted
@@ -408,7 +576,9 @@ const Conversation = ({ currentRoom }) => {
           setPage(1);
           setHasMore(result.pagination?.hasMore ?? false);
           setNextCursor(
-            result.pagination?.nextCursor || result.data?.[0]?.createdAt || null
+            result.pagination?.nextCursor ||
+              result.data?.[0]?.createdAt ||
+              null,
           );
           setShowNewMessagesPill(false);
           isNearBottomRef.current = true;
@@ -416,7 +586,7 @@ const Conversation = ({ currentRoom }) => {
           setTimeout(
             () =>
               chatBottomRef.current?.scrollIntoView({ behavior: "instant" }),
-            50
+            50,
           );
         }
       } catch (err) {
@@ -443,7 +613,23 @@ const Conversation = ({ currentRoom }) => {
 
       if (isMatch) {
         setMessages((prev) => {
-          // Check for duplicate messages by ID or content window
+          // 1. If this message matches an optimistic pending message, swap it in-place
+          const tempIdx = prev.findIndex(
+            (m) =>
+              m._id &&
+              String(m._id).startsWith("temp_") &&
+              m.text === newMsg.text &&
+              (m.senderId === newMsg.senderId ||
+                m.senderRole === newMsg.senderRole),
+          );
+
+          if (tempIdx !== -1) {
+            const next = [...prev];
+            next[tempIdx] = newMsg;
+            return next;
+          }
+
+          // 2. Check for duplicate messages by ID or content window
           const exists = prev.some(
             (m) =>
               (m._id && newMsg._id && String(m._id) === String(newMsg._id)) ||
@@ -452,16 +638,7 @@ const Conversation = ({ currentRoom }) => {
                 m.metaMessageId === newMsg.metaMessageId) ||
               (m.externalMetaId &&
                 newMsg.metaMessageId &&
-                m.externalMetaId === newMsg.metaMessageId) ||
-              (m.text &&
-                newMsg.text &&
-                m.text.trim() === newMsg.text.trim() &&
-                (m.senderRole === newMsg.senderRole ||
-                  m.senderId === newMsg.senderId) &&
-                Math.abs(
-                  new Date(m.createdAt || 0).getTime() -
-                    new Date(newMsg.createdAt || 0).getTime()
-                ) < 25000)
+                m.externalMetaId === newMsg.metaMessageId),
           );
           if (exists) return prev;
           return [...prev, newMsg];
@@ -476,7 +653,7 @@ const Conversation = ({ currentRoom }) => {
         if (isMe || isNearBottomRef.current) {
           setTimeout(
             () => chatBottomRef.current?.scrollIntoView({ behavior: "smooth" }),
-            50
+            50,
           );
           setShowNewMessagesPill(false);
         } else {
@@ -523,7 +700,7 @@ const Conversation = ({ currentRoom }) => {
             setTimeout(
               () =>
                 chatBottomRef.current?.scrollIntoView({ behavior: "smooth" }),
-              50
+              50,
             );
           }
         }
@@ -538,9 +715,18 @@ const Conversation = ({ currentRoom }) => {
         cleanRoomId(roomId) === cleanRoomId(currentRoom)
       ) {
         setMessages((prev) =>
-          prev.every((m) => m.isRead)
-            ? prev
-            : prev.map((m) => (m.isRead ? m : { ...m, isRead: true }))
+          prev.map((m) => {
+            const isOutgoing =
+              m.senderId === currentUser?.user?._id ||
+              (["admin", "member"].includes(role) &&
+                ["admin", "member"].includes(m.senderRole));
+
+            if (isOutgoing) {
+              // Outgoing messages only become "read" when the recipient reads it
+              return m;
+            }
+            return m.isRead ? m : { ...m, isRead: true };
+          }),
         );
       }
     };
@@ -560,6 +746,68 @@ const Conversation = ({ currentRoom }) => {
         cleanRoomId(roomId) === cleanRoomId(currentRoom)
       ) {
         toast.error(message || "Message delivery to external channel failed.");
+        setMessages((prev) => {
+          const lastPendingIdx = [...prev]
+            .reverse()
+            .findIndex(
+              (m) =>
+                m._id?.startsWith("temp_") || m.deliveryStatus === "pending",
+            );
+          if (lastPendingIdx === -1) return prev;
+          const realIdx = prev.length - 1 - lastPendingIdx;
+          const next = [...prev];
+          next[realIdx] = {
+            ...next[realIdx],
+            deliveryStatus: "failed",
+            failureReason: message || "Failed to deliver",
+          };
+          return next;
+        });
+      }
+    };
+
+    const handleMessageStatusUpdate = ({
+      messageId,
+      metaMessageId,
+      status,
+      roomId: statusRoom,
+      failureReason,
+    }) => {
+      if (
+        statusRoom === currentRoom ||
+        cleanRoomId(statusRoom) === cleanRoomId(currentRoom)
+      ) {
+        setMessages((prev) =>
+          prev.map((msg) => {
+            const isMatch =
+              (messageId && msg._id && String(msg._id) === String(messageId)) ||
+              (metaMessageId &&
+                msg.metaMessageId &&
+                msg.metaMessageId === metaMessageId) ||
+              (metaMessageId &&
+                msg.externalMetaId &&
+                msg.externalMetaId === metaMessageId);
+
+            if (!isMatch) return msg;
+
+            return {
+              ...msg,
+              deliveryStatus: status,
+              isRead: status === "read" ? true : msg.isRead,
+              failureReason: failureReason || msg.failureReason,
+            };
+          }),
+        );
+      }
+    };
+
+    const handleBlockStatusUpdated = ({ roomId }) => {
+      if (!roomId) return;
+      if (
+        roomId === currentRoom ||
+        cleanRoomId(roomId) === cleanRoomId(currentRoom)
+      ) {
+        queryClient.invalidateQueries({ queryKey: ["conversations"] });
       }
     };
 
@@ -568,6 +816,17 @@ const Conversation = ({ currentRoom }) => {
     socket.on("messagesRead", handleMessagesRead);
     socket.on("conversationDeleted", handleConversationDeleted);
     socket.on("messageDeliveryFailed", handleDeliveryFailed);
+    socket.on("messageStatusUpdate", handleMessageStatusUpdate);
+    socket.on("conversationBlockStatusUpdated", handleBlockStatusUpdated);
+
+    const handleLocalMessage = (e) => {
+      if (e?.detail) {
+        handleReceiveMessage(e.detail);
+      }
+    };
+    if (typeof window !== "undefined") {
+      window.addEventListener("localMessageSent", handleLocalMessage);
+    }
 
     return () => {
       socket.off("receiveMessage", handleReceiveMessage);
@@ -575,15 +834,20 @@ const Conversation = ({ currentRoom }) => {
       socket.off("messagesRead", handleMessagesRead);
       socket.off("conversationDeleted", handleConversationDeleted);
       socket.off("messageDeliveryFailed", handleDeliveryFailed);
+      socket.off("messageStatusUpdate", handleMessageStatusUpdate);
+      socket.off("conversationBlockStatusUpdated", handleBlockStatusUpdated);
+      if (typeof window !== "undefined") {
+        window.removeEventListener("localMessageSent", handleLocalMessage);
+      }
     };
-  }, [socket, currentRoom, role, currentUser?.user?._id]);
+  }, [socket, currentRoom, role, currentUser?.user?._id, queryClient]);
 
   // Determine active platform from currentRoom or conversation
   const currentConversation = useMemo(() => {
     return conversations?.find(
       (c) =>
         c?.roomId === currentRoom ||
-        (c?.roomId && cleanRoomId(c.roomId) === cleanRoomId(currentRoom))
+        (c?.roomId && cleanRoomId(c.roomId) === cleanRoomId(currentRoom)),
     );
   }, [conversations, currentRoom]);
 
@@ -595,6 +859,17 @@ const Conversation = ({ currentRoom }) => {
     if (currentConversation?.platform) return currentConversation.platform;
     return "web";
   }, [currentRoom, currentConversation]);
+
+  const isBlocked = Boolean(currentConversation?.isBlocked);
+
+  const isWhatsAppSessionExpired = useMemo(() => {
+    if (activePlatform !== "whatsapp") return false;
+    const lastAct =
+      currentConversation?.lastCustomerMessageAt ||
+      currentConversation?.updatedAt;
+    if (!lastAct) return false;
+    return Date.now() - new Date(lastAct).getTime() > 24 * 60 * 60 * 1000;
+  }, [activePlatform, currentConversation]);
 
   // ৩. One-time sync when opening a Facebook conversation (webhooks handle live messages)
   useEffect(() => {
@@ -611,7 +886,7 @@ const Conversation = ({ currentRoom }) => {
           {},
           {
             headers: { Authorization: `Bearer ${token}` },
-          }
+          },
         );
       } catch (e) {
         // Silent catch for background sync
@@ -652,12 +927,12 @@ const Conversation = ({ currentRoom }) => {
           const total = progressEvent.total || item.size;
           const percent = Math.min(
             99,
-            Math.round((progressEvent.loaded * 100) / total)
+            Math.round((progressEvent.loaded * 100) / total),
           );
           setStagedFiles((prev) =>
             prev.map((it) =>
-              it.id === item.id ? { ...it, progress: percent } : it
-            )
+              it.id === item.id ? { ...it, progress: percent } : it,
+            ),
           );
         },
       });
@@ -673,8 +948,8 @@ const Conversation = ({ currentRoom }) => {
                   progress: 100,
                   uploadedAttachment: uploaded,
                 }
-              : it
-          )
+              : it,
+          ),
         );
       } else {
         throw new Error(res.data?.message || "Upload failed");
@@ -690,8 +965,8 @@ const Conversation = ({ currentRoom }) => {
         prev.map((it) =>
           it.id === item.id
             ? { ...it, status: "error", errorMessage: errMsg }
-            : it
-        )
+            : it,
+        ),
       );
       toast.error(`Upload failed: ${item.name} (${errMsg})`);
     }
@@ -705,7 +980,7 @@ const Conversation = ({ currentRoom }) => {
     const batchRes = validateFileBatch(
       files,
       stagedFiles.length,
-      activePlatform
+      activePlatform,
     );
     if (!batchRes.valid) {
       return toast.error(batchRes.error);
@@ -752,11 +1027,11 @@ const Conversation = ({ currentRoom }) => {
       };
 
       setStagedFiles((prev) =>
-        prev.map((it) => (it.id === itemId ? updated : it))
+        prev.map((it) => (it.id === itemId ? updated : it)),
       );
       uploadStagedItem(updated);
     },
-    [stagedFiles]
+    [stagedFiles],
   );
 
   const handleRemoveStaged = useCallback((itemId) => {
@@ -827,11 +1102,11 @@ const Conversation = ({ currentRoom }) => {
 
     // Check if any items are actively uploading
     const isStillUploading = stagedFiles.some(
-      (it) => it.status === "uploading"
+      (it) => it.status === "uploading",
     );
     if (isStillUploading) {
       return toast.info(
-        "Please wait for your attachments to finish uploading."
+        "Please wait for your attachments to finish uploading.",
       );
     }
 
@@ -839,7 +1114,7 @@ const Conversation = ({ currentRoom }) => {
     const failedItems = stagedFiles.filter((it) => it.status === "error");
     if (failedItems.length > 0) {
       return toast.error(
-        "Please remove or retry attachments that failed before sending."
+        "Please remove or retry attachments that failed before sending.",
       );
     }
 
@@ -863,6 +1138,30 @@ const Conversation = ({ currentRoom }) => {
     const readyAttachments = stagedFiles
       .filter((it) => it.status === "ready" && it.uploadedAttachment)
       .map((it) => it.uploadedAttachment);
+
+    const optimisticId = `temp_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+    const now = new Date();
+    const optimisticMsg = {
+      _id: optimisticId,
+      roomId: currentRoom,
+      platform: activePlatform,
+      senderId: currentUser?.user?._id,
+      senderRole: role || "admin",
+      receiverId,
+      text: trimmedText,
+      attachments: readyAttachments,
+      isRead: false,
+      deliveryStatus: "pending",
+      replyTo: replyTo ? { ...replyTo } : null,
+      createdAt: now,
+    };
+
+    // Show message immediately in UI without waiting for network roundtrip
+    setMessages((prev) => [...prev, optimisticMsg]);
+    setTimeout(
+      () => chatBottomRef.current?.scrollIntoView({ behavior: "smooth" }),
+      30,
+    );
 
     try {
       if (readyAttachments.length > 0) {
@@ -913,8 +1212,20 @@ const Conversation = ({ currentRoom }) => {
       if (fileInputRef.current) fileInputRef.current.value = "";
     } catch (err) {
       console.error("Error sending message:", err);
+      setMessages((prev) =>
+        prev.map((m) =>
+          m._id === optimisticId
+            ? {
+                ...m,
+                deliveryStatus: "failed",
+                failureReason:
+                  err.response?.data?.message || "Failed to send message",
+              }
+            : m,
+        ),
+      );
       toast.error(
-        err.response?.data?.message || "Failed to send message. Please retry."
+        err.response?.data?.message || "Failed to send message. Please retry.",
       );
       // Draft text & attachments preserved on failure
     } finally {
@@ -956,52 +1267,54 @@ const Conversation = ({ currentRoom }) => {
         <div
           ref={chatEndRef}
           onScroll={checkIfNearBottom}
-          className="flex-1 p-3 md:p-5 overflow-y-auto h-[calc(100dvh-233px)]"
+          className={`flex-1 p-3 md:p-5 overflow-y-auto ${replyTo ? "h-[calc(100dvh-254px)]" : stagedFiles.length > 0 ? "h-[calc(100dvh-290px)]" : "h-[calc(100dvh-225px)]"}`}
         >
-          {hasMore && (
-            <div className="flex justify-center py-4">
-              <button
-                onClick={handleLoadMore}
-                disabled={loading}
-                className="btn btn-sm rounded-full"
-              >
-                {loading ? (
-                  <span className="loading loading-spinner loading-sm"></span>
-                ) : (
-                  <>
-                    <LuArrowUp />
-                    Load more
-                  </>
-                )}
-              </button>
-            </div>
-          )}
+          <div ref={chatContentRef}>
+            {hasMore && (
+              <div className="flex justify-center py-4">
+                <button
+                  onClick={handleLoadMore}
+                  disabled={loading}
+                  className="btn btn-sm rounded-full"
+                >
+                  {loading ? (
+                    <span className="loading loading-spinner loading-sm"></span>
+                  ) : (
+                    <>
+                      <LuArrowUp />
+                      Load more
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
 
-          {/* Grouped Message Timeline (Memoized items) */}
-          {groupedTimeline.map((item) => (
-            <TimelineItemView
-              key={item.id}
-              item={item}
-              customerName={customerName}
-              customerAvatar={customerAvatar}
-              onReply={handleSelectReply}
-            />
-          ))}
+            {/* Grouped Message Timeline (Memoized items) */}
+            {groupedTimeline.map((item) => (
+              <TimelineItemView
+                key={item.id}
+                item={item}
+                customerName={customerName}
+                customerAvatar={customerAvatar}
+                onReply={handleSelectReply}
+              />
+            ))}
 
-          {/* Conversation Deleted Badge & Button */}
-          {isConversationDeleted && (
-            <div className="flex flex-col items-center justify-center my-8 gap-4">
-              <span className="badge badge-error">Conversation Ended</span>
-              <Link
-                href="/dashboard/support"
-                className="btn btn-nexoro-primary"
-              >
-                Back to support page
-              </Link>
-            </div>
-          )}
+            {/* Conversation Deleted Badge & Button */}
+            {isConversationDeleted && (
+              <div className="flex flex-col items-center justify-center my-8 gap-4">
+                <span className="badge badge-error">Conversation Ended</span>
+                <Link
+                  href="/dashboard/support"
+                  className="btn btn-nexoro-primary"
+                >
+                  Back to support page
+                </Link>
+              </div>
+            )}
 
-          <div ref={chatBottomRef} />
+            <div ref={chatBottomRef} />
+          </div>
         </div>
 
         {/* Drag and Drop Visual Overlay */}
@@ -1059,6 +1372,19 @@ const Conversation = ({ currentRoom }) => {
             onDrop={handleDrop}
             className="p-3 md:p-4 bg-base-300 border-t border-base-200 space-y-2 relative"
           >
+            {/* WhatsApp 24-Hour Policy Window Notice */}
+            {isWhatsAppSessionExpired && (
+              <div className="flex items-center gap-2 p-2.5 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-700 dark:text-amber-300 text-xs">
+                <LuCircleAlert className="size-4 shrink-0 text-amber-500" />
+                <span className="flex-1 leading-snug">
+                  <strong>WhatsApp 24-hour response window expired:</strong>{" "}
+                  Meta policy requires customers to message first before you can
+                  send free-form replies. Messages sent now may fail without
+                  pre-approved templates.
+                </span>
+              </div>
+            )}
+
             {/* Active Reply Bar */}
             {replyTo && (
               <div className="flex items-center justify-between bg-base-200 border-l-4 border-l-info px-3 py-1.5 rounded-md text-xs mb-2">
@@ -1104,69 +1430,96 @@ const Conversation = ({ currentRoom }) => {
               </div>
             )}
 
-            <form onSubmit={handleSend} className="flex items-end gap-2">
-              {/* Quick Canned Responses Button (for staff) */}
-              {(role === "admin" || role === "member") && (
-                <button
-                  type="button"
-                  onClick={() => cannedRef.current?.showModal()}
-                  className="btn btn-circle btn-ghost btn-sm text-amber-500 hover:bg-amber-500/10 text-lg shrink-0"
-                  title="Quick Canned Replies (or type / in chat)"
-                >
-                  <LuZap />
-                </button>
-              )}
-
-              <div className="input w-full flex items-center gap-2 bg-base-100 border border-base-300 focus-within:border-primary/50 focus-within:ring-1 focus-within:ring-primary/20 rounded-xl transition-all">
-                <input
-                  value={text}
-                  onPaste={handlePaste}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    setText(val);
-                    if (val.startsWith("/") && val.length < 15) {
-                      setShowSlashHints(true);
-                    } else {
-                      setShowSlashHints(false);
-                    }
-                  }}
-                  type="text"
-                  placeholder={
-                    role === "admin" || role === "member"
-                      ? "Write a message, paste image, or type / for quick replies..."
-                      : "Write a message or paste image..."
-                  }
-                  className="grow bg-transparent focus:outline-none text-xs md:text-sm"
-                />
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  multiple
-                  onChange={(e) => handleStageFiles(e.target.files)}
-                  id="chat-file"
-                  hidden
-                />
-                <label
-                  htmlFor="chat-file"
-                  className="btn btn-ghost btn-circle btn-sm text-lg cursor-pointer"
-                  title="Attach files (Images, video, audio, documents)"
-                >
-                  <LuPaperclip />
-                </label>
-              </div>
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="btn btn-circle btn-primary shrink-0"
-                title="Send Message"
-              >
-                {isSubmitting ? (
-                  <span className="loading loading-spinner loading-xs"></span>
-                ) : (
-                  <LuSend />
+            {isBlocked ? (
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3.5 rounded-xl bg-error/10 border border-error/20 text-error">
+                <div className="flex items-center gap-2.5">
+                  <LuBan className="size-5 shrink-0" />
+                  <div>
+                    <h4 className="font-semibold text-xs md:text-sm">
+                      This contact is currently blocked
+                    </h4>
+                    <p className="text-[11px] md:text-xs text-base-content/70">
+                      Incoming messages are dropped. Unblock to reply to this
+                      customer.
+                    </p>
+                  </div>
+                </div>
+                {(role === "admin" || role === "member") && (
+                  <button
+                    type="button"
+                    onClick={() => setIsBlockModalOpen(true)}
+                    className="btn btn-xs sm:btn-sm btn-outline btn-success rounded-lg shrink-0 gap-1.5"
+                  >
+                    <LuShieldCheck className="size-4" />
+                    <span>Unblock Contact</span>
+                  </button>
                 )}
-              </button>
-            </form>
+              </div>
+            ) : (
+              <form onSubmit={handleSend} className="flex items-end gap-2">
+                {/* Quick Canned Responses Button (for staff) */}
+                {(role === "admin" || role === "member") && (
+                  <button
+                    type="button"
+                    onClick={() => cannedRef.current?.showModal()}
+                    className="btn btn-circle btn-ghost btn-sm text-amber-500 hover:bg-amber-500/10 text-lg shrink-0"
+                    title="Quick Canned Replies (or type / in chat)"
+                  >
+                    <LuZap />
+                  </button>
+                )}
+
+                <div className="input w-full flex items-center gap-2 bg-base-100 border border-base-300 focus-within:border-primary/50 focus-within:ring-1 focus-within:ring-primary/20 rounded-xl transition-all">
+                  <input
+                    value={text}
+                    onPaste={handlePaste}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setText(val);
+                      if (val.startsWith("/") && val.length < 15) {
+                        setShowSlashHints(true);
+                      } else {
+                        setShowSlashHints(false);
+                      }
+                    }}
+                    type="text"
+                    placeholder={
+                      role === "admin" || role === "member"
+                        ? "Write a message, paste image, or type / for quick replies..."
+                        : "Write a message or paste image..."
+                    }
+                    className="grow bg-transparent focus:outline-none text-xs md:text-sm"
+                  />
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    multiple
+                    onChange={(e) => handleStageFiles(e.target.files)}
+                    id="chat-file"
+                    hidden
+                  />
+                  <label
+                    htmlFor="chat-file"
+                    className="btn btn-ghost btn-circle btn-sm text-lg cursor-pointer"
+                    title="Attach files (Images, video, audio, documents)"
+                  >
+                    <LuPaperclip />
+                  </label>
+                </div>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="btn btn-circle btn-primary shrink-0"
+                  title="Send Message"
+                >
+                  {isSubmitting ? (
+                    <span className="loading loading-spinner loading-xs"></span>
+                  ) : (
+                    <LuSend />
+                  )}
+                </button>
+              </form>
+            )}
           </div>
         )}
       </div>
@@ -1174,6 +1527,22 @@ const Conversation = ({ currentRoom }) => {
       {/* CRM Side Panel (Visible for staff when toggled) */}
       {(role === "admin" || role === "member") && (
         <CRMPanel roomId={currentRoom} />
+      )}
+
+      {/* Block User Modal */}
+      {(role === "admin" || role === "member") && (
+        <BlockUserModal
+          isOpen={isBlockModalOpen}
+          onClose={() => setIsBlockModalOpen(false)}
+          conversation={
+            currentConversation || {
+              roomId: currentRoom,
+              platform: activePlatform,
+              isBlocked,
+              customer,
+            }
+          }
+        />
       )}
     </div>
   );

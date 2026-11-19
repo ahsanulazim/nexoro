@@ -1,14 +1,20 @@
 import TitleBanner from "@/components/ui/TitleBanner";
 import { LuCalendar } from "react-icons/lu";
-import parse from 'html-react-parser';
+import parse from "html-react-parser";
 import moment from "moment";
 import LatestBlogs from "@/components/blog/LatestBlogs";
+
+// @next-codemod-ignore Cache Components adoption: this segment temporarily allows blocking.
+// Remove this opt-out after verifying the segment passes validation without it.
+// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
+//export const instant = false;
 
 const articles = async ({ params }) => {
   const { article } = await params;
 
   const blogData = await fetch(
-    `${process.env.NEXT_PUBLIC_API_BASE}/blogs/getBlog/${article}`).then((res) => res.json());
+    `${process.env.NEXT_PUBLIC_API_BASE}/blogs/getBlog/${article}`,
+  ).then((res) => res.json());
 
   return (
     <main>
@@ -28,14 +34,16 @@ const articles = async ({ params }) => {
               </p>
               <p className="flex gap-2 items-center opacity-50 text-sm">
                 <LuCalendar />
-                {moment(blogData.added).format('lll')}
+                {moment(blogData.added).format("lll")}
               </p>
               <div className="divider"></div>
               <p className="p-6 bg-base-100 rounded-box mb-6">
                 <span className="font-semibold">Summery:</span>{" "}
                 {blogData.description}
               </p>
-              <div className="blog-content">{parse(blogData.content.replace(/\u00A0/g, " "))}</div>
+              <div className="blog-content">
+                {parse(blogData.content.replace(/\u00A0/g, " "))}
+              </div>
             </div>
           </div>
           <div className="lg:col-span-1 lg:sticky lg:top-28">

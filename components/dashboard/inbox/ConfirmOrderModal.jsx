@@ -15,9 +15,11 @@ import {
   LuCalendar,
   LuCreditCard,
   LuGlobe,
+  LuLink,
   LuMail,
   LuPackageCheck,
   LuPhone,
+  LuSend,
   LuSparkles,
   LuStickyNote,
   LuUser,
@@ -87,6 +89,9 @@ const ConfirmOrderModal = ({ roomId }) => {
     enabled: Boolean(roomId && isConfirmOrderOpen),
   });
 
+  // Mode state: Pay-by-link vs Manual Order
+  const [actionType, setActionType] = useState("payment_link"); // "payment_link" | "manual_order"
+
   // Client fields state
   const [clientName, setClientName] = useState("");
   const [clientEmail, setClientEmail] = useState("");
@@ -119,25 +124,29 @@ const ConfirmOrderModal = ({ roomId }) => {
     if (extracted) {
       setClientName(extracted.name || fallbackCust?.name || "Customer");
       setClientEmail(extracted.email || "");
+      const rawClean = cleanRoom(roomId);
+      const isRoomPhone = /^\+?[0-9]+$/.test(rawClean);
       setClientPhone(
         extracted.phone ||
           fallbackCust?.phone ||
-          (String(roomId || "").startsWith("wa_")
-            ? `+${cleanRoom(roomId).replace(/[^0-9]/g, "")}`
+          (String(roomId || "").startsWith("wa_") && isRoomPhone
+            ? `+${rawClean.replace(/[^0-9]/g, "")}`
             : "")
       );
       setCompany(extracted.company || "Individual / Self");
       setClientRole(extracted.clientRole || "Client");
       setCountry(extracted.country || "Bangladesh");
     } else if (fallbackCust) {
+      const rawClean = cleanRoom(roomId);
+      const isRoomPhone = /^\+?[0-9]+$/.test(rawClean);
       setClientName(
         fallbackCust.name || fallbackCust.userName || "Customer"
       );
       setClientEmail(fallbackCust.email || "");
       setClientPhone(
         fallbackCust.phone ||
-          (String(roomId || "").startsWith("wa_")
-            ? `+${cleanRoom(roomId).replace(/[^0-9]/g, "")}`
+          (String(roomId || "").startsWith("wa_") && isRoomPhone
+            ? `+${rawClean.replace(/[^0-9]/g, "")}`
             : "")
       );
       setCompany(fallbackCust.company || "Individual / Self");
@@ -223,6 +232,38 @@ const ConfirmOrderModal = ({ roomId }) => {
     },
   });
 
+  const dealLinkMutation = useMutation({
+    mutationFn: async (payload) => {
+      const token = await auth.currentUser?.getIdToken();
+      const res = await api.post("/payment/deals/create-link", payload, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      return res.data;
+    },
+    onSuccess: (resData) => {
+      toast.success(
+        resData?.message || "Payment link created and sent to customer in chat!"
+      );
+      if (resData?.data?.message && typeof window !== "undefined") {
+        window.dispatchEvent(
+          new CustomEvent("localMessageSent", {
+            detail: resData.data.message,
+          })
+        );
+      }
+      queryClient.invalidateQueries({ queryKey: ["messages", roomId] });
+      queryClient.invalidateQueries({ queryKey: ["conversations"] });
+      handleClose();
+    },
+    onError: (err) => {
+      toast.error(
+        err.response?.data?.message ||
+          err.message ||
+          "Failed to create deal payment link"
+      );
+    },
+  });
+
   const handleClose = () => {
     setIsConfirmOrderOpen(false);
     setServiceName("");
@@ -262,6 +303,35 @@ const ConfirmOrderModal = ({ roomId }) => {
       currentUser?.user?.displayName ||
       currentUser?.user?.email ||
       (userRole === "member" ? "Member" : "Admin");
+
+    if (actionType === "payment_link") {
+      dealLinkMutation.mutate({
+        roomId,
+        clientId: crmData?.clientId || crmData?.existingClient?._id || null,
+        clientName: clientName.trim(),
+        clientEmail: clientEmail.trim(),
+        clientPhone: clientPhone.trim(),
+        company: company.trim() || "Individual / Self",
+        clientRole: clientRole.trim() || "Client",
+        country: country || "Bangladesh",
+        slug,
+        planId: slug === "custom" ? null : planId,
+        serviceName: slug === "custom" ? serviceName.trim() : undefined,
+        servicePrice: slug === "custom" ? Number(servicePrice) : undefined,
+        discount: Number(discount) || 0,
+        amount: Number(amount) > 0 ? Number(amount) : undefined,
+        deadline: deadline || null,
+        assignToSelf: Boolean(assignToSelf),
+        assignedTo: assignToSelf
+          ? currentUser?.user?._id
+          : assignedTo || null,
+        createdBy: creatorName,
+        createdByRole: userRole,
+        createdById: currentUser?.user?._id || null,
+        orderNote: orderNote.trim(),
+      });
+      return;
+    }
 
     confirmMutation.mutate({
       roomId,
@@ -308,15 +378,22 @@ const ConfirmOrderModal = ({ roomId }) => {
         <div className="px-6 py-4 bg-base-200/80 border-b border-base-300 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="p-2.5 rounded-xl bg-primary/15 text-primary">
-              <LuPackageCheck className="size-5" />
+              {actionType === "payment_link" ? (
+                <LuCreditCard className="size-5" />
+              ) : (
+                <LuPackageCheck className="size-5" />
+              )}
             </div>
             <div>
               <h3 className="font-bold text-base md:text-lg text-base-content leading-tight">
-                Confirm Order & Auto-Save Client
+                {actionType === "payment_link"
+                  ? "Send Custom Deal Payment Link"
+                  : "Confirm Order & Auto-Save Client"}
               </h3>
               <p className="text-xs text-base-content/60">
-                Create an order from this conversation and automatically sync
-                customer to Clients
+                {actionType === "payment_link"
+                  ? "Generate a secure EPS pay-by-link and send it directly into this customer's chat"
+                  : "Directly record a manual order from this conversation and sync customer"}
               </p>
             </div>
           </div>
@@ -327,6 +404,34 @@ const ConfirmOrderModal = ({ roomId }) => {
           >
             <LuX className="size-4" />
           </button>
+        </div>
+
+        {/* Action Type Toggle Tabs */}
+        <div className="px-6 pt-3 pb-0 bg-base-200/40">
+          <div className="grid grid-cols-2 p-1 bg-base-300/60 rounded-xl gap-1">
+            <button
+              type="button"
+              onClick={() => setActionType("payment_link")}
+              className={`btn btn-xs sm:btn-sm rounded-lg font-semibold transition-all border-none ${
+                actionType === "payment_link"
+                  ? "bg-primary text-primary-content shadow-xs"
+                  : "btn-ghost text-base-content/70 hover:text-base-content"
+              }`}
+            >
+              <LuCreditCard className="size-3.5" /> Send EPS Payment Link
+            </button>
+            <button
+              type="button"
+              onClick={() => setActionType("manual_order")}
+              className={`btn btn-xs sm:btn-sm rounded-lg font-semibold transition-all border-none ${
+                actionType === "manual_order"
+                  ? "bg-primary text-primary-content shadow-xs"
+                  : "btn-ghost text-base-content/70 hover:text-base-content"
+              }`}
+            >
+              <LuPackageCheck className="size-3.5" /> Manual Confirm Order
+            </button>
+          </div>
         </div>
 
         <form
@@ -614,64 +719,99 @@ const ConfirmOrderModal = ({ roomId }) => {
                 />
               </div>
 
-              {/* Payment Status */}
-              <div>
-                <label className="label py-1">
-                  <span className="label-text text-xs font-medium flex items-center gap-1">
-                    <LuCreditCard className="size-3 opacity-60" /> Payment
-                    Status
-                  </span>
-                </label>
-                <select
-                  value={payment}
-                  onChange={(e) => setPayment(e.target.value)}
-                  className="select select-sm select-bordered w-full bg-base-100"
-                >
-                  <option value="Pending">Pending (Unpaid)</option>
-                  <option value="Partial">Partial (Advance Paid)</option>
-                  <option value="Success">Paid in Full</option>
-                </select>
-              </div>
-
-              {/* Paid / Advance Amount when not Paid in Full */}
-              {payment !== "Success" && (
-                <div>
-                  <label className="label py-1">
-                    <span className="label-text text-xs font-medium">
-                      Advance / Paid Amount ({slug === "custom" ? "BDT" : "USD"}
-                      )
+              {/* Conditional Payment Configuration */}
+              {actionType === "payment_link" ? (
+                <div className="sm:col-span-2 p-3.5 bg-primary/10 rounded-2xl border border-primary/25 space-y-2">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2 text-primary">
+                      <LuCreditCard className="size-4 shrink-0" />
+                      <span className="text-xs font-bold">
+                        Online Payment via EPS Gateway
+                      </span>
+                    </div>
+                    <span className="badge badge-xs badge-primary font-semibold">
+                      bKash • Nagad • Cards
                     </span>
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
-                    placeholder="0"
-                    className="input input-sm input-bordered w-full bg-base-100"
-                  />
+                  </div>
+                  <p className="text-[11px] text-base-content/70">
+                    A unique payment link will be sent to the customer. When paid via EPS, the system automatically registers the client and confirms the order.
+                  </p>
+                  <div className="pt-2 border-t border-primary/20 flex items-center justify-between">
+                    <span className="text-xs font-semibold text-base-content/80">
+                      Amount to Charge:
+                    </span>
+                    <span className="text-base font-extrabold text-primary flex items-center">
+                      <HiOutlineCurrencyBangladeshi className="size-4 inline" />
+                      {Math.max(
+                        0,
+                        (Number(servicePrice) || 0) - (Number(discount) || 0)
+                      ).toLocaleString()}{" "}
+                      BDT
+                    </span>
+                  </div>
                 </div>
-              )}
+              ) : (
+                <>
+                  {/* Payment Status */}
+                  <div>
+                    <label className="label py-1">
+                      <span className="label-text text-xs font-medium flex items-center gap-1">
+                        <LuCreditCard className="size-3 opacity-60" /> Payment
+                        Status
+                      </span>
+                    </label>
+                    <select
+                      value={payment}
+                      onChange={(e) => setPayment(e.target.value)}
+                      className="select select-sm select-bordered w-full bg-base-100"
+                    >
+                      <option value="Pending">Pending (Unpaid)</option>
+                      <option value="Partial">Partial (Advance Paid)</option>
+                      <option value="Success">Paid in Full</option>
+                    </select>
+                  </div>
 
-              {/* Payment Method */}
-              <div>
-                <label className="label py-1">
-                  <span className="label-text text-xs font-medium">
-                    Payment Method
-                  </span>
-                </label>
-                <select
-                  value={paymentMethod}
-                  onChange={(e) => setPaymentMethod(e.target.value)}
-                  className="select select-sm select-bordered w-full bg-base-100"
-                >
-                  {PAYMENT_METHODS.map((pm) => (
-                    <option key={pm.value} value={pm.value}>
-                      {pm.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
+                  {/* Paid / Advance Amount when not Paid in Full */}
+                  {payment !== "Success" && (
+                    <div>
+                      <label className="label py-1">
+                        <span className="label-text text-xs font-medium">
+                          Advance / Paid Amount ({slug === "custom" ? "BDT" : "USD"}
+                          )
+                        </span>
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        value={amount}
+                        onChange={(e) => setAmount(e.target.value)}
+                        placeholder="0"
+                        className="input input-sm input-bordered w-full bg-base-100"
+                      />
+                    </div>
+                  )}
+
+                  {/* Payment Method */}
+                  <div>
+                    <label className="label py-1">
+                      <span className="label-text text-xs font-medium">
+                        Payment Method
+                      </span>
+                    </label>
+                    <select
+                      value={paymentMethod}
+                      onChange={(e) => setPaymentMethod(e.target.value)}
+                      className="select select-sm select-bordered w-full bg-base-100"
+                    >
+                      {PAYMENT_METHODS.map((pm) => (
+                        <option key={pm.value} value={pm.value}>
+                          {pm.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </>
+              )}
 
               {/* Project Deadline */}
               <div>
@@ -767,10 +907,22 @@ const ConfirmOrderModal = ({ roomId }) => {
             </button>
             <button
               type="submit"
-              disabled={confirmMutation.isPending}
+              disabled={confirmMutation.isPending || dealLinkMutation.isPending}
               className="btn btn-sm btn-primary gap-2 px-5"
             >
-              {confirmMutation.isPending ? (
+              {actionType === "payment_link" ? (
+                dealLinkMutation.isPending ? (
+                  <>
+                    <span className="loading loading-spinner loading-xs" />
+                    <span>Sending Link...</span>
+                  </>
+                ) : (
+                  <>
+                    <LuSend className="size-4" />
+                    <span>Send Payment Link to Customer</span>
+                  </>
+                )
+              ) : confirmMutation.isPending ? (
                 <>
                   <span className="loading loading-spinner loading-xs" />
                   <span>Confirming...</span>

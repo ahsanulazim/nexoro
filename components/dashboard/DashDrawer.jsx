@@ -1,35 +1,28 @@
 "use client";
 
-import {
-  LuBookUser,
-  LuBriefcase,
-  LuFlag,
-  LuGalleryThumbnails,
-  LuHeadset,
-  LuLayoutDashboard,
-  LuMessageCircle,
-  LuNotebookPen,
-  LuPackage,
-  LuReceipt,
-  LuSettings,
-  LuStar,
-  LuStore,
-  LuTrophy,
-  LuUsers,
-  LuUsersRound,
-} from "react-icons/lu";
-import { HiOutlineCurrencyBangladeshi } from "react-icons/hi";
+import { useState } from "react";
+import { LuLayoutDashboard, LuSettings } from "react-icons/lu";
 import DashNav from "./DashNav";
 import ActiveLink from "./ActiveLink";
 import BrowserNotificationBanner from "./BrowserNotificationBanner";
-import { useAuth } from "@/context/AuthProvider";
-import { useState } from "react";
 import { useDashTheme } from "@/context/DashThemeProvider";
+import usePermissions from "@/hooks/usePermissions";
+import {
+  DASHBOARD_NAV_ITEMS,
+  CUSTOMER_NAV_ITEMS,
+} from "./dashboardNavItems";
 
 const DashDrawer = ({ children }) => {
-  const { currentUser } = useAuth();
+  const { isAdmin, isMember, isCustomer, hasPermission } = usePermissions();
   const [isChecked, setIsChecked] = useState(false);
   const { isDark } = useDashTheme();
+
+  // Filter staff nav items based on granular member/admin permissions
+  const visibleStaffItems = (isAdmin || isMember)
+    ? DASHBOARD_NAV_ITEMS.filter((item) =>
+        isAdmin ? true : hasPermission(item.permissionKey)
+      )
+    : [];
 
   return (
     <div
@@ -74,146 +67,47 @@ const DashDrawer = ({ children }) => {
               />
             </span>
           </div>
-          {/* Sidebar content here */}
+
+          {/* Sidebar Navigation */}
           <ul className="menu w-full grow">
-            {/* List item */}
+            {/* Common Dashboard Home */}
             <li>
               <ActiveLink href="/dashboard" dataTip="Dashboard">
-                {/* Home icon */}
                 <LuLayoutDashboard className="my-1.5 inline-block size-4" />
                 <span className="is-drawer-close:hidden">Dashboard</span>
               </ActiveLink>
             </li>
-            {currentUser?.user?.role === "admin" ||
-            currentUser?.user?.role === "member" ? (
-              <>
-                <li>
-                  <ActiveLink href="/dashboard/orders" dataTip="Orders">
-                    <LuPackage className="my-1.5 inline-block size-4" />
-                    <span className="is-drawer-close:hidden">Orders</span>
-                  </ActiveLink>
-                </li>
 
-                <li>
-                  <ActiveLink href="/dashboard/inbox" dataTip="Inbox">
-                    <LuMessageCircle className="my-1.5 inline-block size-4" />
-                    <span className="is-drawer-close:hidden">Inbox</span>
+            {/* Staff Navigation Items (Admin & Member with permissions) */}
+            {visibleStaffItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <li key={item.href}>
+                  <ActiveLink href={item.href} dataTip={item.dataTip}>
+                    <Icon className="my-1.5 inline-block size-4" />
+                    <span className="is-drawer-close:hidden">{item.label}</span>
                   </ActiveLink>
                 </li>
+              );
+            })}
 
-                <li>
-                  <ActiveLink href="/dashboard/blogs" dataTip="Blog">
-                    <LuNotebookPen className="my-1.5 inline-block size-4" />
-                    <span className="is-drawer-close:hidden">Blog</span>
-                  </ActiveLink>
-                </li>
+            {/* Customer Navigation Items */}
+            {isCustomer &&
+              CUSTOMER_NAV_ITEMS.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <li key={item.href}>
+                    <ActiveLink href={item.href} dataTip={item.dataTip}>
+                      <Icon className="my-1.5 inline-block size-4" />
+                      <span className="is-drawer-close:hidden">{item.label}</span>
+                    </ActiveLink>
+                  </li>
+                );
+              })}
 
-                <li>
-                  <ActiveLink href="/dashboard/projects" dataTip="Projects">
-                    <LuBriefcase className="my-1.5 inline-block size-4" />
-                    <span className="is-drawer-close:hidden">Projects</span>
-                  </ActiveLink>
-                </li>
-                <li>
-                  <ActiveLink
-                    href="/dashboard/points"
-                    dataTip="Points & Leaderboard"
-                  >
-                    <LuTrophy className="my-1.5 inline-block size-4" />
-                    <span className="is-drawer-close:hidden">
-                      Points & Leaderboard
-                    </span>
-                  </ActiveLink>
-                </li>
-                <li>
-                  <ActiveLink href="/dashboard/portfolio" dataTip="Portfolio">
-                    <LuBookUser className="my-1.5 inline-block size-4" />
-                    <span className="is-drawer-close:hidden">Portfolio</span>
-                  </ActiveLink>
-                </li>
-
-                <li>
-                  <ActiveLink href="/dashboard/services" dataTip="Services">
-                    <LuFlag className="my-1.5 inline-block size-4" />
-                    <span className="is-drawer-close:hidden">Services</span>
-                  </ActiveLink>
-                </li>
-                <li>
-                  <ActiveLink href="/dashboard/pricing" dataTip="Pricing">
-                    <HiOutlineCurrencyBangladeshi className="my-1.5 inline-block size-4" />
-                    <span className="is-drawer-close:hidden">Pricing</span>
-                  </ActiveLink>
-                </li>
-                <li>
-                  <ActiveLink href="/dashboard/clients" dataTip="Clients">
-                    <LuStore className="my-1.5 inline-block size-4" />
-                    <span className="is-drawer-close:hidden">Clients</span>
-                  </ActiveLink>
-                </li>
-              </>
-            ) : null}
-            {currentUser?.user?.role === "admin" ? (
-              <>
-                <li>
-                  <ActiveLink href="/dashboard/expenses" dataTip="Expenses">
-                    <LuReceipt className="my-1.5 inline-block size-4" />
-                    <span className="is-drawer-close:hidden">Expenses</span>
-                  </ActiveLink>
-                </li>
-                <li>
-                  <ActiveLink href="/dashboard/sliders" dataTip="Sliders">
-                    <LuGalleryThumbnails className="my-1.5 inline-block size-4" />
-                    <span className="is-drawer-close:hidden">Sliders</span>
-                  </ActiveLink>
-                </li>
-                <li>
-                  <ActiveLink href="/dashboard/review" dataTip="Review">
-                    <LuStar className="my-1.5 inline-block size-4" />
-                    <span className="is-drawer-close:hidden">Review</span>
-                  </ActiveLink>
-                </li>
-                <li>
-                  <ActiveLink href="/dashboard/users" dataTip="Users">
-                    <LuUsersRound className="my-1.5 inline-block size-4" />
-                    <span className="is-drawer-close:hidden">Users</span>
-                  </ActiveLink>
-                </li>
-                <li>
-                  <ActiveLink href="/dashboard/team" dataTip="Team">
-                    <LuUsers className="my-1.5 inline-block size-4" />
-                    <span className="is-drawer-close:hidden">Team</span>
-                  </ActiveLink>
-                </li>
-              </>
-            ) : null}
-            {currentUser?.user?.role !== "admin" &&
-            currentUser?.user?.role !== "member" ? (
-              <>
-                <li>
-                  <ActiveLink href="/dashboard/orders" dataTip="My Orders">
-                    <LuPackage className="my-1.5 inline-block size-4" />
-                    <span className="is-drawer-close:hidden">My Orders</span>
-                  </ActiveLink>
-                </li>
-                <li>
-                  <ActiveLink href="/dashboard/support" dataTip="Support">
-                    <LuHeadset className="my-1.5 inline-block size-4" />
-                    <span className="is-drawer-close:hidden">Support</span>
-                  </ActiveLink>
-                </li>
-                <li>
-                  <ActiveLink href="/dashboard/profile" dataTip="Profile">
-                    <LuBookUser className="my-1.5 inline-block size-4" />
-                    <span className="is-drawer-close:hidden">Profile</span>
-                  </ActiveLink>
-                </li>
-              </>
-            ) : null}
-            {/* List item */}
-
+            {/* Settings (Available to all) */}
             <li>
               <ActiveLink href="/dashboard/settings" dataTip="Settings">
-                {/* Settings icon */}
                 <LuSettings className="my-1.5 inline-block size-4" />
                 <span className="is-drawer-close:hidden">Settings</span>
               </ActiveLink>

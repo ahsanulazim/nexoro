@@ -1,6 +1,11 @@
 import FooterYear from "@/components/FooterYear";
 import Link from "next/link";
 
+// @next-codemod-ignore Cache Components adoption: this segment temporarily allows blocking.
+// Remove this opt-out after verifying the segment passes validation without it.
+// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
+//export const instant = false;
+
 const layout = ({ children }) => {
   return (
     <main className="min-h-dvh flex flex-col justify-between">

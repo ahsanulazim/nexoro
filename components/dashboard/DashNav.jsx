@@ -321,7 +321,7 @@ const DashNav = ({ isChecked }) => {
                         className={`flex items-start gap-3 p-3 rounded-lg text-left transition-all cursor-pointer ${
                           notification.isRead
                             ? "opacity-60 hover:opacity-100"
-                            : "bg-base-200/50 font-medium"
+                            : "bg-base-200/50 font-medium w-full"
                         }`}
                       >
                         <div

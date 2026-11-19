@@ -59,31 +59,25 @@ export const getMembers = async () => {
 };
 
 //promote user
-export const promoteUser = async (email) => {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_BASE}/users/promote?email=${email}`,
-    { method: "PUT" },
-  );
-  const user = await res.json();
-
-  if (!res.ok) {
-    throw new Error(user.message || "Failed to promote user");
-  }
-  return user;
+export const promoteUser = async (email, permissions) => {
+  const res = await api.put("/users/promote", { email, permissions }, {
+    params: { email },
+  });
+  return res.data;
 };
 
 //demote member
 export const demoteMember = async (email) => {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_BASE}/users/demote?email=${email}`,
-    { method: "PUT" },
-  );
-  const member = await res.json();
+  const res = await api.put("/users/demote", null, {
+    params: { email },
+  });
+  return res.data;
+};
 
-  if (!res.ok) {
-    throw new Error(member.message || "Failed to demote member");
-  }
-  return member;
+// Update member permissions (Admin only)
+export const updateMemberPermissions = async (email, permissions) => {
+  const res = await api.put("/users/permissions", { email, permissions });
+  return res.data;
 };
 
 //delete user

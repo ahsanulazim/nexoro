@@ -10,11 +10,15 @@ export default function VideoCard({ attachment, onOpenModal, isMe }) {
     return (
       <div
         className={`flex items-center gap-2 p-3 rounded-xl text-xs max-w-xs ${
-          isMe ? "bg-black/25 text-white/90" : "bg-base-300 text-base-content/80"
+          isMe
+            ? "bg-black/25 text-white/90"
+            : "bg-base-300 text-base-content/80"
         }`}
       >
         <LuVideoOff className="size-5 shrink-0 text-error" />
-        <span className="truncate">Video unavailable or format unsupported</span>
+        <span className="truncate">
+          Video unavailable or format unsupported
+        </span>
       </div>
     );
   }
@@ -54,7 +58,7 @@ export default function VideoCard({ attachment, onOpenModal, isMe }) {
           )}
 
           {/* Dark scrim overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent" />
 
           {/* Central Play Button */}
           <div className="relative z-10 size-11 rounded-full bg-primary text-primary-content flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">

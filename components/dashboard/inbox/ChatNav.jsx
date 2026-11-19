@@ -3,15 +3,20 @@
 import { useAuth } from "@/context/AuthProvider";
 import { useSocket } from "@/context/SocketProvider";
 import { useParams } from "next/navigation";
+import Link from "next/link";
+import { useMemo, useState } from "react";
+import { FaFacebookF, FaInstagram, FaWhatsapp, FaGlobe } from "react-icons/fa6";
 import {
-  FaFacebookF,
-  FaInstagram,
-  FaWhatsapp,
-  FaGlobe,
-} from "react-icons/fa6";
-import { LuBadgeCheck, LuPackageCheck, LuUserCheck } from "react-icons/lu";
+  LuBadgeCheck,
+  LuPackageCheck,
+  LuUserCheck,
+  LuArrowLeft,
+  LuBan,
+  LuShieldCheck,
+} from "react-icons/lu";
 import { getInitials, getAvatarColor } from "@/utils/messageGrouping";
 import ConfirmOrderModal from "./ConfirmOrderModal";
+import BlockUserModal from "./BlockUserModal";
 
 const ChatNav = () => {
   const { message: currentRoom } = useParams();
@@ -27,7 +32,16 @@ const ChatNav = () => {
   const role = currentUser?.user?.role;
   const isStaff = role === "admin" || role === "member";
 
-  const cleanRoom = (id) => String(id || "").replace(/^(fb_|ig_|wa_|room_)/, "");
+  const cleanRoom = (id) => {
+    if (!id) return "";
+    const decoded = decodeURIComponent(String(id)).trim();
+    const stripped = decoded.replace(/^(fb_|ig_|wa_|room_)/, "");
+    const digits = stripped.replace(/[^0-9]/g, "");
+    if (digits.length >= 10) {
+      return digits.slice(-10);
+    }
+    return stripped.toLowerCase();
+  };
   const currentConversation = conversations?.find(
     (c) =>
       c?.roomId === currentRoom ||
@@ -36,25 +50,122 @@ const ChatNav = () => {
 
   const customer = currentConversation?.customer;
   const customerId = customer?._id || customer?.id;
-  const isOnline = customerId ? Boolean(onlineStatuses[customerId]) : false;
+  const platform = currentConversation?.platform || "web";
+  const isBlocked = Boolean(currentConversation?.isBlocked);
+  const [isBlockModalOpen, setIsBlockModalOpen] = useState(false);
+
+  // Calculate active status & WhatsApp 24h window
+  const activeStatusInfo = useMemo(() => {
+    if (platform === "whatsapp") {
+      const lastActivity =
+        currentConversation?.lastCustomerMessageAt ||
+        currentConversation?.updatedAt;
+      if (!lastActivity) {
+        return {
+          isOnline: false,
+          label: "Offline",
+          dotColor: "bg-base-content/40",
+          textColor: "text-base-content/40",
+          sessionBadge: null,
+        };
+      }
+
+      const diffMs = Date.now() - new Date(lastActivity).getTime();
+      const isWithin5Mins = diffMs <= 5 * 60 * 1000;
+      const isWithin24Hours = diffMs <= 24 * 60 * 60 * 1000;
+      const hoursLeft = Math.max(
+        0,
+        Math.floor((24 * 3600 * 1000 - diffMs) / (3600 * 1000)),
+      );
+
+      if (isWithin5Mins) {
+        return {
+          isOnline: true,
+          label: "Active Now",
+          dotColor: "bg-success",
+          textColor: "text-success",
+          sessionBadge: {
+            text: `24h (${hoursLeft}h left)`,
+            style:
+              "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/25",
+          },
+        };
+      }
+
+      if (isWithin24Hours) {
+        return {
+          isOnline: true,
+          label: hoursLeft > 0 ? `Active ${hoursLeft}h ago` : "Active today",
+          dotColor: "bg-emerald-500",
+          textColor: "text-emerald-500",
+          sessionBadge: {
+            text: `24h (${hoursLeft}h left)`,
+            style: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
+          },
+        };
+      }
+
+      return {
+        isOnline: false,
+        label: "24h Window Expired",
+        dotColor: "bg-amber-500/60",
+        textColor: "text-amber-600 dark:text-amber-400",
+        sessionBadge: {
+          text: "Templates Only (Window Expired)",
+          style:
+            "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/25",
+        },
+      };
+    }
+
+    // Web / Other platform check
+    const isOnline = customerId ? Boolean(onlineStatuses[customerId]) : false;
+    return {
+      isOnline,
+      label: isOnline ? "Active Now" : "Offline",
+      dotColor: isOnline ? "bg-success" : "bg-base-content/40",
+      textColor: isOnline ? "text-success" : "text-base-content/40",
+      sessionBadge: null,
+    };
+  }, [platform, currentConversation, customerId, onlineStatuses]);
+
   const isClient = Boolean(
     currentConversation?.isClient ||
-      currentConversation?.clientId ||
-      customer?.clientId
+    currentConversation?.clientId ||
+    customer?.clientId,
   );
   const customerName =
-    customer?.userName || customer?.name || customer?.email || "Customer Support";
-  const platform = currentConversation?.platform || "web";
+    customer?.userName ||
+    customer?.name ||
+    customer?.email ||
+    "Customer Support";
 
   const renderPlatformInfo = () => {
     switch (platform) {
-      case "whatsapp":
+      case "whatsapp": {
+        const rawClean = cleanRoom(currentRoom);
+        const isPurePhone = /^\+?[0-9]+$/.test(rawClean);
+        let waSubtext = "WhatsApp Contact";
+        if (customer?.phone) {
+          waSubtext = customer.phone;
+        } else if (
+          customer?.userName &&
+          customer.userName !== "WhatsApp User"
+        ) {
+          waSubtext = customer.userName.startsWith("@")
+            ? customer.userName
+            : `@${customer.userName}`;
+        } else if (isPurePhone) {
+          waSubtext = `+${rawClean.replace(/[^0-9]/g, "")}`;
+        }
+
         return {
           label: "WhatsApp",
           color: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
           icon: FaWhatsapp,
-          subtext: customer?.phone || currentRoom?.replace("wa_", "+") || "WhatsApp Contact",
+          subtext: waSubtext,
         };
+      }
       case "facebook":
         return {
           label: "Facebook Messenger",
@@ -85,13 +196,22 @@ const ChatNav = () => {
 
   return (
     <>
-      <div className="navbar bg-base-300/80 backdrop-blur shadow-xs px-4 py-2.5 justify-between border-b border-base-200">
-        <div className="flex items-center gap-3">
+      <div className="navbar bg-base-300/80 backdrop-blur shadow-xs px-2.5 sm:px-4 py-2 justify-between border-b border-base-200">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+          {/* Mobile Back to List Button */}
+          <Link
+            href="/dashboard/inbox"
+            className="btn btn-ghost btn-circle btn-sm lg:hidden -ml-1 text-base-content shrink-0"
+            title="Back to inbox"
+          >
+            <LuArrowLeft className="size-5" />
+          </Link>
+
           {/* Avatar */}
           <div className="relative">
             <div
               className={`size-10 rounded-full overflow-hidden flex items-center justify-center font-bold text-xs uppercase shadow-inner relative border ${getAvatarColor(
-                customerName || currentRoom
+                customerName || currentRoom,
               )}`}
             >
               <span className="pointer-events-none select-none">
@@ -109,24 +229,19 @@ const ChatNav = () => {
               )}
             </div>
             <span
-              className={`absolute bottom-0 right-0 size-3 rounded-full border-2 border-base-300 ${
-                isOnline ? "bg-success" : "bg-base-content/30"
-              }`}
-              title={isOnline ? "Online" : "Offline"}
+              className={`absolute bottom-0 right-0 size-3 rounded-full border-2 border-base-300 ${activeStatusInfo.dotColor}`}
+              title={activeStatusInfo.label}
             />
           </div>
 
           {/* Name and Platform Details */}
           <div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <h3 className="font-bold text-sm md:text-base leading-tight">
+            <div className="flex items-center gap-2">
+              <h3 className="font-bold text-sm md:text-base leading-tight line-clamp-1">
                 {customerName}
               </h3>
-              <span
-                className={`inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full border ${platformInfo.color}`}
-              >
+              <span className={`${platformInfo.color}`}>
                 <PlatformIcon className="text-xs" />
-                <span>{platformInfo.label}</span>
               </span>
               {isClient && (
                 <span
@@ -137,21 +252,40 @@ const ChatNav = () => {
                   <span>Client</span>
                 </span>
               )}
+              {isBlocked && (
+                <span
+                  className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-error/15 text-error border border-error/25"
+                  title="Blocked Contact"
+                >
+                  <LuBan className="size-3" />
+                  <span>Blocked</span>
+                </span>
+              )}
+              {/* {activeStatusInfo.sessionBadge && (
+                <span
+                  className={`badge badge-xs ${activeStatusInfo.sessionBadge.style}`}
+                  title="WhatsApp 24-Hour Customer Care Window"
+                >
+                  {activeStatusInfo.sessionBadge.text}
+                </span>
+              )} */}
             </div>
             <div className="flex items-center gap-2 text-xs text-base-content/60 mt-0.5">
-              <span>{platformInfo.subtext}</span>
-              <span>•</span>
-              <span
-                className={`inline-flex items-center gap-1 font-medium ${
-                  isOnline ? "text-success" : "text-base-content/40"
-                }`}
-              >
+              {/* <span>{platformInfo.subtext}</span>
+              <span>•</span> */}
+              {activeStatusInfo.sessionBadge && (
                 <span
-                  className={`size-1.5 rounded-full ${
-                    isOnline ? "bg-success" : "bg-base-content/40"
-                  }`}
-                />
-                {isOnline ? "Active Now" : "Offline"}
+                  className={`badge badge-xs ${activeStatusInfo.sessionBadge.style}`}
+                  title="WhatsApp 24-Hour Customer Care Window"
+                >
+                  {activeStatusInfo.sessionBadge.text}
+                </span>
+              )}
+              <span>-</span>
+              <span
+                className={`inline-flex items-center max-xs:text-[8px] text-xs font-medium ${activeStatusInfo.textColor}`}
+              >
+                {activeStatusInfo.label}
               </span>
             </div>
           </div>
@@ -166,11 +300,11 @@ const ChatNav = () => {
             <button
               type="button"
               onClick={() => setIsConfirmOrderOpen(true)}
-              className="btn btn-xs sm:btn-sm btn-primary gap-1.5 rounded-lg shadow-xs"
+              className="btn max-sm:btn-square btn-sm btn-primary rounded-box"
               title="Confirm Order & Auto-Add Customer as Client"
             >
-              <LuPackageCheck className="size-4" />
-              <span className="hidden sm:inline font-medium">Confirm Order</span>
+              <LuPackageCheck />
+              <span className="max-sm:hidden">Confirm Order</span>
             </button>
           )}
 
@@ -178,21 +312,51 @@ const ChatNav = () => {
             <button
               type="button"
               onClick={() => setIsCrmOpen(!isCrmOpen)}
-              className={`btn btn-xs sm:btn-sm gap-1.5 rounded-lg transition-all ${
-                isCrmOpen
-                  ? "btn-primary shadow-xs"
-                  : "btn-outline border-base-300 hover:border-primary/50 text-base-content"
+              className={`btn max-sm:btn-square btn-sm rounded-box ${
+                isCrmOpen ? "btn-primary" : "btn-outline btn-primary"
               }`}
               title="Toggle Customer CRM Profile"
             >
-              <LuUserCheck className="size-4" />
-              <span className="hidden sm:inline font-medium">CRM Profile</span>
+              <LuUserCheck />
+              <span className="max-sm:hidden">CRM Profile</span>
             </button>
           )}
+
+          {/* {isStaff && currentRoom && (
+            <button
+              type="button"
+              onClick={() => setIsBlockModalOpen(true)}
+              className={`btn max-sm:btn-square btn-sm rounded-box ${
+                isBlocked
+                  ? "btn-outline btn-success"
+                  : "btn-outline btn-error hover:bg-error hover:text-white"
+              }`}
+              title={isBlocked ? "Unblock this contact" : "Block this contact"}
+            >
+              {isBlocked ? (
+                <LuShieldCheck className="size-4" />
+              ) : (
+                <LuBan className="size-4" />
+              )}
+              <span className="max-sm:hidden">
+                {isBlocked ? "Unblock" : "Block"}
+              </span>
+            </button>
+          )} */}
         </div>
       </div>
 
       {isStaff && currentRoom && <ConfirmOrderModal roomId={currentRoom} />}
+
+      {isStaff && currentRoom && (
+        <BlockUserModal
+          isOpen={isBlockModalOpen}
+          onClose={() => setIsBlockModalOpen(false)}
+          conversation={
+            currentConversation || { roomId: currentRoom, platform, isBlocked }
+          }
+        />
+      )}
     </>
   );
 };

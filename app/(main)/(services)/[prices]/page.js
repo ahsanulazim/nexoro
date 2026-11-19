@@ -6,6 +6,11 @@ import { fetchPlans } from "@/api/fetchPlans";
 import { fetchService } from "@/api/fetchServices";
 import { notFound } from "next/navigation";
 
+// @next-codemod-ignore Cache Components adoption: this segment temporarily allows blocking.
+// Remove this opt-out after verifying the segment passes validation without it.
+// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
+//export const instant = false;
+
 const page = async ({ params }) => {
   const { prices } = await params;
 

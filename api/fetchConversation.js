@@ -24,3 +24,18 @@ export const deleteConversation = async (roomId) => {
   });
   return res.data;
 };
+
+export const toggleBlockConversation = async ({ roomId, reason }) => {
+  const token = await auth.currentUser?.getIdToken();
+
+  const res = await api.post(
+    "/conversations/toggleBlock",
+    { roomId, reason },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+  return res.data;
+};

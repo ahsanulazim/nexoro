@@ -11,6 +11,7 @@ import {
   LuCircleCheck,
   LuCopy,
   LuShieldAlert,
+  LuSlidersHorizontal,
   LuTrash2,
 } from "react-icons/lu";
 import { toast } from "react-toastify";
@@ -40,7 +41,12 @@ const getInitials = (name = "") => {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 };
 
-const UserRow = ({ client, onRemove, currentLoggedInEmail }) => {
+const UserRow = ({
+  client,
+  onRemove,
+  onManagePermissions,
+  currentLoggedInEmail,
+}) => {
   const queryClient = useQueryClient();
   const [copied, setCopied] = useState(false);
 
@@ -176,9 +182,20 @@ const UserRow = ({ client, onRemove, currentLoggedInEmail }) => {
             <LuShieldAlert /> Admin
           </span>
         ) : isMember ? (
-          <span className="badge badge-sm badge-soft badge-info">
-            Team Member
-          </span>
+          <div className="flex flex-col gap-0.5 items-start">
+            <span className="badge badge-sm badge-soft badge-info">
+              Team Member
+            </span>
+            {Array.isArray(client.permissions) ? (
+              <span className="text-[10px] text-base-content/50 font-medium">
+                {client.permissions.length} modules
+              </span>
+            ) : (
+              <span className="text-[10px] text-base-content/40 font-medium">
+                Default access
+              </span>
+            )}
+          </div>
         ) : (
           <span className="badge badge-sm badge-soft">Customer</span>
         )}
@@ -201,6 +218,19 @@ const UserRow = ({ client, onRemove, currentLoggedInEmail }) => {
       {/* Actions */}
       <td className="py-3.5 text-right whitespace-nowrap">
         <div className="flex items-center justify-end gap-2">
+          {/* Manage Member Permissions */}
+          {isMember && onManagePermissions && (
+            <button
+              type="button"
+              onClick={() => onManagePermissions(client)}
+              className="btn btn-xs sm:btn-sm btn-info btn-soft"
+              title="Manage Route & Feature Access"
+            >
+              <LuSlidersHorizontal />
+              <span className="hidden sm:inline">Access</span>
+            </button>
+          )}
+
           {/* Promote to Member */}
           {isCustomer && (
             <button

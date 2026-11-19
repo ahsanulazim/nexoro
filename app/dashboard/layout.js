@@ -1,5 +1,6 @@
 "use client";
 import DashDrawer from "@/components/dashboard/DashDrawer";
+import RouteGuard from "@/components/dashboard/permissions/RouteGuard";
 import Loader from "@/components/ui/Loader";
 import { useAuth } from "@/context/AuthProvider";
 import { DashThemeProvider } from "@/context/DashThemeProvider";
@@ -26,7 +27,9 @@ export default function Layout({ children }) {
 
   return (
     <DashThemeProvider>
-      <DashDrawer>{children}</DashDrawer>
+      <DashDrawer>
+        <RouteGuard>{children}</RouteGuard>
+      </DashDrawer>
     </DashThemeProvider>
   );
 }
