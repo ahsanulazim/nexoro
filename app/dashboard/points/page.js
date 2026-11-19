@@ -13,6 +13,7 @@ import { toast } from "react-toastify";
 import DashBread from "@/components/dashboard/DashBread";
 import { useAuth } from "@/context/AuthProvider";
 import { useSocket } from "@/context/SocketProvider";
+import { getStoredProfileMeta } from "@/utils/userInfo";
 import {
   fetchLeaderboard,
   fetchMyPointsSummary,
@@ -47,6 +48,44 @@ import {
 const formatMonthLabel = (monthKey) => {
   if (!monthKey || monthKey === "all_time") return "All-Time Ranking";
   return moment(monthKey, "YYYY-MM").format("MMMM YYYY");
+};
+
+const LeaderboardAvatar = ({
+  src,
+  name,
+  className = "size-9",
+  textClassName = "text-xs",
+  ringClass = "",
+}) => {
+  const [hasError, setHasError] = useState(false);
+  const firstLetter = (name || "M").trim().charAt(0).toUpperCase();
+
+  if (src && !hasError) {
+    return (
+      <div
+        className={`${className} rounded-full bg-base-300 flex items-center justify-center overflow-hidden shrink-0 select-none ${ringClass}`}
+      >
+        <img
+          src={src}
+          alt={name || "Member"}
+          className="size-full object-cover"
+          onError={() => setHasError(true)}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={`${className} rounded-full bg-base-300 flex items-center justify-center overflow-hidden shrink-0 select-none ${ringClass}`}
+    >
+      <span
+        className={`${textClassName} font-bold uppercase flex items-center justify-center size-full`}
+      >
+        {firstLetter}
+      </span>
+    </div>
+  );
 };
 
 const PointsAndLeaderboardContent = () => {
@@ -635,6 +674,17 @@ const PointsAndLeaderboardContent = () => {
                         icon: <LuAward className="size-3" />,
                       };
 
+                const isMe =
+                  (currentUserEmail && member.userEmail === currentUserEmail) ||
+                  (currentUserId && String(member.userId) === currentUserId);
+                const avatarSrc =
+                  member.profilePic ||
+                  (isMe ? currentUser?.user?.photoURL : null) ||
+                  (member.userEmail
+                    ? getStoredProfileMeta(member.userEmail)?.photoURL
+                    : null) ||
+                  null;
+
                 return (
                   <div
                     key={member.userId || member.userEmail || index}
@@ -642,21 +692,13 @@ const PointsAndLeaderboardContent = () => {
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-center gap-3">
-                        <div className="avatar">
-                          <div className="size-12 rounded-full bg-base-300 ring-2 ring-primary/20 flex items-center justify-center overflow-hidden">
-                            {member.profilePic ? (
-                              <img
-                                src={member.profilePic}
-                                alt={member.userName}
-                                className="object-cover size-full"
-                              />
-                            ) : (
-                              <span className="text-lg font-bold uppercase flex items-center justify-center size-full">
-                                {(member.userName || "M").charAt(0)}
-                              </span>
-                            )}
-                          </div>
-                        </div>
+                        <LeaderboardAvatar
+                          src={avatarSrc}
+                          name={member.userName}
+                          className="size-12"
+                          textClassName="text-lg"
+                          ringClass="ring-2 ring-primary/20"
+                        />
                         <div>
                           <span
                             className={`badge badge-xs font-bold gap-1 ${medalStyles.badge} mb-1`}
@@ -741,6 +783,13 @@ const PointsAndLeaderboardContent = () => {
                           member.userEmail === currentUserEmail) ||
                         (currentUserId &&
                           String(member.userId) === currentUserId);
+                      const avatarSrc =
+                        member.profilePic ||
+                        (isMe ? currentUser?.user?.photoURL : null) ||
+                        (member.userEmail
+                          ? getStoredProfileMeta(member.userEmail)?.photoURL
+                          : null) ||
+                        null;
 
                       return (
                         <tr
@@ -774,20 +823,12 @@ const PointsAndLeaderboardContent = () => {
                           </td>
                           <td>
                             <div className="flex items-center gap-3">
-                              <div className="avatar">
-                                <div className="size-9 rounded-full bg-base-300 flex items-center justify-center overflow-hidden">
-                                  {member.profilePic ? (
-                                    <img
-                                      src={member.profilePic}
-                                      alt={member.userName}
-                                    />
-                                  ) : (
-                                    <span className="text-xs font-bold uppercase flex items-center justify-center size-full">
-                                      {(member.userName || "M").charAt(0)}
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
+                              <LeaderboardAvatar
+                                src={avatarSrc}
+                                name={member.userName}
+                                className="size-9"
+                                textClassName="text-xs"
+                              />
                               <div>
                                 <div className="font-bold flex items-center gap-1.5">
                                   <span>{member.userName}</span>

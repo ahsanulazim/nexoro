@@ -10,6 +10,7 @@ import {
   LuMessageCircle,
   LuRefreshCw,
   LuTrash2,
+  LuMegaphone,
 } from "react-icons/lu";
 import { FaFacebookF, FaInstagram, FaWhatsapp, FaGlobe } from "react-icons/fa6";
 import SearchChat from "./SearchChat";
@@ -178,6 +179,19 @@ const SidebarConversationItem = memo(function SidebarConversationItem({
                 {customerName}
               </span>
               {renderPlatformBadge(conversation?.platform, isSelected)}
+              {conversation?.referral && (
+                <span
+                  className={`inline-flex items-center gap-0.5 text-[10px] font-semibold px-1.5 py-0.2 rounded-full shrink-0 border ${
+                    isSelected
+                      ? "bg-amber-400/25 text-amber-200 border-amber-300/40"
+                      : "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20"
+                  }`}
+                  title={`Meta Ad: ${conversation.referral.headline || "Sponsored Ad Campaign"}`}
+                >
+                  <LuMegaphone className="text-[9px]" />
+                  <span>Ad</span>
+                </span>
+              )}
               {(conversation?.isClient ||
                 conversation?.clientId ||
                 conversation?.customer?.clientId) && (

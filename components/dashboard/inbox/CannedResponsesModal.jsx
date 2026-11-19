@@ -8,9 +8,10 @@ import { toast } from "react-toastify";
 import {
   LuCheck,
   LuFolder,
+  LuPencil,
   LuPlus,
   LuSearch,
-  LuSparkles,
+  LuTrash2,
   LuX,
   LuZap,
 } from "react-icons/lu";
@@ -19,10 +20,14 @@ const CannedResponsesModal = forwardRef(({ onSelectResponse }, ref) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [isAddingNew, setIsAddingNew] = useState(false);
-  const [newShortcut, setNewShortcut] = useState("");
-  const [newTitle, setNewTitle] = useState("");
-  const [newText, setNewText] = useState("");
-  const [newCategory, setNewCategory] = useState("General");
+  const [editingItem, setEditingItem] = useState(null);
+  const [formData, setFormData] = useState({
+    shortcut: "",
+    title: "",
+    text: "",
+    category: "General",
+  });
+
   const queryClient = useQueryClient();
 
   const { data: responses = [], isLoading } = useQuery({
@@ -47,13 +52,51 @@ const CannedResponsesModal = forwardRef(({ onSelectResponse }, ref) => {
     onSuccess: () => {
       queryClient.invalidateQueries(["cannedResponses"]);
       setIsAddingNew(false);
-      setNewShortcut("");
-      setNewTitle("");
-      setNewText("");
+      setFormData({ shortcut: "", title: "", text: "", category: "General" });
       toast.success("Quick reply saved!");
     },
     onError: (err) => {
       toast.error(err.response?.data?.message || "Failed to save response");
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: async ({ id, ...payload }) => {
+      const token = await auth.currentUser?.getIdToken();
+      const res = await api.put(`/conversations/cannedResponses/${id}`, payload, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["cannedResponses"]);
+      setEditingItem(null);
+      setFormData({ shortcut: "", title: "", text: "", category: "General" });
+      toast.success("Quick reply updated!");
+    },
+    onError: (err) => {
+      toast.error(err.response?.data?.message || "Failed to update response");
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id) => {
+      const token = await auth.currentUser?.getIdToken();
+      const res = await api.delete(`/conversations/cannedResponses/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["cannedResponses"]);
+      if (editingItem) {
+        setEditingItem(null);
+        setFormData({ shortcut: "", title: "", text: "", category: "General" });
+      }
+      toast.success("Quick reply deleted!");
+    },
+    onError: (err) => {
+      toast.error(err.response?.data?.message || "Failed to delete response");
     },
   });
 
@@ -84,16 +127,65 @@ const CannedResponsesModal = forwardRef(({ onSelectResponse }, ref) => {
     ref.current?.close();
   };
 
-  const handleCreate = (e) => {
-    e.preventDefault();
-    if (!newShortcut.trim() || !newText.trim()) return;
-    createMutation.mutate({
-      shortcut: newShortcut.trim(),
-      title: newTitle.trim() || newShortcut.trim(),
-      text: newText.trim(),
-      category: newCategory,
+  const handleToggleAdd = () => {
+    if (isAddingNew) {
+      setIsAddingNew(false);
+      setFormData({ shortcut: "", title: "", text: "", category: "General" });
+    } else {
+      setEditingItem(null);
+      setIsAddingNew(true);
+      setFormData({ shortcut: "", title: "", text: "", category: "General" });
+    }
+  };
+
+  const handleStartEdit = (e, item) => {
+    e.stopPropagation();
+    setIsAddingNew(false);
+    setEditingItem(item);
+    setFormData({
+      shortcut: item.shortcut || "",
+      title: item.title || "",
+      text: item.text || "",
+      category: item.category || "General",
     });
   };
+
+  const handleDelete = (e, item) => {
+    e.stopPropagation();
+    if (
+      window.confirm(
+        `Are you sure you want to delete "${item.title || item.shortcut}"?`
+      )
+    ) {
+      deleteMutation.mutate(item._id);
+    }
+  };
+
+  const handleCancelForm = () => {
+    setIsAddingNew(false);
+    setEditingItem(null);
+    setFormData({ shortcut: "", title: "", text: "", category: "General" });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!formData.shortcut.trim() || !formData.text.trim()) return;
+
+    const payload = {
+      shortcut: formData.shortcut.trim(),
+      title: formData.title.trim() || formData.shortcut.trim(),
+      text: formData.text.trim(),
+      category: formData.category || "General",
+    };
+
+    if (editingItem) {
+      updateMutation.mutate({ id: editingItem._id, ...payload });
+    } else {
+      createMutation.mutate(payload);
+    }
+  };
+
+  const isFormOpen = isAddingNew || !!editingItem;
 
   return (
     <dialog ref={ref} className="modal modal-bottom sm:modal-middle">
@@ -107,7 +199,7 @@ const CannedResponsesModal = forwardRef(({ onSelectResponse }, ref) => {
             <div>
               <h3 className="font-bold text-base">Quick Canned Replies</h3>
               <p className="text-xs text-base-content/60">
-                Insert predefined answers or shortcuts instantly
+                Insert, manage, and edit predefined answers or shortcuts
               </p>
             </div>
           </div>
@@ -133,10 +225,13 @@ const CannedResponsesModal = forwardRef(({ onSelectResponse }, ref) => {
               />
             </div>
             <button
-              onClick={() => setIsAddingNew(!isAddingNew)}
-              className="btn btn-sm btn-primary rounded-xl gap-1 text-xs"
+              onClick={handleToggleAdd}
+              className={`btn btn-sm rounded-xl gap-1 text-xs ${
+                isAddingNew ? "btn-neutral" : "btn-primary"
+              }`}
             >
-              <LuPlus /> {isAddingNew ? "Cancel" : "New Reply"}
+              <LuPlus className={isAddingNew ? "rotate-45 transition-transform" : ""} />
+              {isAddingNew ? "Cancel" : "New Reply"}
             </button>
           </div>
 
@@ -158,32 +253,76 @@ const CannedResponsesModal = forwardRef(({ onSelectResponse }, ref) => {
           </div>
         </div>
 
-        {/* New Response Form Collapsible */}
-        {isAddingNew && (
+        {/* Create / Edit Form Collapsible */}
+        {isFormOpen && (
           <form
-            onSubmit={handleCreate}
-            className="p-4 bg-primary/5 border-b border-primary/20 space-y-3"
+            onSubmit={handleSubmit}
+            className={`p-4 border-b space-y-3 transition-colors ${
+              editingItem
+                ? "bg-amber-500/5 border-amber-500/20"
+                : "bg-primary/5 border-primary/20"
+            }`}
           >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                {editingItem ? (
+                  <>
+                    <div className="p-1 rounded-md bg-amber-500/10 text-amber-500">
+                      <LuPencil className="size-3.5" />
+                    </div>
+                    <span className="text-xs font-semibold text-base-content">
+                      Edit Quick Reply:{" "}
+                      <span className="font-mono text-amber-600 dark:text-amber-400">
+                        {editingItem.shortcut}
+                      </span>
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <div className="p-1 rounded-md bg-primary/10 text-primary">
+                      <LuPlus className="size-3.5" />
+                    </div>
+                    <span className="text-xs font-semibold text-base-content">
+                      Create New Quick Reply
+                    </span>
+                  </>
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={handleCancelForm}
+                className="btn btn-ghost btn-xs text-base-content/60"
+              >
+                Cancel
+              </button>
+            </div>
+
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               <input
                 type="text"
-                value={newShortcut}
-                onChange={(e) => setNewShortcut(e.target.value)}
+                value={formData.shortcut}
+                onChange={(e) =>
+                  setFormData({ ...formData, shortcut: e.target.value })
+                }
                 placeholder="Shortcut (e.g. /custom)"
                 required
                 className="input input-sm input-bordered rounded-lg bg-base-100 text-xs"
               />
               <input
                 type="text"
-                value={newTitle}
-                onChange={(e) => setNewTitle(e.target.value)}
+                value={formData.title}
+                onChange={(e) =>
+                  setFormData({ ...formData, title: e.target.value })
+                }
                 placeholder="Title (e.g. Custom Offer)"
                 required
                 className="input input-sm input-bordered rounded-lg bg-base-100 text-xs"
               />
               <select
-                value={newCategory}
-                onChange={(e) => setNewCategory(e.target.value)}
+                value={formData.category}
+                onChange={(e) =>
+                  setFormData({ ...formData, category: e.target.value })
+                }
                 className="select select-sm select-bordered rounded-lg bg-base-100 text-xs"
               >
                 <option value="General">General</option>
@@ -191,30 +330,41 @@ const CannedResponsesModal = forwardRef(({ onSelectResponse }, ref) => {
                 <option value="Sales">Sales</option>
                 <option value="Support">Support</option>
                 <option value="Billing">Billing</option>
+                <option value="Meeting">Meeting</option>
               </select>
             </div>
             <textarea
-              value={newText}
-              onChange={(e) => setNewText(e.target.value)}
+              value={formData.text}
+              onChange={(e) =>
+                setFormData({ ...formData, text: e.target.value })
+              }
               placeholder="Message body that will be sent..."
               required
-              rows={2}
+              rows={3}
               className="textarea textarea-bordered textarea-sm w-full rounded-lg bg-base-100 text-xs"
             />
             <div className="flex justify-end gap-2">
               <button
                 type="button"
-                onClick={() => setIsAddingNew(false)}
+                onClick={handleCancelForm}
                 className="btn btn-ghost btn-xs"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                disabled={createMutation.isPending}
-                className="btn btn-primary btn-xs"
+                disabled={createMutation.isPending || updateMutation.isPending}
+                className={`btn btn-xs ${
+                  editingItem ? "btn-warning" : "btn-primary"
+                }`}
               >
-                {createMutation.isPending ? "Saving..." : "Save Template"}
+                {editingItem
+                  ? updateMutation.isPending
+                    ? "Updating..."
+                    : "Update Reply"
+                  : createMutation.isPending
+                  ? "Saving..."
+                  : "Save Template"}
               </button>
             </div>
           </form>
@@ -231,41 +381,74 @@ const CannedResponsesModal = forwardRef(({ onSelectResponse }, ref) => {
               No matching canned responses found
             </div>
           ) : (
-            filteredResponses.map((item) => (
-              <div
-                key={item._id}
-                onClick={() => handleSelect(item.text)}
-                className="p-3 rounded-xl bg-base-200/50 hover:bg-base-200 border border-base-300 hover:border-primary/40 transition-all cursor-pointer group space-y-1.5"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono font-bold text-xs text-primary px-2 py-0.5 rounded-md bg-primary/10">
-                      {item.shortcut}
-                    </span>
-                    <span className="font-semibold text-xs text-base-content">
-                      {item.title}
-                    </span>
+            filteredResponses.map((item, idx) => {
+              const isItemEditing = editingItem?._id === item._id;
+              return (
+                <div
+                  key={item._id || `${item.shortcut}-${idx}`}
+                  onClick={() => handleSelect(item.text)}
+                  className={`p-3 rounded-xl border transition-all cursor-pointer group space-y-1.5 ${
+                    isItemEditing
+                      ? "border-amber-500 bg-amber-500/10 ring-1 ring-amber-500/30"
+                      : "bg-base-200/50 hover:bg-base-200 border-base-300 hover:border-primary/40"
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="font-mono font-bold text-xs text-primary px-2 py-0.5 rounded-md bg-primary/10 shrink-0">
+                        {item.shortcut}
+                      </span>
+                      <span className="font-semibold text-xs text-base-content truncate">
+                        {item.title}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <span className="badge badge-xs badge-neutral opacity-70">
+                        {item.category || "General"}
+                      </span>
+
+                      {/* Action Buttons: Edit & Delete */}
+                      <div className="flex items-center gap-1 opacity-80 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                        <button
+                          type="button"
+                          onClick={(e) => handleStartEdit(e, item)}
+                          className={`p-1 rounded-md transition-colors ${
+                            isItemEditing
+                              ? "bg-amber-500 text-white"
+                              : "hover:bg-base-300 text-base-content/70 hover:text-amber-500"
+                          }`}
+                          title="Edit quick reply"
+                        >
+                          <LuPencil className="size-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => handleDelete(e, item)}
+                          disabled={deleteMutation.isPending}
+                          className="p-1 rounded-md hover:bg-base-300 text-base-content/70 hover:text-error transition-colors"
+                          title="Delete quick reply"
+                        >
+                          <LuTrash2 className="size-3.5" />
+                        </button>
+                      </div>
+
+                      <span className="text-[11px] font-medium text-primary hidden sm:inline-block opacity-0 group-hover:opacity-100 transition-opacity ml-1">
+                        Click to insert ↵
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="badge badge-xs badge-neutral opacity-70">
-                      {item.category || "General"}
-                    </span>
-                    <span className="text-[11px] font-medium text-primary opacity-0 group-hover:opacity-100 transition-opacity">
-                      Click to insert ↵
-                    </span>
-                  </div>
+                  <p className="text-xs text-base-content/80 line-clamp-2 leading-relaxed">
+                    {item.text}
+                  </p>
                 </div>
-                <p className="text-xs text-base-content/80 line-clamp-2 leading-relaxed">
-                  {item.text}
-                </p>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
 
         {/* Footer tip */}
         <div className="p-2.5 bg-base-200/60 border-t border-base-300 text-center text-[11px] text-base-content/50">
-          💡 Tip: Type <span className="font-mono font-bold text-primary">/</span> directly in the chat box to trigger quick suggestions!
+          💡 Tip: Click the pencil icon <LuPencil className="inline size-3 text-amber-500 mx-0.5" /> to edit any reply, or type <span className="font-mono font-bold text-primary">/</span> in chat for instant suggestions!
         </div>
       </div>
       <form method="dialog" className="modal-backdrop">

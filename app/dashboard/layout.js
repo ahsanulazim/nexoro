@@ -4,6 +4,8 @@ import RouteGuard from "@/components/dashboard/permissions/RouteGuard";
 import Loader from "@/components/ui/Loader";
 import { useAuth } from "@/context/AuthProvider";
 import { DashThemeProvider } from "@/context/DashThemeProvider";
+import { WhatsAppCallProvider } from "@/context/WhatsAppCallContext";
+import WhatsAppCallModal from "@/components/dashboard/inbox/WhatsAppCallModal";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
@@ -27,9 +29,12 @@ export default function Layout({ children }) {
 
   return (
     <DashThemeProvider>
-      <DashDrawer>
-        <RouteGuard>{children}</RouteGuard>
-      </DashDrawer>
+      <WhatsAppCallProvider>
+        <DashDrawer>
+          <RouteGuard>{children}</RouteGuard>
+        </DashDrawer>
+        <WhatsAppCallModal />
+      </WhatsAppCallProvider>
     </DashThemeProvider>
   );
 }

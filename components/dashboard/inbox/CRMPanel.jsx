@@ -27,6 +27,8 @@ import {
   LuX,
   LuBan,
   LuShieldCheck,
+  LuMegaphone,
+  LuExternalLink,
 } from "react-icons/lu";
 import { FaFacebookF, FaInstagram, FaWhatsapp, FaGlobe } from "react-icons/fa6";
 import { HiOutlineCurrencyBangladeshi } from "react-icons/hi";
@@ -343,6 +345,86 @@ const CRMPanel = ({ roomId }) => {
                     <LuBan />
                     <span>Block Contact</span>
                   </button>
+                )}
+
+                {/* Meta Ad Lead / Campaign Referral Card */}
+                {crmData?.referral && (
+                  <div className="w-full bg-linear-to-br from-amber-500/10 via-base-100 to-amber-500/5 rounded-2xl p-3.5 border border-amber-500/30 shadow-xs space-y-2.5 text-left">
+                    <div className="flex items-center justify-between">
+                      <span className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-600 dark:text-amber-400">
+                        <LuMegaphone className="size-3.5 shrink-0" />
+                        <span>Meta Ad Lead Source</span>
+                      </span>
+                      <span className="badge badge-xs font-semibold badge-warning">
+                        Sponsored Ad
+                      </span>
+                    </div>
+
+                    {/* Ad Image / Video Thumbnail if present */}
+                    {(crmData.referral.image_url || crmData.referral.thumbnail_url) && (
+                      <div className="relative w-full h-28 rounded-xl overflow-hidden border border-amber-500/20 bg-black/10">
+                        <img
+                          src={crmData.referral.image_url || crmData.referral.thumbnail_url}
+                          alt={crmData.referral.headline || "Ad Media"}
+                          className="size-full object-cover"
+                          onError={(e) => {
+                            e.currentTarget.style.display = "none";
+                          }}
+                        />
+                      </div>
+                    )}
+
+                    {/* Headline & Body */}
+                    <div className="space-y-1">
+                      {crmData.referral.headline && (
+                        <h5 className="font-bold text-xs text-base-content leading-snug">
+                          {crmData.referral.headline}
+                        </h5>
+                      )}
+                      {crmData.referral.body && (
+                        <p className="text-[11px] text-base-content/70 line-clamp-2 leading-relaxed">
+                          {crmData.referral.body}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Ad ID and Copy button */}
+                    {crmData.referral.source_id && (
+                      <div className="flex items-center justify-between text-[11px] bg-base-200/60 p-1.5 px-2 rounded-lg border border-base-300/60">
+                        <span className="text-base-content/60 font-mono truncate max-w-[170px]">
+                          Ad ID: {crmData.referral.source_id}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => handleCopy(crmData.referral.source_id, "ad_id")}
+                          className="btn btn-ghost btn-xs min-h-0 h-5 px-1.5 gap-1 text-primary cursor-pointer"
+                          title="Copy Ad ID"
+                        >
+                          {copiedField === "ad_id" ? (
+                            <LuCheck className="size-3 text-success" />
+                          ) : (
+                            <LuCopy className="size-3" />
+                          )}
+                          <span className="text-[10px]">
+                            {copiedField === "ad_id" ? "Copied" : "Copy"}
+                          </span>
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Link to view Ad on Facebook / Meta */}
+                    {crmData.referral.source_url && (
+                      <a
+                        href={crmData.referral.source_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn btn-xs btn-outline btn-warning w-full gap-1.5 font-bold shadow-xs select-none"
+                      >
+                        <span>View Ad on Meta</span>
+                        <LuExternalLink className="size-3" />
+                      </a>
+                    )}
+                  </div>
                 )}
 
                 {/* Contact Information List */}

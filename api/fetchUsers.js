@@ -109,3 +109,10 @@ export const fetchAssignableUsers = async () => {
   const res = await api.get("/users/assignable");
   return res.data;
 };
+
+// Fetch member profile stats & analytics (Admin only)
+export const fetchMemberProfileStats = async (memberId) => {
+  if (!memberId) throw new Error("Member ID is required");
+  const res = await api.get(`/users/profile-stats/${memberId}`);
+  return res.data;
+};

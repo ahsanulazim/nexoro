@@ -13,8 +13,11 @@ import {
   LuArrowLeft,
   LuBan,
   LuShieldCheck,
+  LuPhone,
+  LuMegaphone,
 } from "react-icons/lu";
 import { getInitials, getAvatarColor } from "@/utils/messageGrouping";
+import { useWhatsAppCall } from "@/context/WhatsAppCallContext";
 import ConfirmOrderModal from "./ConfirmOrderModal";
 import BlockUserModal from "./BlockUserModal";
 
@@ -28,6 +31,7 @@ const ChatNav = () => {
     setIsCrmOpen,
     setIsConfirmOrderOpen,
   } = useSocket();
+  const { startCall } = useWhatsAppCall();
 
   const role = currentUser?.user?.role;
   const isStaff = role === "admin" || role === "member";
@@ -261,6 +265,17 @@ const ChatNav = () => {
                   <span>Blocked</span>
                 </span>
               )}
+              {currentConversation?.referral && (
+                <button
+                  type="button"
+                  onClick={() => setIsCrmOpen(true)}
+                  className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/25 hover:bg-amber-500/25 transition-colors cursor-pointer"
+                  title={`Meta Ad Campaign: ${currentConversation.referral.headline || "Sponsored Ad"} (Click to view in CRM)`}
+                >
+                  <LuMegaphone className="size-3" />
+                  <span>Meta Ad Lead</span>
+                </button>
+              )}
               {/* {activeStatusInfo.sessionBadge && (
                 <span
                   className={`badge badge-xs ${activeStatusInfo.sessionBadge.style}`}
@@ -295,6 +310,30 @@ const ChatNav = () => {
           <span className="text-[11px] text-base-content/40 font-mono hidden xl:inline px-2 py-1 bg-base-200 rounded">
             {currentRoom}
           </span>
+
+          {isStaff && platform === "whatsapp" && (
+            <button
+              type="button"
+              onClick={() => {
+                const targetNumber =
+                  customer?.phone ||
+                  (currentConversation?.platformId &&
+                  /^\d+$/.test(currentConversation.platformId)
+                    ? currentConversation.platformId
+                    : currentRoom?.replace(/^(wa_|fb_|ig_)/, ""));
+                startCall({
+                  phoneNumber: targetNumber,
+                  customerName,
+                  roomId: currentRoom,
+                });
+              }}
+              className="btn max-sm:btn-square btn-sm btn-outline btn-success rounded-box gap-1.5"
+              title="Call Customer via WhatsApp Voice"
+            >
+              <LuPhone className="size-4" />
+              <span className="max-sm:hidden">WhatsApp Call</span>
+            </button>
+          )}
 
           {isStaff && currentRoom && (
             <button

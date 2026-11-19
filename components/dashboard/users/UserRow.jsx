@@ -3,13 +3,15 @@
 import { demoteMember, promoteUser } from "@/api/fetchUsers";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import moment from "moment";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   LuArrowBigDownDash,
   LuArrowBigUpDash,
+  LuChartLine,
   LuCheck,
   LuCircleCheck,
   LuCopy,
+  LuEllipsisVertical,
   LuShieldAlert,
   LuSlidersHorizontal,
   LuTrash2,
@@ -45,10 +47,12 @@ const UserRow = ({
   client,
   onRemove,
   onManagePermissions,
+  onViewProfile,
   currentLoggedInEmail,
 }) => {
   const queryClient = useQueryClient();
   const [copied, setCopied] = useState(false);
+  const [failedImgSrc, setFailedImgSrc] = useState(null);
 
   const displayName = client.name || client.userName || "Unnamed User";
   const userRole = (client.role || "customer").toLowerCase();
@@ -56,6 +60,25 @@ const UserRow = ({
   const isAdmin = userRole === "admin";
   const isMember = userRole === "member";
   const isCustomer = userRole === "customer";
+
+  // Resolve profile picture if uploaded
+  const profileImage = useMemo(() => {
+    const candidates = [
+      client.profilePic,
+      client.photoURL,
+      client.avatar,
+      client.image,
+      client.picture,
+    ];
+    return candidates.find(
+      (url) =>
+        typeof url === "string" &&
+        url.trim().length > 0 &&
+        url !== "null" &&
+        url !== "undefined" &&
+        url !== failedImgSrc
+    );
+  }, [client, failedImgSrc]);
 
   // Promote mutation
   const { mutate: handlePromote, isPending: isPromoting } = useMutation({
@@ -104,18 +127,19 @@ const UserRow = ({
       <td className="py-3.5">
         <div className="flex items-center gap-3">
           <div className="avatar placeholder shrink-0">
-            {client.photoURL ? (
-              <div className="size-10 rounded-md overflow-hidden ring-1 ring-base-300">
+            {profileImage ? (
+              <div className="size-10 rounded-xl overflow-hidden ring-1 ring-base-300 bg-base-200">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={client.photoURL}
+                  src={profileImage}
                   alt={displayName}
+                  onError={() => setFailedImgSrc(profileImage)}
                   className="object-cover w-full h-full"
                 />
               </div>
             ) : (
               <div
-                className={`w-10 h-10 rounded-md bg-linear-to-br ${getAvatarGradient(
+                className={`size-10 rounded-xl bg-gradient-to-br ${getAvatarGradient(
                   displayName,
                 )} text-white font-bold text-xs flex items-center justify-center shadow-xs`}
               >
@@ -215,75 +239,124 @@ const UserRow = ({
         </div>
       </td>
 
-      {/* Actions */}
-      <td className="py-3.5 text-right whitespace-nowrap">
-        <div className="flex items-center justify-end gap-2">
-          {/* Manage Member Permissions */}
-          {isMember && onManagePermissions && (
-            <button
-              type="button"
-              onClick={() => onManagePermissions(client)}
-              className="btn btn-xs sm:btn-sm btn-info btn-soft"
-              title="Manage Route & Feature Access"
-            >
-              <LuSlidersHorizontal />
-              <span className="hidden sm:inline">Access</span>
-            </button>
-          )}
-
-          {/* Promote to Member */}
-          {isCustomer && (
-            <button
-              type="button"
-              onClick={() => handlePromote()}
-              disabled={isPromoting}
-              className="btn btn-xs sm:btn-sm btn-success btn-soft"
-              title="Promote to Team Member"
-            >
-              {isPromoting ? (
-                <span className="loading loading-spinner loading-xs"></span>
-              ) : (
-                <LuArrowBigUpDash />
-              )}
-              <span className="hidden sm:inline">Make Member</span>
-            </button>
-          )}
-
-          {/* Demote to Customer */}
-          {isMember && (
-            <button
-              type="button"
-              onClick={() => handleDemote()}
-              disabled={isDemoting}
-              className="btn btn-xs sm:btn-sm btn-warning btn-soft"
-              title="Demote to Customer"
-            >
-              {isDemoting ? (
-                <span className="loading loading-spinner loading-xs"></span>
-              ) : (
-                <LuArrowBigDownDash />
-              )}
-              <span className="hidden sm:inline">Demote</span>
-            </button>
-          )}
-
-          {/* Delete User */}
-          <button
-            type="button"
-            onClick={() => onRemove(client.email)}
-            disabled={isCurrentUser || isAdmin}
-            className="btn btn-xs sm:btn-sm btn-error btn-soft"
-            title={
-              isCurrentUser
-                ? "You cannot delete your own account"
-                : isAdmin
-                  ? "Admin accounts cannot be deleted here"
-                  : "Remove User"
-            }
+      {/* Actions Dropdown */}
+      <td className="py-3.5 pr-5 text-right whitespace-nowrap">
+        <div className="dropdown dropdown-end">
+          <label
+            tabIndex={0}
+            role="button"
+            className="btn btn-ghost btn-sm btn-square rounded-lg hover:bg-base-200 text-base-content/70 hover:text-base-content"
+            title="User Actions"
           >
-            <LuTrash2 />
-            <span className="hidden sm:inline">Remove</span>
-          </button>
+            <LuEllipsisVertical className="size-4" />
+          </label>
+          <ul
+            tabIndex={0}
+            className="dropdown-content menu z-50 p-2 shadow-xl bg-base-100 rounded-box w-56 border border-base-200/90 text-xs font-medium space-y-1"
+          >
+            {/* View Member Profile & Performance (Members & Admins only, NOT for customers) */}
+            {!isCustomer && (
+              <li>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (document.activeElement) document.activeElement.blur();
+                    onViewProfile?.(client);
+                  }}
+                  className="flex items-center gap-2.5 py-2 text-primary font-medium hover:bg-primary/10 rounded-lg"
+                >
+                  <LuChartLine className="size-4" />
+                  <span>Profile & Performance</span>
+                </button>
+              </li>
+            )}
+
+            {/* Manage Member Permissions */}
+            {isMember && onManagePermissions && (
+              <li>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (document.activeElement) document.activeElement.blur();
+                    onManagePermissions(client);
+                  }}
+                  className="flex items-center gap-2.5 py-2 hover:bg-base-200 rounded-lg text-base-content"
+                >
+                  <LuSlidersHorizontal className="size-4 text-info" />
+                  <span>Manage Access</span>
+                </button>
+              </li>
+            )}
+
+            {/* Promote to Member */}
+            {isCustomer && (
+              <li>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (document.activeElement) document.activeElement.blur();
+                    handlePromote();
+                  }}
+                  disabled={isPromoting}
+                  className="flex items-center gap-2.5 py-2 text-success hover:bg-success/10 rounded-lg"
+                >
+                  {isPromoting ? (
+                    <span className="loading loading-spinner loading-xs"></span>
+                  ) : (
+                    <LuArrowBigUpDash className="size-4" />
+                  )}
+                  <span>Make Team Member</span>
+                </button>
+              </li>
+            )}
+
+            {/* Demote to Customer */}
+            {isMember && (
+              <li>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (document.activeElement) document.activeElement.blur();
+                    handleDemote();
+                  }}
+                  disabled={isDemoting}
+                  className="flex items-center gap-2.5 py-2 text-warning hover:bg-warning/10 rounded-lg"
+                >
+                  {isDemoting ? (
+                    <span className="loading loading-spinner loading-xs"></span>
+                  ) : (
+                    <LuArrowBigDownDash className="size-4" />
+                  )}
+                  <span>Demote to Customer</span>
+                </button>
+              </li>
+            )}
+
+            <div className="divider my-0.5 opacity-50"></div>
+
+            {/* Delete User */}
+            <li>
+              <button
+                type="button"
+                onClick={() => {
+                  if (document.activeElement) document.activeElement.blur();
+                  onRemove(client.email);
+                }}
+                disabled={isCurrentUser || isAdmin}
+                className="flex items-center gap-2.5 py-2 text-error hover:bg-error/10 disabled:opacity-40 rounded-lg"
+                title={
+                  isCurrentUser
+                    ? "You cannot delete your own account"
+                    : isAdmin
+                      ? "Admin accounts cannot be deleted here"
+                      : "Remove User"
+                }
+              >
+                <LuTrash2 className="size-4" />
+                <span>Remove User</span>
+              </button>
+            </li>
+          </ul>
         </div>
       </td>
     </tr>

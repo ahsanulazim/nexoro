@@ -5,7 +5,7 @@ import { useSocket } from "@/context/SocketProvider";
 import { auth } from "@/firebase/firebase.config";
 import Link from "next/link";
 import { memo, useCallback, useEffect, useRef, useState, useMemo } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { IoCheckmarkDoneSharp, IoCheckmarkSharp } from "react-icons/io5";
 import {
   LuArrowDown,
@@ -93,7 +93,9 @@ const cleanRoomId = (r) => {
 const extractPaymentUrl = (msg) => {
   if (msg?.deal?.paymentUrl) return msg.deal.paymentUrl;
   if (!msg?.text) return null;
-  const match = msg.text.match(/(https?:\/\/[^\s<>'"]+\/pay\/[^\s<>'"]+|\/pay\/[^\s<>'"]+)/i);
+  const match = msg.text.match(
+    /(https?:\/\/[^\s<>'"]+\/pay\/[^\s<>'"]+|\/pay\/[^\s<>'"]+)/i,
+  );
   return match ? match[0] : null;
 };
 
@@ -279,7 +281,8 @@ const TimelineItemView = memo(function TimelineItemView({
                     const payUrl = extractPaymentUrl(msg);
                     if (!msg.deal && !payUrl) return null;
 
-                    const title = msg.deal?.serviceName || "Custom Deal Invoice";
+                    const title =
+                      msg.deal?.serviceName || "Custom Deal Invoice";
                     const amount = msg.deal?.amount;
                     const status = msg.deal?.status || "Pending";
 
@@ -436,6 +439,18 @@ const Conversation = ({ currentRoom }) => {
   const isNearBottomRef = useRef(true);
   const messagesCountRef = useRef(0);
   const role = currentUser?.user?.role;
+
+  const { data: cannedResponses = [] } = useQuery({
+    queryKey: ["cannedResponses"],
+    queryFn: async () => {
+      const token = await auth.currentUser?.getIdToken();
+      const res = await api.get("/conversations/cannedResponses", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      return res.data?.success ? res.data.data : [];
+    },
+    enabled: role === "admin" || role === "member",
+  });
 
   useEffect(() => {
     messagesCountRef.current = messages.length;
@@ -1267,7 +1282,7 @@ const Conversation = ({ currentRoom }) => {
         <div
           ref={chatEndRef}
           onScroll={checkIfNearBottom}
-          className={`flex-1 p-3 md:p-5 overflow-y-auto ${replyTo ? "h-[calc(100dvh-254px)]" : stagedFiles.length > 0 ? "h-[calc(100dvh-290px)]" : "h-[calc(100dvh-225px)]"}`}
+          className={`flex-1 p-3 md:p-5 overflow-y-auto ${replyTo ? "h-[calc(100dvh-254px)]" : stagedFiles.length > 0 ? "h-[calc(100dvh-290px)]" : showSlashHints ? "h-[calc(100dvh-266px)]" : "h-[calc(100dvh-225px)]"}`}
         >
           <div ref={chatContentRef}>
             {hasMore && (
@@ -1414,9 +1429,12 @@ const Conversation = ({ currentRoom }) => {
                   <LuZap className="size-3 text-amber-500" />
                   <span>Quick Replies:</span>
                 </span>
-                {QUICK_SLASH_HINTS.map((item) => (
+                {(cannedResponses.length > 0
+                  ? cannedResponses
+                  : QUICK_SLASH_HINTS
+                ).map((item, idx) => (
                   <button
-                    key={item.shortcut}
+                    key={item._id || `${item.shortcut}-${idx}`}
                     type="button"
                     onClick={() => {
                       setText(item.text);

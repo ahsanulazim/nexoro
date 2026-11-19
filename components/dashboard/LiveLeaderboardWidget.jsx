@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import moment from "moment";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchLeaderboard, fetchMyPointsSummary } from "@/api/fetchPoints";
 import { useAuth } from "@/context/AuthProvider";
 import { useSocket } from "@/context/SocketProvider";
+import { getStoredProfileMeta } from "@/utils/userInfo";
 import {
   LuAward,
   LuCrown,
@@ -14,6 +15,43 @@ import {
   LuFlame,
   LuTrophy,
 } from "react-icons/lu";
+
+const LeaderboardAvatar = ({
+  src,
+  name,
+  className = "size-8",
+  textClassName = "text-xs",
+}) => {
+  const [hasError, setHasError] = useState(false);
+  const firstLetter = (name || "M").trim().charAt(0).toUpperCase();
+
+  if (src && !hasError) {
+    return (
+      <div
+        className={`${className} rounded-full bg-base-300 flex items-center justify-center overflow-hidden shrink-0 select-none ring-1 ring-base-content/10`}
+      >
+        <img
+          src={src}
+          alt={name || "Member"}
+          className="size-full object-cover"
+          onError={() => setHasError(true)}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={`${className} rounded-full bg-base-300 flex items-center justify-center overflow-hidden shrink-0 select-none ring-1 ring-base-content/10`}
+    >
+      <span
+        className={`${textClassName} font-bold uppercase flex items-center justify-center size-full`}
+      >
+        {firstLetter}
+      </span>
+    </div>
+  );
+};
 
 const LiveLeaderboardWidget = () => {
   const { currentUser } = useAuth();
@@ -114,6 +152,13 @@ const LiveLeaderboardWidget = () => {
               (currentUserEmail && member.userEmail === currentUserEmail) ||
               (currentUserId && String(member.userId) === currentUserId);
             const isFirst = member.rank === 1;
+            const avatarSrc =
+              member.profilePic ||
+              (isMe ? currentUser?.user?.photoURL : null) ||
+              (member.userEmail
+                ? getStoredProfileMeta(member.userEmail)?.photoURL
+                : null) ||
+              null;
 
             return (
               <div
@@ -148,17 +193,12 @@ const LiveLeaderboardWidget = () => {
                 </div>
 
                 <div className="flex items-center gap-2.5">
-                  <div className="avatar">
-                    <div className="size-8 rounded-full bg-base-300 flex items-center justify-center overflow-hidden">
-                      {member.profilePic ? (
-                        <img src={member.profilePic} alt={member.userName} />
-                      ) : (
-                        <span className="text-xs font-bold uppercase flex items-center justify-center size-full">
-                          {(member.userName || "M").charAt(0)}
-                        </span>
-                      )}
-                    </div>
-                  </div>
+                  <LeaderboardAvatar
+                    src={avatarSrc}
+                    name={member.userName}
+                    className="size-8"
+                    textClassName="text-xs"
+                  />
                   <div className="min-w-0">
                     <h4 className="font-bold text-xs truncate">
                       {member.userName} {isMe && "(You)"}

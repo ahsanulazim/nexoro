@@ -61,7 +61,11 @@ const UserForm = ({ isLogin, isReset, verifyEmail }) => {
           const user = userCred.user;
           if (user) {
             const uid = user.uid;
-            mutate({ ...value, uid });
+            mutate({
+              ...value,
+              uid,
+              photoURL: user.photoURL || value.photoURL || "",
+            });
           }
         } catch (error) {
           toast.error(error.message);
@@ -180,9 +184,11 @@ const UserForm = ({ isLogin, isReset, verifyEmail }) => {
       const user = result.user;
       if (user) {
         const userData = {
+          name: user.displayName,
           userName: user.displayName,
           email: user.email,
           uid: user.uid,
+          photoURL: user.photoURL || "",
         };
         googleSync.mutate(userData);
       }

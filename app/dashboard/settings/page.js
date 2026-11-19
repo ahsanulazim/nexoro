@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import api from "@/axios/axiosInstance";
 import DashBread from "@/components/dashboard/DashBread";
 import { useAuth } from "@/context/AuthProvider";
 import { useDashTheme } from "@/context/DashThemeProvider";
@@ -345,6 +346,30 @@ export default function SettingsPage() {
         };
         setCurrentUser(updatedUserObj);
         localStorage.setItem("user", JSON.stringify(updatedUserObj));
+      }
+
+      // 4. Sync profile & avatar to backend database so leaderboard & system display it
+      try {
+        const token = await auth.currentUser?.getIdToken();
+        if (token) {
+          await api.put(
+            "/users/updateUser",
+            {
+              name: profileForm.name.trim(),
+              photoURL: trimmedPhoto,
+              phone: profileForm.phone.trim(),
+              company: profileForm.company.trim(),
+              jobTitle: profileForm.jobTitle.trim(),
+              address: profileForm.address.trim(),
+              bio: profileForm.bio.trim(),
+            },
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            },
+          );
+        }
+      } catch (syncErr) {
+        console.warn("Backend user sync notice:", syncErr?.message);
       }
 
       toast.success("Profile settings updated successfully!");
