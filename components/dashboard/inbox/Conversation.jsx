@@ -10,6 +10,7 @@ import { IoCheckmarkDoneSharp, IoCheckmarkSharp } from "react-icons/io5";
 import {
   LuArrowDown,
   LuArrowUp,
+  LuBookmarkCheck,
   LuCircleAlert,
   LuClock,
   LuCloudUpload,
@@ -29,6 +30,9 @@ import { toast } from "react-toastify";
 import CRMPanel from "./CRMPanel";
 import CannedResponsesModal from "./CannedResponsesModal";
 import BlockUserModal from "./BlockUserModal";
+import FollowUpModal from "./FollowUpModal";
+import { toggleFollowUpConversation } from "@/api/fetchConversation";
+import moment from "moment";
 import MessageAttachments from "./attachments/MessageAttachments";
 import AttachmentComposerPreview from "./attachments/AttachmentComposerPreview";
 import {
@@ -435,10 +439,26 @@ const Conversation = ({ currentRoom }) => {
   const [showSlashHints, setShowSlashHints] = useState(false);
   const [showNewMessagesPill, setShowNewMessagesPill] = useState(false);
   const [isBlockModalOpen, setIsBlockModalOpen] = useState(false);
+  const [isFollowUpModalOpen, setIsFollowUpModalOpen] = useState(false);
   const queryClient = useQueryClient();
+
+  const handleCompleteFollowUp = useCallback(async () => {
+    try {
+      await toggleFollowUpConversation({
+        roomId: currentRoom,
+        isFollowUp: false,
+      });
+      toast.success("Follow-up marked as completed");
+      queryClient.invalidateQueries({ queryKey: ["conversations"] });
+      queryClient.invalidateQueries({ queryKey: ["crmDetails", currentRoom] });
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to update follow-up");
+    }
+  }, [currentRoom, queryClient]);
   const isNearBottomRef = useRef(true);
   const messagesCountRef = useRef(0);
   const role = currentUser?.user?.role;
+  const isStaff = role === "admin" || role === "member";
 
   const { data: cannedResponses = [] } = useQuery({
     queryKey: ["cannedResponses"],
@@ -1279,6 +1299,51 @@ const Conversation = ({ currentRoom }) => {
     <div className="bg-base-100 flex flex-1 overflow-hidden relative">
       {/* Main Chat Column */}
       <div className="flex-1 flex-col min-w-0 relative">
+        {/* Follow-Up Reminder Banner */}
+        {isStaff && currentConversation?.isFollowUp && (
+          <div className="bg-amber-500/10 border-b border-amber-500/20 px-3.5 py-2 flex items-center justify-between gap-3 text-xs text-amber-900 dark:text-amber-200 shrink-0 shadow-2xs">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <span className="p-1 rounded-md bg-amber-500/20 text-amber-600 dark:text-amber-400 shrink-0">
+                <LuBookmarkCheck className="size-4" />
+              </span>
+              <div className="min-w-0 truncate">
+                <span className="font-bold">Follow-Up Marked:</span>{" "}
+                <span className="font-medium">
+                  {currentConversation.followUpReason || "Important conversation"}
+                </span>
+                {currentConversation.followUpDueDate && (
+                  <span className="ml-2 inline-flex items-center gap-1 font-mono text-[11px] opacity-80 bg-amber-500/15 px-1.5 py-0.5 rounded">
+                    <LuClock className="size-3" />
+                    Due {moment(currentConversation.followUpDueDate).format("MMM D, h:mm A")}
+                  </span>
+                )}
+                {currentConversation.followUpPriority &&
+                  currentConversation.followUpPriority !== "medium" && (
+                    <span className="ml-1.5 badge badge-xs font-bold uppercase bg-amber-500/25 text-amber-800 dark:text-amber-300 border-none">
+                      {currentConversation.followUpPriority}
+                    </span>
+                  )}
+              </div>
+            </div>
+            <div className="flex items-center gap-1.5 shrink-0">
+              <button
+                type="button"
+                onClick={() => setIsFollowUpModalOpen(true)}
+                className="btn btn-xs btn-ghost text-amber-800 dark:text-amber-300 hover:bg-amber-500/20"
+              >
+                Edit
+              </button>
+              <button
+                type="button"
+                onClick={handleCompleteFollowUp}
+                className="btn btn-xs btn-warning text-warning-content font-bold shadow-xs"
+              >
+                Mark Done
+              </button>
+            </div>
+          </div>
+        )}
+
         <div
           ref={chatEndRef}
           onScroll={checkIfNearBottom}
@@ -1557,6 +1622,21 @@ const Conversation = ({ currentRoom }) => {
               roomId: currentRoom,
               platform: activePlatform,
               isBlocked,
+              customer,
+            }
+          }
+        />
+      )}
+
+      {/* Follow Up Modal */}
+      {isStaff && (
+        <FollowUpModal
+          isOpen={isFollowUpModalOpen}
+          onClose={() => setIsFollowUpModalOpen(false)}
+          conversation={
+            currentConversation || {
+              roomId: currentRoom,
+              platform: activePlatform,
               customer,
             }
           }

@@ -4,7 +4,9 @@ import {
   LuFlag,
   LuGalleryThumbnails,
   LuHeadset,
+  LuInbox,
   LuLayoutDashboard,
+  LuMailQuestion,
   LuMessageCircle,
   LuNotebookPen,
   LuPackage,
@@ -34,6 +36,13 @@ export const DASHBOARD_NAV_ITEMS = [
     label: "Inbox",
     icon: LuMessageCircle,
     permissionKey: "inbox",
+  },
+  {
+    href: "/dashboard/queries",
+    dataTip: "Queries",
+    label: "Queries",
+    icon: LuMailQuestion,
+    permissionKey: "queries",
   },
   {
     href: "/dashboard/projects",

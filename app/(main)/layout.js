@@ -1,4 +1,5 @@
 import Anime from "@/animation/Anime";
+import Fab from "@/components/Fab";
 import Header from "@/components/Header";
 
 // @next-codemod-ignore Cache Components adoption: this segment temporarily allows blocking.
@@ -9,6 +10,7 @@ import Header from "@/components/Header";
 export default function layout({ children }) {
   return (
     <Anime>
+      <Fab />
       <Header>{children}</Header>
     </Anime>
   );

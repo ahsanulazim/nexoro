@@ -268,7 +268,19 @@ const OrderTable = ({
                     </span>
                   </td>
                   <td>
-                    {order.assignedTo ? (
+                    {Array.isArray(order.assignedMembers) && order.assignedMembers.length > 0 ? (
+                      <div className="flex flex-wrap gap-1 max-w-[200px]">
+                        {order.assignedMembers.map((m, idx) => (
+                          <span
+                            key={idx}
+                            className="badge badge-sm badge-success badge-soft whitespace-nowrap"
+                            title={`${m.memberName || "Member"} (${m.rateType === "percentage" ? `${m.rateValue}%` : `৳${m.rateValue}`})`}
+                          >
+                            {m.memberName || "Member"}
+                          </span>
+                        ))}
+                      </div>
+                    ) : order.assignedTo ? (
                       <span className="badge badge-sm badge-success badge-soft whitespace-nowrap">
                         {order.assignedMember || "Assigned"}
                       </span>

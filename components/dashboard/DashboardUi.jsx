@@ -83,7 +83,11 @@ const DashboardUi = () => {
     if (!socket || !isStaff) return;
 
     const handleStatsUpdate = (updatedStats) => {
-      if (!filterState.isCustom) {
+      if (isMember) {
+        // Broadcasted stats only contain global admin metrics and omit personal memberEarnings.
+        // For members, invalidate queries to refetch personalized stats with token.
+        queryClient.invalidateQueries({ queryKey: ["dashboardStats"] });
+      } else if (!filterState.isCustom) {
         queryClient.setQueryData(
           ["dashboardStats", null, null, "this_month"],
           updatedStats
@@ -372,11 +376,11 @@ const DashboardUi = () => {
           My Workspace Overview
         </h3>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
           {/* Assigned Projects */}
           <StatsCard
             title="Assigned Projects"
-            stat={stats?.assignedProjects}
+            stat={stats?.memberEarnings?.assignedCount !== undefined ? { total: stats.memberEarnings.assignedCount } : stats?.assignedProjects}
             icon={<LuBriefcase className="text-primary" />}
             isLoading={isLoading}
             highlight="primary"
@@ -386,20 +390,44 @@ const DashboardUi = () => {
           {/* Pending Projects */}
           <StatsCard
             title="Pending Projects"
-            stat={stats?.pendingProjects}
+            stat={stats?.memberEarnings?.pendingCount !== undefined ? { total: stats.memberEarnings.pendingCount } : stats?.pendingProjects}
             icon={<LuClock className="text-warning" />}
             isLoading={isLoading}
             inverseTone={true}
             subtext="Awaiting review or delivery"
           />
 
-          {/* Total Client Orders */}
+          {/* My Total Earnings (Completed Projects) */}
           <StatsCard
-            title="Total Orders"
-            stat={stats?.orders}
-            icon={<LuShoppingBag className="text-info" />}
+            title="My Earnings"
+            stat={{ total: stats?.memberEarnings?.totalEarnings || 0 }}
+            isCurrency={true}
+            icon={<LuTrendingUp className="text-success" />}
             isLoading={isLoading}
-            subtext="Client orders in pipeline"
+            highlight="success"
+            badgeText={`${stats?.memberEarnings?.completedCount || 0} completed`}
+            badgeVariant="success"
+            subtext="From completed projects"
+          />
+
+          {/* Due Earnings (Pending/Active Projects) */}
+          <StatsCard
+            title="Due Earnings"
+            stat={{ total: stats?.memberEarnings?.dueEarnings || 0 }}
+            isCurrency={true}
+            icon={<LuReceipt className="text-warning" />}
+            isLoading={isLoading}
+            highlight="primary"
+            badgeText={`${stats?.memberEarnings?.assignedCount || 0} active`}
+            badgeVariant="warning"
+            subtext={
+              stats?.memberEarnings?.dueEarnings !== undefined
+                ? `Pending payout • Total Assigned: ৳${(
+                    (stats?.memberEarnings?.totalEarnings || 0) +
+                    (stats?.memberEarnings?.dueEarnings || 0)
+                  ).toLocaleString()}`
+                : "Pending project payout"
+            }
           />
 
           {/* Member's Monthly Points */}
@@ -415,65 +443,67 @@ const DashboardUi = () => {
         </div>
       </section>
 
-      {/* 2. Operations Activity Trends & Quick Shortcuts */}
+      {/* 2. Quick Work Actions & Daily Shortcuts */}
       <section>
-        <div className="grid lg:grid-cols-5 gap-5">
-          {/* Order Activity Trends (Volume Only, Safe for Members) */}
-          <div className="bg-base-100 rounded-box p-5 lg:col-span-3">
-            <h2 className="uppercase text-sm font-semibold tracking-wider mb-3">
-              Order Activity Trends
-            </h2>
-            <OrderChart />
-          </div>
-
-          {/* Quick Work Actions & Daily Shortcuts */}
-          <div className="bg-base-100 rounded-box p-5 lg:col-span-2 flex flex-col justify-between">
+        <div className="bg-base-100 rounded-box p-5 border border-base-content/5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
             <div>
-              <h2 className="uppercase text-sm font-semibold tracking-wider mb-1.5">
+              <h2 className="uppercase text-sm font-semibold tracking-wider mb-1">
                 Quick Shortcuts
               </h2>
-              <p className="text-xs text-base-content/70 mb-4">
-                Fast navigation to your daily operational responsibilities.
+              <p className="text-xs text-base-content/70">
+                Fast navigation to your daily operational responsibilities and workstations.
               </p>
-
-              <div className="grid grid-cols-2 gap-2.5">
-                <Link
-                  href="/dashboard/projects"
-                  className="btn btn-sm btn-outline border-base-content/20 hover:border-primary hover:bg-primary/10 flex items-center justify-start gap-2"
-                >
-                  <LuBriefcase className="size-4 text-primary" />
-                  <span className="truncate">Projects</span>
-                </Link>
-                <Link
-                  href="/dashboard/inbox"
-                  className="btn btn-sm btn-outline border-base-content/20 hover:border-primary hover:bg-primary/10 flex items-center justify-start gap-2"
-                >
-                  <LuMessageCircle className="size-4 text-info" />
-                  <span className="truncate">Client Inbox</span>
-                </Link>
-                <Link
-                  href="/dashboard/orders"
-                  className="btn btn-sm btn-outline border-base-content/20 hover:border-primary hover:bg-primary/10 flex items-center justify-start gap-2"
-                >
-                  <LuShoppingBag className="size-4 text-accent" />
-                  <span className="truncate">Orders</span>
-                </Link>
-                <Link
-                  href="/dashboard/points"
-                  className="btn btn-sm btn-outline border-base-content/20 hover:border-primary hover:bg-primary/10 flex items-center justify-start gap-2"
-                >
-                  <LuTrophy className="size-4 text-warning" />
-                  <span className="truncate">Points Hub</span>
-                </Link>
-              </div>
             </div>
-
-            <div className="mt-4 p-3 rounded-lg bg-base-200/60 border border-base-content/5 text-xs text-base-content/70 flex items-center gap-2">
+            <div className="p-2.5 rounded-lg bg-base-200/60 border border-base-content/5 text-xs text-base-content/70 flex items-center gap-2">
               <LuSparkles className="size-4 text-primary shrink-0" />
               <span>
                 Tip: Complete tasks on time and submit extra work to climb the monthly leaderboard!
               </span>
             </div>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <Link
+              href="/dashboard/projects"
+              className="btn btn-md btn-outline border-base-content/20 hover:border-primary hover:bg-primary/10 flex items-center justify-start gap-2.5"
+            >
+              <LuBriefcase className="size-5 text-primary shrink-0" />
+              <div className="text-left truncate">
+                <span className="block text-xs font-bold">Projects</span>
+                <span className="block text-[10px] opacity-60">View assigned tasks</span>
+              </div>
+            </Link>
+            <Link
+              href="/dashboard/inbox"
+              className="btn btn-md btn-outline border-base-content/20 hover:border-primary hover:bg-primary/10 flex items-center justify-start gap-2.5"
+            >
+              <LuMessageCircle className="size-5 text-info shrink-0" />
+              <div className="text-left truncate">
+                <span className="block text-xs font-bold">Client Inbox</span>
+                <span className="block text-[10px] opacity-60">Messages & deals</span>
+              </div>
+            </Link>
+            <Link
+              href="/dashboard/orders"
+              className="btn btn-md btn-outline border-base-content/20 hover:border-primary hover:bg-primary/10 flex items-center justify-start gap-2.5"
+            >
+              <LuShoppingBag className="size-5 text-accent shrink-0" />
+              <div className="text-left truncate">
+                <span className="block text-xs font-bold">Orders</span>
+                <span className="block text-[10px] opacity-60">Order overview</span>
+              </div>
+            </Link>
+            <Link
+              href="/dashboard/points"
+              className="btn btn-md btn-outline border-base-content/20 hover:border-primary hover:bg-primary/10 flex items-center justify-start gap-2.5"
+            >
+              <LuTrophy className="size-5 text-warning shrink-0" />
+              <div className="text-left truncate">
+                <span className="block text-xs font-bold">Points Hub</span>
+                <span className="block text-[10px] opacity-60">Reward submissions</span>
+              </div>
+            </Link>
           </div>
         </div>
       </section>
@@ -483,35 +513,20 @@ const DashboardUi = () => {
         <LiveLeaderboardWidget />
       </section>
 
-      {/* 4. Recent Projects & Recent Orders */}
+      {/* 4. Recent Assigned Projects */}
       <section>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-          <div className="bg-base-200 rounded-box p-5">
-            <div className="flex items-center justify-between mb-5">
-              <h3 className="uppercase text-sm font-semibold tracking-wider">
-                Recent Orders
-              </h3>
-              <Link href="/dashboard/orders">
-                <button className="btn btn-sm btn-soft btn-accent">
-                  View All
-                </button>
-              </Link>
-            </div>
-            <RecentOrderData />
+        <div className="bg-base-200 rounded-box p-5">
+          <div className="flex items-center justify-between mb-5">
+            <h3 className="uppercase text-sm font-semibold tracking-wider flex items-center gap-2">
+              <LuBriefcase className="text-primary" /> Recent Assigned Projects
+            </h3>
+            <Link href="/dashboard/projects">
+              <button className="btn btn-sm btn-soft btn-accent">
+                View All
+              </button>
+            </Link>
           </div>
-          <div className="bg-base-200 rounded-box p-5">
-            <div className="flex items-center justify-between mb-5">
-              <h3 className="uppercase text-sm font-semibold tracking-wider">
-                Recent Projects
-              </h3>
-              <Link href="/dashboard/projects">
-                <button className="btn btn-sm btn-soft btn-accent">
-                  View All
-                </button>
-              </Link>
-            </div>
-            <RecentProjectsData />
-          </div>
+          <RecentProjectsData />
         </div>
       </section>
     </main>

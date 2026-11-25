@@ -9,7 +9,7 @@ const PortCarousel = ({ port }) => {
         alt={port.title}
         width={700}
         height={700}
-        className="w-full m-auto rounded-xl"
+        className="w-full m-auto rounded-xl aspect-video object-cover"
       />
       <div className=" sm:absolute w-full sm:bottom-0 sm:p-6 text-gray-900 mt-5">
         <div className="bg-white rounded-lg p-5 gap-5 lg:p-10 flex flex-col lg:flex-row lg:items-center justify-between sm:shadow-lg">

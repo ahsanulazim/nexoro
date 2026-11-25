@@ -8,6 +8,8 @@ import { useMemo, useState } from "react";
 import { FaFacebookF, FaInstagram, FaWhatsapp, FaGlobe } from "react-icons/fa6";
 import {
   LuBadgeCheck,
+  LuBookmark,
+  LuBookmarkCheck,
   LuPackageCheck,
   LuUserCheck,
   LuArrowLeft,
@@ -20,6 +22,7 @@ import { getInitials, getAvatarColor } from "@/utils/messageGrouping";
 import { useWhatsAppCall } from "@/context/WhatsAppCallContext";
 import ConfirmOrderModal from "./ConfirmOrderModal";
 import BlockUserModal from "./BlockUserModal";
+import FollowUpModal from "./FollowUpModal";
 
 const ChatNav = () => {
   const { message: currentRoom } = useParams();
@@ -57,6 +60,7 @@ const ChatNav = () => {
   const platform = currentConversation?.platform || "web";
   const isBlocked = Boolean(currentConversation?.isBlocked);
   const [isBlockModalOpen, setIsBlockModalOpen] = useState(false);
+  const [isFollowUpModalOpen, setIsFollowUpModalOpen] = useState(false);
 
   // Calculate active status & WhatsApp 24h window
   const activeStatusInfo = useMemo(() => {
@@ -265,6 +269,27 @@ const ChatNav = () => {
                   <span>Blocked</span>
                 </span>
               )}
+              {currentConversation?.isFollowUp && (
+                <button
+                  type="button"
+                  onClick={() => setIsFollowUpModalOpen(true)}
+                  className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/25 hover:bg-amber-500/25 transition-colors cursor-pointer"
+                  title={`Follow-Up: ${currentConversation.followUpReason || "Important"}${
+                    currentConversation.followUpDueDate
+                      ? ` (Due: ${new Date(currentConversation.followUpDueDate).toLocaleString()})`
+                      : ""
+                  } - Click to edit`}
+                >
+                  <LuBookmarkCheck className="size-3 text-amber-500" />
+                  <span>Follow-Up</span>
+                  {currentConversation.followUpPriority &&
+                    currentConversation.followUpPriority !== "medium" && (
+                      <span className="uppercase text-[9px] font-bold opacity-80">
+                        ({currentConversation.followUpPriority})
+                      </span>
+                    )}
+                </button>
+              )}
               {currentConversation?.referral && (
                 <button
                   type="button"
@@ -338,6 +363,28 @@ const ChatNav = () => {
           {isStaff && currentRoom && (
             <button
               type="button"
+              onClick={() => setIsFollowUpModalOpen(true)}
+              className={`btn max-sm:btn-square btn-sm rounded-box gap-1.5 ${
+                currentConversation?.isFollowUp
+                  ? "btn-warning text-warning-content shadow-xs"
+                  : "btn-outline btn-warning hover:bg-warning hover:text-warning-content"
+              }`}
+              title={
+                currentConversation?.isFollowUp
+                  ? "Edit Follow-Up details"
+                  : "Mark this chat for follow-up"
+              }
+            >
+              <LuBookmarkCheck className="size-4" />
+              <span className="max-sm:hidden">
+                {currentConversation?.isFollowUp ? "Follow-Up" : "Follow Up"}
+              </span>
+            </button>
+          )}
+
+          {isStaff && currentRoom && (
+            <button
+              type="button"
               onClick={() => setIsConfirmOrderOpen(true)}
               className="btn max-sm:btn-square btn-sm btn-primary rounded-box"
               title="Confirm Order & Auto-Add Customer as Client"
@@ -351,7 +398,7 @@ const ChatNav = () => {
             <button
               type="button"
               onClick={() => setIsCrmOpen(!isCrmOpen)}
-              className={`btn max-sm:btn-square btn-sm rounded-box ${
+              className={`btn max-sm:btn-square btn-sm rounded-box xl:hidden ${
                 isCrmOpen ? "btn-primary" : "btn-outline btn-primary"
               }`}
               title="Toggle Customer CRM Profile"
@@ -393,6 +440,16 @@ const ChatNav = () => {
           onClose={() => setIsBlockModalOpen(false)}
           conversation={
             currentConversation || { roomId: currentRoom, platform, isBlocked }
+          }
+        />
+      )}
+
+      {isStaff && currentRoom && (
+        <FollowUpModal
+          isOpen={isFollowUpModalOpen}
+          onClose={() => setIsFollowUpModalOpen(false)}
+          conversation={
+            currentConversation || { roomId: currentRoom, platform }
           }
         />
       )}

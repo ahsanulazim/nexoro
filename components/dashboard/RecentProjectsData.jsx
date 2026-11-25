@@ -38,7 +38,19 @@ const RecentProjectsData = () => {
             data.map((project) => (
               <tr key={project._id}>
                 <td>{project.serviceName}</td>
-                <td>{project.assignedTo}</td>
+                <td>
+                  {Array.isArray(project.assignedMembers) && project.assignedMembers.length > 0 ? (
+                    <div className="flex flex-wrap gap-1 max-w-[200px]">
+                      {project.assignedMembers.map((m, idx) => (
+                        <span key={idx} className="badge badge-xs badge-soft badge-primary font-medium">
+                          {m.memberName || "Member"}
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    project.assignedTo || "Unassigned"
+                  )}
+                </td>
                 <td>
                   <progress
                     className="progress progress-accent w-20"

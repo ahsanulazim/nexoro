@@ -4,6 +4,7 @@ import DashBread from "@/components/dashboard/DashBread";
 import OrderAction from "@/components/dashboard/order/OrderAction";
 import OrderTaskManagement from "@/components/dashboard/order/OrderTaskManagement";
 import OrderCostManagement from "@/components/dashboard/order/OrderCostManagement";
+import OrderNotes from "@/components/dashboard/order/OrderNotes";
 import InvoiceModal from "@/components/dashboard/order/InvoiceModal";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import moment from "moment";
@@ -223,6 +224,9 @@ const Order = () => {
             </div>
             <div className="p-5 bg-base-100 rounded-box mt-5">
               <OrderTaskManagement order={data.order} />
+            </div>
+            <div className="mt-5">
+              <OrderNotes order={data.order} />
             </div>
           </div>
         </section>

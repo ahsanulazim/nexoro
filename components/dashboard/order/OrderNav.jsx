@@ -103,7 +103,7 @@ const OrderNav = ({
                         : "badge-neutral"
                   }`}
                 >
-                  {tab.count}
+                  {tab.count > 99 ? "99+" : tab.count}
                 </span>
               )}
             </button>

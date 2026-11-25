@@ -2,13 +2,14 @@
 
 import { getAllProjects } from "@/api/fetchProject";
 import DashBread from "@/components/dashboard/DashBread";
+import AddProjectModal from "@/components/dashboard/profile/AddProjectModal";
 import ProjectCard from "@/components/dashboard/projects/ProjectCard";
 import ProjectNav from "@/components/dashboard/projects/ProjectNav";
 import { useAuth } from "@/context/AuthProvider";
 import { MyContext } from "@/context/MyProvider";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useContext, useState } from "react";
+import { Suspense, useContext, useRef, useState } from "react";
 import {
   LuCircleCheck,
   LuClock,
@@ -24,6 +25,7 @@ const ProjectsContent = () => {
   const searchParams = useSearchParams();
   const { currentUser } = useAuth();
   const { team } = useContext(MyContext);
+  const addProjectModalRef = useRef();
 
   // Read initial states from URL query parameters
   const initialPage = Math.max(1, Number(searchParams.get("page") || 1));
@@ -89,6 +91,7 @@ const ProjectsContent = () => {
   const totalPages = pagination.totalPages || 1;
   const totalProjects = pagination.totalProjects || 0;
 
+  const isAdmin = currentUser?.user?.role === "admin";
   const isMemberOrHasAssigned =
     currentUser?.user?.role === "member" || counts.my > 0;
 
@@ -96,6 +99,23 @@ const ProjectsContent = () => {
   const isAssignedToUser = (project) => {
     if (project.isAssignedToMe) return true;
     if (!currentUser?.user) return false;
+
+    if (Array.isArray(project.assignedMembers)) {
+      const match = project.assignedMembers.some(
+        (m) =>
+          (m.memberId && userId && String(m.memberId) === String(userId)) ||
+          (m.memberId &&
+            currentMember?._id &&
+            String(m.memberId) === String(currentMember._id)) ||
+          (m.memberEmail &&
+            userEmail &&
+            m.memberEmail.toLowerCase() === userEmail) ||
+          (m.memberName &&
+            userName &&
+            m.memberName.toLowerCase() === userName),
+      );
+      if (match) return true;
+    }
 
     if (
       project.assignedMemberEmail &&
@@ -229,6 +249,7 @@ const ProjectsContent = () => {
     <main className="space-y-6">
       {/* Top Breadcrumb & Actions */}
       <section>
+        {isAdmin && <AddProjectModal ref={addProjectModalRef} />}
         <DashBread title="Projects" />
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mt-2">
           <div>
@@ -236,15 +257,22 @@ const ProjectsContent = () => {
               <LuFolderKanban className="text-primary" /> Projects
             </h1>
             <p className="text-sm opacity-60 mt-1">
-              Manage all assigned projects, monitor milestones, and update tasks.
+              Manage all assigned projects, monitor milestones, and update
+              tasks.
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
-            <button className="btn btn-nexoro-primary">
-              <LuPlus /> Add Project
-            </button>
-          </div>
+          {isAdmin && (
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => addProjectModalRef.current?.showModal()}
+                className="btn btn-nexoro-primary"
+              >
+                <LuPlus /> Add Project
+              </button>
+            </div>
+          )}
         </div>
       </section>
 
@@ -290,14 +318,17 @@ const ProjectsContent = () => {
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <h2 className="text-base font-bold">My Assigned Projects</h2>
+                    <h2 className="text-base font-bold">
+                      My Assigned Projects
+                    </h2>
                     <span className="badge badge-primary bg-main border-main text-white badge-sm font-semibold">
                       {counts.my}
                     </span>
                   </div>
                   <p className="text-xs opacity-60 mt-0.5">
-                    You have {counts.my} assigned project{counts.my > 1 ? "s" : ""}.
-                    Track milestones and checklist tasks in your workspace.
+                    You have {counts.my} assigned project
+                    {counts.my > 1 ? "s" : ""}. Track milestones and checklist
+                    tasks in your workspace.
                   </p>
                 </div>
               </div>

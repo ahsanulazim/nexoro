@@ -3,6 +3,7 @@
 import {
   LuBadgeCheck,
   LuBan,
+  LuBookmarkCheck,
   LuDownload,
   LuEllipsis,
   LuEllipsisVertical,
@@ -27,6 +28,7 @@ import { auth } from "@/firebase/firebase.config";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
 import DeleteChatModal from "./DeleteChatModal";
+import FollowUpModal from "./FollowUpModal";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "@/axios/axiosInstance";
 import ConversationTabs from "./ConversationTabs";
@@ -112,6 +114,7 @@ const SidebarConversationItem = memo(function SidebarConversationItem({
   isOnline,
   unread,
   onDeleteChat,
+  onManageFollowUp,
 }) {
   const customerName =
     conversation?.customer?.userName ||
@@ -220,6 +223,23 @@ const SidebarConversationItem = memo(function SidebarConversationItem({
                   <span>Blocked</span>
                 </span>
               )}
+              {conversation?.isFollowUp && (
+                <span
+                  className={`inline-flex items-center gap-0.5 text-[10px] font-semibold px-1.5 py-0.2 rounded-full shrink-0 border ${
+                    isSelected
+                      ? "bg-amber-400/30 text-amber-100 border-amber-300/40"
+                      : "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/25"
+                  }`}
+                  title={`Follow-Up: ${conversation.followUpReason || "Important"}${
+                    conversation.followUpDueDate
+                      ? ` (Due: ${formatRelativeShort(conversation.followUpDueDate)})`
+                      : ""
+                  }`}
+                >
+                  <LuBookmarkCheck className="text-[10px]" />
+                  <span>Follow-up</span>
+                </span>
+              )}
             </div>
             {conversation?.updatedAt && (
               <span
@@ -270,8 +290,17 @@ const SidebarConversationItem = memo(function SidebarConversationItem({
         </div>
         <ul
           tabIndex={0}
-          className="dropdown-content menu bg-base-100 rounded-box z-50 w-36 p-1.5 shadow-lg border border-base-200 text-xs"
+          className="dropdown-content menu bg-base-100 rounded-box z-50 w-40 p-1.5 shadow-lg border border-base-200 text-xs space-y-1"
         >
+          <li>
+            <button
+              onClick={() => onManageFollowUp && onManageFollowUp(conversation)}
+              className="text-amber-600 dark:text-amber-400 flex items-center gap-2 font-medium"
+            >
+              <LuBookmarkCheck className="size-3.5" />
+              <span>{conversation?.isFollowUp ? "Edit Follow-Up" : "Mark Follow-Up"}</span>
+            </button>
+          </li>
           <li>
             <button
               onClick={() => onDeleteChat(conversation)}
@@ -292,6 +321,8 @@ const ChatSidebar = () => {
     useSocket();
   const queryClient = useQueryClient();
   const [chat, setChat] = useState(null);
+  const [subFilter, setSubFilter] = useState("all"); // 'all' | 'followup' | 'unread'
+  const [followUpModalChat, setFollowUpModalChat] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [isSyncingFB, setIsSyncingFB] = useState(false);
@@ -581,6 +612,26 @@ const ChatSidebar = () => {
               payload.isBlocked !== undefined
                 ? payload.isBlocked
                 : existing.isBlocked,
+            isFollowUp:
+              payload.isFollowUp !== undefined
+                ? payload.isFollowUp
+                : existing.isFollowUp,
+            followUpReason:
+              payload.followUpReason !== undefined
+                ? payload.followUpReason
+                : existing.followUpReason,
+            followUpDueDate:
+              payload.followUpDueDate !== undefined
+                ? payload.followUpDueDate
+                : existing.followUpDueDate,
+            followUpPriority:
+              payload.followUpPriority !== undefined
+                ? payload.followUpPriority
+                : existing.followUpPriority,
+            followUpBy:
+              payload.followUpBy !== undefined
+                ? payload.followUpBy
+                : existing.followUpBy,
           };
           const next = [
             updatedItem,
@@ -651,14 +702,30 @@ const ChatSidebar = () => {
       });
     };
 
+    const handleFollowUpStatusUpdated = (data) => {
+      if (!data?.roomId) return;
+      queryClient.setQueryData(["conversations", platform], (old = []) => {
+        if (!Array.isArray(old)) return old;
+        const next = old.map((c) =>
+          c.roomId === data.roomId || cleanRoomId(c.roomId) === cleanRoomId(data.roomId)
+            ? { ...c, ...data }
+            : c
+        );
+        setConversations(next);
+        return next;
+      });
+    };
+
     socket.on("newConversationUpdate", handleConversationUpdate);
     socket.on("conversationDeleted", handleConversationDeleted);
     socket.on("conversationBlockStatusUpdated", handleBlockStatusUpdated);
+    socket.on("conversationFollowUpUpdated", handleFollowUpStatusUpdated);
 
     return () => {
       socket.off("newConversationUpdate", handleConversationUpdate);
       socket.off("conversationDeleted", handleConversationDeleted);
       socket.off("conversationBlockStatusUpdated", handleBlockStatusUpdated);
+      socket.off("conversationFollowUpUpdated", handleFollowUpStatusUpdated);
     };
   }, [socket, currentUser, platform, queryClient, refetch, setConversations]);
 
@@ -676,11 +743,13 @@ const ChatSidebar = () => {
     setChat(conversation);
   }, []);
 
-  const filteredConversations = useMemo(() => {
-    if (!conversations || conversations.length === 0) return [];
+  const handleManageFollowUp = useCallback((conversation) => {
+    setFollowUpModalChat(conversation);
+  }, []);
 
-    // 1. Strict platform tab filter
-    const platformFiltered = conversations.filter((conv) => {
+  const platformConversations = useMemo(() => {
+    if (!conversations || conversations.length === 0) return [];
+    return conversations.filter((conv) => {
       if (platform === "inbox" || platform === "all") return true;
 
       let convPlatform = conv.platform;
@@ -693,11 +762,33 @@ const ChatSidebar = () => {
 
       return convPlatform === platform;
     });
+  }, [conversations, platform]);
 
-    if (!debouncedSearch) return platformFiltered;
+  const followUpCount = useMemo(() => {
+    return platformConversations.filter((c) => Boolean(c?.isFollowUp)).length;
+  }, [platformConversations]);
+
+  const unreadTotalCount = useMemo(() => {
+    return platformConversations.filter(
+      (c) => (unreadCounts[c?.roomId] ?? c?.unreadCount ?? 0) > 0
+    ).length;
+  }, [platformConversations, unreadCounts]);
+
+  const filteredConversations = useMemo(() => {
+    let list = platformConversations;
+
+    if (subFilter === "followup") {
+      list = list.filter((c) => Boolean(c?.isFollowUp));
+    } else if (subFilter === "unread") {
+      list = list.filter(
+        (c) => (unreadCounts[c?.roomId] ?? c?.unreadCount ?? 0) > 0
+      );
+    }
+
+    if (!debouncedSearch) return list;
 
     const term = debouncedSearch.toLowerCase();
-    return platformFiltered.filter((conv) => {
+    return list.filter((conv) => {
       const name = (
         conv?.customer?.userName ||
         conv?.customer?.name ||
@@ -713,7 +804,7 @@ const ChatSidebar = () => {
         roomId.includes(term)
       );
     });
-  }, [conversations, debouncedSearch, platform]);
+  }, [platformConversations, subFilter, debouncedSearch, unreadCounts]);
 
   const loadOlderFacebookChats = useCallback(() => {
     if (
@@ -809,6 +900,11 @@ const ChatSidebar = () => {
   return (
     <div className="flex flex-col w-full h-full bg-base-100 overflow-hidden">
       <DeleteChatModal ref={deleteRef} chat={chat} />
+      <FollowUpModal
+        isOpen={Boolean(followUpModalChat)}
+        onClose={() => setFollowUpModalChat(null)}
+        conversation={followUpModalChat}
+      />
       <div className="flex flex-col w-full h-full">
         {/* Header & Search */}
         <div className="p-4 bg-base-100 backdrop-blur space-y-3 border-b border-base-100">
@@ -876,6 +972,54 @@ const ChatSidebar = () => {
         {/* Platform Tabs */}
         <div className="p-2 border-b border-base-300">
           <ConversationTabs />
+        </div>
+
+        {/* Quick Sub-filters: All / Follow-Up / Unread */}
+        <div className="px-3 py-1.5 flex items-center gap-1.5 bg-base-100 border-b border-base-200 overflow-x-auto no-scrollbar">
+          <button
+            type="button"
+            onClick={() => setSubFilter("all")}
+            className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all shrink-0 ${
+              subFilter === "all"
+                ? "bg-base-300 text-base-content shadow-xs"
+                : "text-base-content/60 hover:text-base-content hover:bg-base-200"
+            }`}
+          >
+            All ({platformConversations.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => setSubFilter("followup")}
+            className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all shrink-0 ${
+              subFilter === "followup"
+                ? "bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30 shadow-xs"
+                : "text-base-content/60 hover:text-amber-600 hover:bg-base-200"
+            }`}
+          >
+            <LuBookmarkCheck className="size-3.5 text-amber-500" />
+            <span>Follow-Up</span>
+            {followUpCount > 0 && (
+              <span className="badge badge-xs bg-amber-500 text-white font-bold px-1.5">
+                {followUpCount}
+              </span>
+            )}
+          </button>
+          <button
+            type="button"
+            onClick={() => setSubFilter("unread")}
+            className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all shrink-0 ${
+              subFilter === "unread"
+                ? "bg-error/20 text-error border border-error/30 shadow-xs"
+                : "text-base-content/60 hover:text-error hover:bg-base-200"
+            }`}
+          >
+            <span>Unread</span>
+            {unreadTotalCount > 0 && (
+              <span className="badge badge-xs badge-error text-white font-bold px-1.5">
+                {unreadTotalCount}
+              </span>
+            )}
+          </button>
         </div>
 
         {/* Facebook Sync Banner */}
@@ -977,6 +1121,7 @@ const ChatSidebar = () => {
                     isOnline={isOnline}
                     unread={unread}
                     onDeleteChat={handleDeleteChat}
+                    onManageFollowUp={handleManageFollowUp}
                   />
                 );
               })}

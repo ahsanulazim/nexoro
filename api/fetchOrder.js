@@ -66,3 +66,15 @@ export const updateOrderCosts = async ({ orderId, costs }) => {
   );
   return res.data;
 };
+
+export const addOrderNote = async ({ orderId, text }) => {
+  const res = await api.post("/orders/addNote", { orderId, text });
+  return res.data;
+};
+
+export const deleteOrderNote = async ({ orderId, noteId }) => {
+  const res = await api.delete("/orders/deleteNote", {
+    data: { orderId, noteId },
+  });
+  return res.data;
+};

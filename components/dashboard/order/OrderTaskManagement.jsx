@@ -9,6 +9,7 @@ import {
   LuPencil,
   LuPlus,
   LuSettings2,
+  LuStickyNote,
   LuTrash2,
   LuUserCheck,
   LuX,
@@ -40,7 +41,16 @@ const OrderTaskManagement = ({ order }) => {
           String(order.assignedTo).toLowerCase() === currentUserEmail ||
           String(order.assignedTo).toLowerCase() === currentUserName)) ||
         (order?.assignedMemberEmail &&
-          order.assignedMemberEmail.toLowerCase() === currentUserEmail)),
+          order.assignedMemberEmail.toLowerCase() === currentUserEmail) ||
+        (Array.isArray(order?.assignedMembers) &&
+          order.assignedMembers.some(
+            (m) =>
+              (m.memberId && String(m.memberId) === currentUserId) ||
+              (m.memberEmail &&
+                m.memberEmail.toLowerCase() === currentUserEmail) ||
+              (m.memberName &&
+                m.memberName.toLowerCase() === currentUserName),
+          ))),
   );
 
   const isCreatedByMe = Boolean(
@@ -67,6 +77,7 @@ const OrderTaskManagement = ({ order }) => {
   const [modalAssignedTo, setModalAssignedTo] = useState(
     order?.assignedTo || "",
   );
+  const [modalAssignedMembers, setModalAssignedMembers] = useState([]);
   const [modalRewardPoints, setModalRewardPoints] = useState(
     order?.rewardPoints ?? 5,
   );
@@ -81,6 +92,7 @@ const OrderTaskManagement = ({ order }) => {
       queryClient.invalidateQueries({ queryKey: ["projects"] });
       queryClient.invalidateQueries({ queryKey: ["leaderboard"] });
       queryClient.invalidateQueries({ queryKey: ["myPointsSummary"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboardStats"] });
       if (modalRef.current?.open) {
         modalRef.current.close();
       }
@@ -95,8 +107,12 @@ const OrderTaskManagement = ({ order }) => {
 
   if (!order) return null;
 
+  const hasAssigned =
+    Boolean(order?.assignedTo) ||
+    (Array.isArray(order?.assignedMembers) && order.assignedMembers.length > 0);
+
   // If not yet assigned, show the initial assignment component (admin or creator member can assign)
-  if (!order.assignedTo) {
+  if (!hasAssigned) {
     if (!canAssign) {
       return (
         <div className="p-4 text-center text-sm opacity-60 bg-base-200 rounded-xl">
@@ -200,6 +216,13 @@ const OrderTaskManagement = ({ order }) => {
   const handleOpenManageModal = () => {
     if (!canManage) return;
     setModalAssignedTo(order.assignedTo || "");
+    const initialMembers =
+      Array.isArray(order.assignedMembers) && order.assignedMembers.length > 0
+        ? order.assignedMembers.map((m) => ({ ...m }))
+        : order.assignedTo
+          ? [{ memberId: order.assignedTo, rateType: "percentage", rateValue: 0 }]
+          : [{ memberId: "", rateType: "percentage", rateValue: 0 }];
+    setModalAssignedMembers(initialMembers);
     setModalRewardPoints(order.rewardPoints ?? 5);
     setModalTasks(
       tasks.length > 0
@@ -211,21 +234,66 @@ const OrderTaskManagement = ({ order }) => {
 
   return (
     <div>
-      {/* Header & Assigned Member */}
+      {/* Header & Assigned Member(s) */}
       <div className="flex items-center justify-between gap-3 pb-3 border-b border-base-200">
         <div>
           <span className="text-xs uppercase tracking-wider opacity-60 block">
-            Assigned Member
+            Assigned Member{Array.isArray(order.assignedMembers) && order.assignedMembers.length > 1 ? "s" : ""}
           </span>
-          <div className="flex flex-wrap items-center gap-2 mt-0.5">
-            <h2 className="font-bold text-base text-base-content">
-              {order.assignedMember || "Assigned"}
-            </h2>
+          <div className="flex flex-wrap items-center gap-2 mt-1">
+            {Array.isArray(order.assignedMembers) && order.assignedMembers.length > 0 ? (
+              order.assignedMembers.map((m, idx) => (
+                <div
+                  key={idx}
+                  className="badge badge-sm badge-primary badge-soft py-2 px-2.5 gap-1.5 font-semibold"
+                >
+                  <span>{m.memberName || "Member"}</span>
+                  {isAdmin && (
+                    <span className="opacity-70 text-[10px]">
+                      ({m.rateType === "percentage" ? `${m.rateValue}%` : `৳${m.rateValue}`})
+                    </span>
+                  )}
+                </div>
+              ))
+            ) : (
+              <h2 className="font-bold text-base text-base-content">
+                {order.assignedMember || "Assigned"}
+              </h2>
+            )}
             <span className="badge badge-success badge-sm">Active</span>
             <span className="badge badge-warning badge-soft badge-sm font-semibold gap-1">
               <LuAward className="size-3" /> +{order.rewardPoints ?? 5} pts
             </span>
           </div>
+
+          {/* If member is assigned, show their personal share */}
+          {!isAdmin && isAssignedToMe && (
+            <div className="mt-1.5 text-xs text-success font-semibold flex items-center gap-1.5">
+              <span>Your Share:</span>
+              <span>
+                {(() => {
+                  const myMatch = Array.isArray(order.assignedMembers)
+                    ? order.assignedMembers.find(
+                        (m) =>
+                          String(m.memberId) === currentUserId ||
+                          (m.memberEmail &&
+                            m.memberEmail.toLowerCase() === currentUserEmail),
+                      )
+                    : null;
+                  if (!myMatch) return "Assigned";
+                  const price =
+                    Number(order.price) || Number(order.servicePrice) || 0;
+                  const amt =
+                    myMatch.amount ||
+                    (myMatch.rateType === "percentage"
+                      ? Math.round(price * (myMatch.rateValue / 100))
+                      : myMatch.rateValue) ||
+                    0;
+                  return `৳${amt.toLocaleString()} (${myMatch.rateType === "percentage" ? `${myMatch.rateValue}%` : "Flat Rate"})`;
+                })()}
+              </span>
+            </div>
+          )}
         </div>
         {canManage && (
           <button
@@ -239,6 +307,19 @@ const OrderTaskManagement = ({ order }) => {
           </button>
         )}
       </div>
+
+      {/* Client Scope / Order Instructions Note */}
+      {order?.orderNote && (
+        <div className="mt-3 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs">
+          <div className="flex items-center gap-1.5 font-bold text-amber-600 dark:text-amber-400 mb-1">
+            <LuStickyNote className="size-3.5" />
+            <span>Order Instructions / Scope:</span>
+          </div>
+          <p className="text-base-content/90 whitespace-pre-wrap leading-relaxed">
+            {order.orderNote}
+          </p>
+        </div>
+      )}
 
       {/* Progress Bar Section */}
       <div className="mt-4 bg-base-200/60 p-3 rounded-xl">
@@ -425,6 +506,8 @@ const OrderTaskManagement = ({ order }) => {
           order={order}
           modalAssignedTo={modalAssignedTo}
           setModalAssignedTo={setModalAssignedTo}
+          modalAssignedMembers={modalAssignedMembers}
+          setModalAssignedMembers={setModalAssignedMembers}
           modalRewardPoints={modalRewardPoints}
           setModalRewardPoints={setModalRewardPoints}
           modalTasks={modalTasks}

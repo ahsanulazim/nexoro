@@ -13,3 +13,8 @@ export const getAllProjects = async (contextOrParams) => {
 
   return res.data;
 };
+
+export const createProject = async (data) => {
+  const res = await api.post("/projects/create", data);
+  return res.data;
+};

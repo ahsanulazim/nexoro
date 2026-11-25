@@ -19,6 +19,13 @@ export const PERMISSION_MODULES = [
     route: "/dashboard/inbox",
   },
   {
+    id: "queries",
+    label: "Contact Queries",
+    category: "Operations",
+    description: "Manage client queries and messages submitted from website contact form",
+    route: "/dashboard/queries",
+  },
+  {
     id: "projects",
     label: "Projects",
     category: "Operations",
@@ -114,6 +121,7 @@ export const ALL_PERMISSION_IDS = PERMISSION_MODULES.map((m) => m.id);
 export const DEFAULT_MEMBER_PERMISSIONS = [
   "orders",
   "inbox",
+  "queries",
   "blogs",
   "projects",
   "points",
@@ -137,8 +145,8 @@ export const PERMISSION_PRESETS = [
   },
   {
     name: "Support & Communication",
-    description: "Inbox, Orders, Clients, Points",
-    permissions: ["inbox", "orders", "clients", "points"],
+    description: "Inbox, Queries, Orders, Clients, Points",
+    permissions: ["inbox", "queries", "orders", "clients", "points"],
   },
   {
     name: "Project & Operations",
@@ -161,6 +169,7 @@ export const PERMISSION_PRESETS = [
 export const ROUTE_PERMISSION_MAP = {
   "/dashboard/orders": "orders",
   "/dashboard/inbox": "inbox",
+  "/dashboard/queries": "queries",
   "/dashboard/projects": "projects",
   "/dashboard/clients": "clients",
   "/dashboard/points": "points",

@@ -9,9 +9,11 @@ import moment from "moment";
 import { toast } from "react-toastify";
 import {
   LuBadgeCheck,
+  LuBookmarkCheck,
   LuBriefcase,
   LuBuilding,
   LuCheck,
+  LuClock,
   LuCopy,
   LuGlobe,
   LuMail,
@@ -33,6 +35,10 @@ import {
 import { FaFacebookF, FaInstagram, FaWhatsapp, FaGlobe } from "react-icons/fa6";
 import { HiOutlineCurrencyBangladeshi } from "react-icons/hi";
 import BlockUserModal from "./BlockUserModal";
+import FollowUpModal from "./FollowUpModal";
+import { toggleFollowUpConversation } from "@/api/fetchConversation";
+
+const cleanRoomId = (id) => String(id || "").replace(/^(wa_|fb_|ig_|room_)/, "");
 
 const CRMPanel = ({ roomId }) => {
   const { isCrmOpen, setIsCrmOpen, setIsConfirmOrderOpen } = useSocket();
@@ -40,6 +46,7 @@ const CRMPanel = ({ roomId }) => {
   const [copiedField, setCopiedField] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isBlockModalOpen, setIsBlockModalOpen] = useState(false);
+  const [isFollowUpModalOpen, setIsFollowUpModalOpen] = useState(false);
   const [editForm, setEditForm] = useState({
     name: "",
     userName: "",
@@ -49,6 +56,20 @@ const CRMPanel = ({ roomId }) => {
     country: "",
   });
   const queryClient = useQueryClient();
+
+  const handleRemoveFollowUp = async () => {
+    try {
+      await toggleFollowUpConversation({
+        roomId,
+        isFollowUp: false,
+      });
+      toast.success("Follow-up mark removed");
+      queryClient.invalidateQueries({ queryKey: ["conversations"] });
+      queryClient.invalidateQueries({ queryKey: ["crmDetails", roomId] });
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to remove follow-up");
+    }
+  };
 
   // Fetch CRM details
   const {
@@ -66,7 +87,7 @@ const CRMPanel = ({ roomId }) => {
       });
       return res.data?.success ? res.data.data : null;
     },
-    enabled: !!roomId && isCrmOpen,
+    enabled: !!roomId,
   });
 
   // Edit CRM profile mutation
@@ -154,7 +175,7 @@ const CRMPanel = ({ roomId }) => {
     setTimeout(() => setCopiedField(null), 1500);
   };
 
-  if (!isCrmOpen) return null;
+  if (!roomId) return null;
 
   const customer = crmData?.customer || {};
   const isClient = Boolean(crmData?.isClient);
@@ -162,6 +183,20 @@ const CRMPanel = ({ roomId }) => {
   const platform = crmData?.platform || "web";
   const notes = crmData?.notes || [];
   const orders = crmData?.recentOrders || [];
+
+  const totalDue =
+    crmData?.totalDue !== undefined && crmData?.totalDue !== null
+      ? Number(crmData.totalDue) || 0
+      : orders
+          .filter((o) => o.status !== "Cancelled" && o.payment !== "Success")
+          .reduce((sum, o) => {
+            if (o.dueAmount !== undefined && o.dueAmount !== null) {
+              return sum + Math.max(0, Number(o.dueAmount) || 0);
+            }
+            const price = Number(o.price ?? o.amount ?? 0);
+            const amt = Number(o.amount ?? 0);
+            return sum + Math.max(0, price - amt);
+          }, 0);
 
   const renderPlatformBadge = (plat) => {
     switch (plat) {
@@ -196,15 +231,21 @@ const CRMPanel = ({ roomId }) => {
   return (
     <>
       {/* Backdrop for mobile & tablet screens */}
-      <div
-        className="fixed inset-0 bg-black/40 backdrop-blur-xs z-40 xl:hidden"
-        onClick={() => setIsCrmOpen(false)}
-        aria-hidden="true"
-      />
+      {isCrmOpen && (
+        <div
+          className="fixed inset-0 bg-black/40 backdrop-blur-xs z-40 xl:hidden"
+          onClick={() => setIsCrmOpen(false)}
+          aria-hidden="true"
+        />
+      )}
 
-      <aside className="fixed inset-y-0 right-0 z-50 w-full sm:w-96 max-w-full shadow-2xl xl:shadow-none xl:static xl:z-auto xl:w-80 2xl:w-88 xl:border-l xl:border-base-300 bg-base-100 dark:bg-base-200 flex flex-col h-full transition-all">
+      <aside
+        className={`${
+          isCrmOpen ? "flex" : "hidden xl:flex"
+        } fixed inset-y-0 right-0 z-50 w-full sm:w-96 max-w-full shadow-2xl xl:shadow-none xl:static xl:z-auto xl:w-80 2xl:w-88 xl:border-l xl:border-base-300 bg-base-100 dark:bg-base-200 flex-col h-full transition-all`}
+      >
         {/* Top Header */}
-        <div className="p-3.5 border-b border-base-300 flex items-center justify-between bg-base-200/80">
+        <div className="p-3.5 border-b border-base-300 flex items-center justify-between bg-base-200/80 shrink-0">
           <div className="flex items-center gap-2">
             <div className="p-1.5 rounded-lg bg-primary/10 text-primary">
               <LuUser className="size-4" />
@@ -213,7 +254,7 @@ const CRMPanel = ({ roomId }) => {
           </div>
           <button
             onClick={() => setIsCrmOpen(false)}
-            className="btn btn-ghost btn-circle btn-sm hover:bg-base-300"
+            className="btn btn-ghost btn-circle btn-sm hover:bg-base-300 xl:hidden"
             title="Close CRM Panel"
           >
             <LuX className="size-4" />
@@ -346,6 +387,102 @@ const CRMPanel = ({ roomId }) => {
                     <span>Block Contact</span>
                   </button>
                 )}
+
+                {/* Follow-Up Card inside CRM Panel */}
+                <div
+                  className={`w-full p-3 rounded-2xl border text-left space-y-2 mt-2 transition-all ${
+                    crmData?.isFollowUp
+                      ? "bg-amber-500/10 border-amber-500/30"
+                      : "bg-base-200/50 border-base-300"
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5">
+                      <span
+                        className={`p-1 rounded-lg ${
+                          crmData?.isFollowUp
+                            ? "bg-amber-500/20 text-amber-600 dark:text-amber-400"
+                            : "bg-base-300 text-base-content/60"
+                        }`}
+                      >
+                        <LuBookmarkCheck className="size-3.5" />
+                      </span>
+                      <span className="text-xs font-bold text-base-content">
+                        {crmData?.isFollowUp ? "Follow-Up Active" : "Follow-Up"}
+                      </span>
+                    </div>
+                    {crmData?.isFollowUp ? (
+                      <span
+                        className={`badge badge-xs uppercase font-bold ${
+                          crmData.followUpPriority === "urgent"
+                            ? "badge-error"
+                            : crmData.followUpPriority === "high"
+                              ? "badge-warning"
+                              : "badge-neutral"
+                        }`}
+                      >
+                        {crmData.followUpPriority || "Normal"}
+                      </span>
+                    ) : (
+                      <span className="text-[10px] text-base-content/40">
+                        Not marked
+                      </span>
+                    )}
+                  </div>
+
+                  {crmData?.isFollowUp ? (
+                    <>
+                      <div className="space-y-1 text-xs">
+                        <p className="font-medium text-base-content leading-snug">
+                          &quot;{crmData.followUpReason || "Important follow-up"}&quot;
+                        </p>
+                        {crmData.followUpDueDate && (
+                          <p className="text-[11px] text-base-content/60 flex items-center gap-1">
+                            <LuClock className="size-3 text-amber-500 shrink-0" />
+                            <span>
+                              Due:{" "}
+                              {moment(crmData.followUpDueDate).format(
+                                "MMM D, YYYY h:mm A"
+                              )}
+                            </span>
+                          </p>
+                        )}
+                        {crmData.followUpBy?.name && (
+                          <p className="text-[10px] text-base-content/40">
+                            Marked by {crmData.followUpBy.name}
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="flex items-center gap-2 pt-1 border-t border-amber-500/20">
+                        <button
+                          type="button"
+                          onClick={() => setIsFollowUpModalOpen(true)}
+                          className="btn btn-xs flex-1 btn-outline btn-warning rounded-lg"
+                        >
+                          Edit Details
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleRemoveFollowUp}
+                          className="btn btn-xs btn-ghost text-error hover:bg-error/10 rounded-lg"
+                          title="Mark complete and remove"
+                        >
+                          Mark Done
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setIsFollowUpModalOpen(true)}
+                      className="btn btn-xs w-full btn-outline btn-warning rounded-lg gap-1.5"
+                    >
+                      <LuBookmarkCheck className="size-3" />
+                      <span>Set Follow-Up Reminder</span>
+                    </button>
+                  )}
+                </div>
 
                 {/* Meta Ad Lead / Campaign Referral Card */}
                 {crmData?.referral && (
@@ -566,26 +703,60 @@ const CRMPanel = ({ roomId }) => {
               </div>
 
               {/* Quick Metrics / Lifetime Stats */}
-              <div className="grid grid-cols-2 gap-2">
-                <div className="bg-base-100 p-3 rounded-xl border border-base-300">
-                  <div className="flex items-center gap-1.5 text-base-content/60 text-xs mb-1">
-                    <LuPackage className="text-primary size-3.5" />
-                    <span>Orders</span>
+              <div className="grid grid-cols-3 gap-2">
+                <div className="bg-base-100 p-2.5 rounded-xl border border-base-300 flex flex-col justify-between">
+                  <div className="flex items-center gap-1 text-base-content/60 text-[11px] mb-1">
+                    <LuPackage className="text-primary size-3.5 shrink-0" />
+                    <span className="truncate">Orders</span>
                   </div>
-                  <div className="text-lg font-bold">
+                  <div className="text-base sm:text-lg font-bold text-base-content">
                     {crmData?.ordersCount || 0}
                   </div>
                 </div>
-                <div className="bg-base-100 p-3 rounded-xl border border-base-300">
-                  <div className="flex items-center gap-1.5 text-base-content/60 text-xs mb-1">
-                    <HiOutlineCurrencyBangladeshi className="text-emerald-500 size-4" />
-                    <span>Total Spent</span>
+                <div className="bg-base-100 p-2.5 rounded-xl border border-base-300 flex flex-col justify-between">
+                  <div className="flex items-center gap-1 text-base-content/60 text-[11px] mb-1">
+                    <HiOutlineCurrencyBangladeshi className="text-emerald-500 size-3.5 shrink-0" />
+                    <span className="truncate">Spent</span>
                   </div>
-                  <div className="text-lg font-bold text-emerald-500 truncate">
+                  <div
+                    className="text-base sm:text-lg font-bold text-emerald-500 truncate"
+                    title={`৳${(crmData?.totalSpent || 0).toLocaleString()}`}
+                  >
                     ৳{(crmData?.totalSpent || 0).toLocaleString()}
                   </div>
                 </div>
+                <div className="bg-base-100 p-2.5 rounded-xl border border-base-300 flex flex-col justify-between">
+                  <div className="flex items-center gap-1 text-base-content/60 text-[11px] mb-1">
+                    <HiOutlineCurrencyBangladeshi
+                      className={`size-3.5 shrink-0 ${
+                        totalDue > 0 ? "text-warning" : "text-base-content/60"
+                      }`}
+                    />
+                    <span className="truncate">Due</span>
+                  </div>
+                  <div
+                    className={`text-base sm:text-lg font-bold truncate ${
+                      totalDue > 0 ? "text-warning" : "text-base-content/70"
+                    }`}
+                    title={`৳${totalDue.toLocaleString()}`}
+                  >
+                    ৳{totalDue.toLocaleString()}
+                  </div>
+                </div>
               </div>
+
+              {/* Outstanding Due Banner if customer has dues */}
+              {totalDue > 0 && (
+                <div className="p-2.5 rounded-xl bg-warning/10 border border-warning/25 flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-1.5 text-warning font-semibold">
+                    <HiOutlineCurrencyBangladeshi className="size-4 shrink-0" />
+                    <span>Customer Due:</span>
+                  </div>
+                  <span className="font-bold text-warning font-mono">
+                    ৳{totalDue.toLocaleString()}
+                  </span>
+                </div>
+              )}
 
               {/* Recent Orders Section */}
               <div className="bg-base-100 rounded-2xl p-3.5 border border-base-300 space-y-2.5">
@@ -623,15 +794,22 @@ const CRMPanel = ({ roomId }) => {
                         </div>
                         <div className="flex items-center justify-between text-[11px] text-base-content/60">
                           <span className="font-mono">{ord.orderId}</span>
-                          <span
-                            className={`badge badge-xs ${
-                              ord.payment === "Success"
-                                ? "badge-success text-success-content"
-                                : "badge-warning"
-                            }`}
-                          >
-                            {ord.payment || "Pending"}
-                          </span>
+                          <div className="flex items-center gap-1.5">
+                            {Number(ord.dueAmount) > 0 && (
+                              <span className="badge badge-xs badge-warning font-semibold">
+                                Due: ৳{Number(ord.dueAmount).toLocaleString()}
+                              </span>
+                            )}
+                            <span
+                              className={`badge badge-xs ${
+                                ord.payment === "Success"
+                                  ? "badge-success text-success-content"
+                                  : "badge-warning"
+                              }`}
+                            >
+                              {ord.payment || "Pending"}
+                            </span>
+                          </div>
                         </div>
                       </li>
                     ))}
@@ -883,6 +1061,19 @@ const CRMPanel = ({ roomId }) => {
             isBlocked: crmData?.isBlocked,
             customer: crmData?.customer,
           }}
+        />
+
+        {/* Follow Up Modal */}
+        <FollowUpModal
+          isOpen={isFollowUpModalOpen}
+          onClose={() => setIsFollowUpModalOpen(false)}
+          conversation={
+            crmData || {
+              roomId,
+              platform: crmData?.platform,
+              customer: crmData?.customer,
+            }
+          }
         />
       </aside>
     </>

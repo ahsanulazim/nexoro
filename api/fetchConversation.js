@@ -39,3 +39,24 @@ export const toggleBlockConversation = async ({ roomId, reason }) => {
   );
   return res.data;
 };
+
+export const toggleFollowUpConversation = async ({
+  roomId,
+  isFollowUp,
+  reason,
+  dueDate,
+  priority,
+}) => {
+  const token = await auth.currentUser?.getIdToken();
+
+  const res = await api.post(
+    "/conversations/toggleFollowUp",
+    { roomId, isFollowUp, reason, dueDate, priority },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+  return res.data;
+};

@@ -34,12 +34,26 @@ const ProjectCard = ({
   const queryClient = useQueryClient();
 
   const isAdmin = currentUser?.user?.role === "admin";
-  const canUpdateTasks = isAdmin || isAssignedToMe;
-  const canViewCosts = isAdmin || isAssignedToMe;
+  const myAssigneeInfo = Array.isArray(project?.assignedMembers)
+    ? project.assignedMembers.find(
+        (m) =>
+          (m.memberId &&
+            currentUser?.user?._id &&
+            String(m.memberId) === String(currentUser.user._id)) ||
+          (m.memberEmail &&
+            currentUser?.user?.email &&
+            m.memberEmail.toLowerCase() ===
+              currentUser.user.email.toLowerCase()),
+      )
+    : null;
+  const effectivelyAssignedToMe = isAssignedToMe || Boolean(myAssigneeInfo);
+
+  const canUpdateTasks = isAdmin || effectivelyAssignedToMe;
+  const canViewCosts = isAdmin || effectivelyAssignedToMe;
 
   const costsModalRef = useRef(null);
   const [tasksOpen, setTasksOpen] = useState(
-    defaultTasksOpen || isAssignedToMe,
+    defaultTasksOpen || effectivelyAssignedToMe,
   );
   const [newTaskText, setNewTaskText] = useState("");
   const [isAddingTask, setIsAddingTask] = useState(false);
@@ -442,13 +456,35 @@ const ProjectCard = ({
         <div className="card-actions justify-between items-center text-xs">
           <div>
             <h3 className="opacity-60 text-[11px]">Assigned To</h3>
-            <span
-              className={`font-semibold ${
-                isAssignedToMe ? "text-primary" : "text-base-content"
-              }`}
-            >
-              {project?.assignedTo || "Unassigned"}
-            </span>
+            {Array.isArray(project?.assignedMembers) && project.assignedMembers.length > 0 ? (
+              <div className="flex flex-wrap gap-1 mt-0.5 max-w-[240px]">
+                {project.assignedMembers.map((m, idx) => (
+                  <span
+                    key={idx}
+                    className="badge badge-xs badge-soft badge-primary font-medium"
+                    title={`${m.memberName || "Member"} (${m.rateType === "percentage" ? `${m.rateValue}%` : `৳${m.rateValue}`})`}
+                  >
+                    {m.memberName || "Member"}
+                    {isAdmin && (m.rateType === "percentage" ? ` (${m.rateValue}%)` : ` (৳${m.rateValue})`)}
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <span
+                className={`font-semibold ${
+                  effectivelyAssignedToMe ? "text-primary" : "text-base-content"
+                }`}
+              >
+                {project?.assignedTo || "Unassigned"}
+              </span>
+            )}
+            {!isAdmin && myAssigneeInfo && (
+              <div className="mt-1">
+                <span className="badge badge-xs badge-success badge-soft font-semibold">
+                  My Earning: ৳{(myAssigneeInfo.amount || (myAssigneeInfo.rateType === "percentage" ? Math.round((Number(project.price) || 0) * (myAssigneeInfo.rateValue / 100)) : myAssigneeInfo.rateValue) || 0).toLocaleString()}
+                </span>
+              </div>
+            )}
           </div>
           <div className="flex flex-col items-end gap-0.5">
             {project.deadline ? (

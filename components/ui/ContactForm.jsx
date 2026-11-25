@@ -18,8 +18,8 @@ const ContactForm = () => {
       message: e.target.message.value,
     };
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE}/messages`,
+      let response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE}/queries`,
         {
           method: "POST",
           headers: {
@@ -28,6 +28,19 @@ const ContactForm = () => {
           body: JSON.stringify(formData),
         },
       );
+      if (!response.ok) {
+        // Fallback to legacy endpoint if /queries is unreachable
+        response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_BASE}/messages`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(formData),
+          },
+        );
+      }
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
